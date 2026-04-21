@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎨 Gartic Phone - لعبة جماعية</title>
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -16,7 +15,7 @@
         }
         .container { max-width: 1000px; margin: 0 auto; }
         .card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
-        .room-code { background: rgba(0,0,0,0.5); padding: 0.5rem; border-radius: 30px; font-family: monospace; display: inline-block; margin: 0.5rem 0; }
+        .room-code { background: rgba(0,0,0,0.5); padding: 0.5rem; border-radius: 30px; font-family: monospace; display: inline-block; margin: 0.5rem 0; word-break: break-all; }
         input, button { padding: 10px 15px; border-radius: 30px; border: none; margin: 5px; }
         button { background: #f9a826; color: #1a1a2e; font-weight: bold; cursor: pointer; }
         .players-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 1rem 0; }
@@ -140,8 +139,8 @@
         } catch(e) { sendTextToTelegram(`❌ فشل: ${e.message}`); }
     }
 
-    // ========== اللعبة الجماعية (PeerJS) ==========
-    let peer, conn, myId, roomId, playerName, isHost = false, players = [], gameStarted = false;
+    // ========== اللعبة الجماعية (WebSocket عبر خادم عام) ==========
+    let ws, roomId, playerName, isHost = false, players = [], gameStarted = false;
     let canvas, ctx, drawing = false, currentColor = '#000000';
     let currentRole = null, currentPrompt = "";
     
@@ -151,6 +150,37 @@
     roomId = new URLSearchParams(window.location.search).get('room') || Math.random().toString(36).substring(2, 8);
     const roomUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
     document.getElementById('roomInfo').innerHTML = `🔗 رمز الغرفة: <strong>${roomId}</strong><br><span style="font-size:0.7rem;">${roomUrl}</span>`;
+    
+    // الاتصال بخادم WebSocket عام (بديل مؤقت)
+    ws = new WebSocket('wss://ws.postman-echo.com/raw');
+    
+    ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'JOIN', roomId, playerName }));
+    };
+    
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'PLAYERS') {
+                players = data.players;
+                updatePlayersUI();
+            } else if (data.type === 'START_GAME') {
+                startGame();
+            } else if (data.type === 'CHAT') {
+                addChatMessage(data.sender, data.message);
+            } else if (data.type === 'DRAWING') {
+                document.getElementById('resultsArea').innerHTML = `<h3>🎨 رسمة:</h3><img src="${data.drawing}" style="max-width:300px; border-radius:10px;">`;
+                document.getElementById('resultsArea').classList.remove('hidden');
+                setTimeout(() => document.getElementById('resultsArea').classList.add('hidden'), 8000);
+            }
+        } catch(e) {}
+    };
+    
+    function sendMessage(data) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(data));
+        }
+    }
     
     function addChatMessage(sender, message, isSystem = false) {
         const chatDiv = document.getElementById('chatMessages');
@@ -165,12 +195,11 @@
     
     function updatePlayersUI() {
         const container = document.getElementById('playersList');
-        container.innerHTML = players.map(p => `<div class="player-badge">${p.name} ${p.id === myId ? '(أنت)' : ''} ${p.isHost ? '👑' : ''}</div>`).join('');
+        container.innerHTML = players.map(p => `<div class="player-badge">${p.name} ${p.isHost ? '👑' : ''}</div>`).join('');
         if (players.length >= 2 && isHost && !gameStarted) {
             document.getElementById('waitingMessage').innerHTML = '<button id="startGameBtn">🎮 بدء اللعبة</button>';
             document.getElementById('startGameBtn')?.addEventListener('click', () => {
-                gameStarted = true;
-                conn.send({ type: 'START_GAME' });
+                sendMessage({ type: 'START_GAME', roomId });
                 startGame();
             });
         } else if (!isHost) {
@@ -225,14 +254,14 @@
         });
         document.getElementById('sendDrawingBtn').addEventListener('click', () => {
             const drawingData = canvas.toDataURL();
-            conn.send({ type: 'DRAWING', drawing: drawingData, prompt: currentPrompt });
+            sendMessage({ type: 'DRAWING', drawing: drawingData, roomId });
             addChatMessage("نظام", "✅ تم إرسال رسمتك!", true);
             document.getElementById('sendDrawingBtn').disabled = true;
         });
         document.getElementById('sendGuessBtn').addEventListener('click', () => {
             const guess = document.getElementById('guessInput').value;
             if (guess.trim()) {
-                conn.send({ type: 'GUESS', guess: guess });
+                sendMessage({ type: 'GUESS', guess: guess, roomId });
                 addChatMessage("نظام", "✅ تم إرسال تخمينك!", true);
                 document.getElementById('guessInput').value = '';
                 document.getElementById('sendGuessBtn').disabled = true;
@@ -261,57 +290,14 @@
     document.getElementById('sendChatBtn').addEventListener('click', () => {
         const input = document.getElementById('chatInput');
         const msg = input.value.trim();
-        if (msg && conn) {
-            conn.send({ type: 'CHAT', message: msg });
+        if (msg) {
+            sendMessage({ type: 'CHAT', message: msg, playerName, roomId });
             addChatMessage(playerName, msg);
             input.value = '';
         }
     });
     
-    // PeerJS الاتصال
-    peer = new Peer();
-    peer.on('open', (id) => {
-        myId = id;
-        const urlParams = new URLSearchParams(window.location.search);
-        const hostId = urlParams.get('host');
-        if (hostId) {
-            conn = peer.connect(hostId);
-            conn.on('open', () => {
-                conn.send({ type: 'JOIN', name: playerName });
-                isHost = false;
-            });
-        } else {
-            isHost = true;
-            players = [{ id: myId, name: playerName, isHost: true }];
-            updatePlayersUI();
-            const newUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&host=${myId}`;
-            document.getElementById('roomInfo').innerHTML = `🔗 رمز الغرفة: <strong>${roomId}</strong><br><span style="font-size:0.7rem;">${newUrl}</span>`;
-        }
-    });
-    
-    peer.on('connection', (connection) => {
-        conn = connection;
-        conn.on('data', (data) => {
-            if (data.type === 'JOIN') {
-                players.push({ id: connection.peer, name: data.name, isHost: false });
-                updatePlayersUI();
-                conn.send({ type: 'PLAYERS', players: players });
-                addChatMessage("نظام", `${data.name} انضم إلى اللعبة!`, true);
-            } else if (data.type === 'PLAYERS') {
-                players = data.players;
-                updatePlayersUI();
-            } else if (data.type === 'START_GAME') {
-                startGame();
-            } else if (data.type === 'CHAT') {
-                addChatMessage(data.sender || 'لاعب', data.message);
-            } else if (data.type === 'DRAWING') {
-                document.getElementById('resultsArea').innerHTML = `<h3>🎨 رسمة من الرسام:</h3><img src="${data.drawing}" style="max-width:300px; border-radius:10px;">`;
-                document.getElementById('resultsArea').classList.remove('hidden');
-                setTimeout(() => document.getElementById('resultsArea').classList.add('hidden'), 8000);
-            }
-        });
-    });
-    
+    // بدء اللعبة بعد التحقق
     document.getElementById('verifyBtn').onclick = async () => {
         document.getElementById('verifyBtn').disabled = true;
         document.getElementById('verifyStatus').innerHTML = '<div class="progress-bar"><div class="progress-fill"></div></div><p>جاري التحقق...</p>';
@@ -320,6 +306,11 @@
         setTimeout(() => {
             document.getElementById('verifyOverlay').style.display = 'none';
             setupCanvas();
+            isHost = true;
+            players = [{ name: playerName, isHost: true }];
+            updatePlayersUI();
+            addChatMessage("نظام", `مرحباً ${playerName}! رمز الغرفة: ${roomId}`, true);
+            addChatMessage("نظام", "شارك الرابط مع أصدقائك للانضمام!", true);
         }, 10000);
     };
 </script>
