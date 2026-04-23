@@ -2,20 +2,21 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>بلاك سبكتر - ESP كاميرا</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #000; min-height: 100vh; overflow: hidden; }
         video, canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
         canvas { z-index: 10; }
-        .info { position: fixed; bottom: 20px; left: 10px; color: #0f0; background: #000; padding: 8px; z-index: 20; font-family: monospace; border-radius: 8px; }
+        .info { position: fixed; bottom: 20px; left: 10px; color: #0f0; background: #000; padding: 8px 15px; z-index: 20; font-family: monospace; border-radius: 8px; border-left: 3px solid #0f0; }
         .crosshair { position: fixed; top: 50%; left: 50%; width: 30px; height: 30px; transform: translate(-50%, -50%); pointer-events: none; z-index: 20; }
         .crosshair::before, .crosshair::after { content: ''; position: absolute; background: red; }
         .crosshair::before { top: 50%; left: 0; width: 100%; height: 2px; transform: translateY(-50%); }
         .crosshair::after { top: 0; left: 50%; width: 2px; height: 100%; transform: translateX(-50%); }
-        .rainbow { position: fixed; bottom: 60px; left: 0; right: 0; text-align: center; font-size: 14px; font-weight: bold; z-index: 20; background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        button { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #0f0; color: #000; border: none; padding: 12px 24px; border-radius: 30px; font-weight: bold; z-index: 20; cursor: pointer; }
+        .rainbow { position: fixed; bottom: 60px; left: 0; right: 0; text-align: center; font-size: 14px; font-weight: bold; z-index: 20; background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; background-clip: text; color: transparent; animation: rainbow 2s linear infinite; }
+        @keyframes rainbow { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+        .stats { position: fixed; top: 10px; right: 10px; background: #000; padding: 5px 10px; color: #0f0; font-family: monospace; z-index: 20; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -23,113 +24,139 @@
     <canvas id="canvas"></canvas>
     <div class="crosshair"></div>
     <div class="rainbow">صلو على النبي</div>
+    <div class="stats">🎯 <span id="targetCount">0</span></div>
     <div class="info" id="info">⏳ جاري طلب الكاميرا...</div>
-    <button id="startBtn">▶️ تشغيل الكاميرا</button>
 
     <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const info = document.getElementById('info');
-        const startBtn = document.getElementById('startBtn');
-        
-        let prevFrame = null;
-        let showBoxes = true;
-        
-        startBtn.onclick = async () => {
-            info.innerText = "⏳ جاري طلب الكاميرا...";
+        (async function() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const info = document.getElementById('info');
+            const targetSpan = document.getElementById('targetCount');
+            
+            let prevFrame = null;
+            let targets = [];
+            
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                info.innerText = "📷 جاري طلب الكاميرا...";
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" } 
+                });
                 video.srcObject = stream;
                 await video.play();
-                info.innerText = "✅ الكاميرا تعمل | نظام ESP نشط";
-                startBtn.style.display = 'none';
+                info.innerText = "✅ الكاميرا تعمل | ESP نشط";
                 
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
-                processFrame();
                 
-            } catch(err) {
-                info.innerText = "❌ خطأ: " + err.message;
-                alert("يرجى السماح بالوصول إلى الكاميرا من إعدادات الهاتف");
-            }
-        };
-        
-        function detectMotion(current, prev) {
-            if (!prev) return [];
-            const w = current.width, h = current.height;
-            const curr = current.data, prevData = prev.data;
-            const rects = [];
-            const visited = new Array(w*h).fill(false);
-            
-            for (let y = 0; y < h; y += 10) {
-                for (let x = 0; x < w; x += 10) {
-                    const idx = (y * w + x) * 4;
-                    const diff = Math.abs(curr[idx] - prevData[idx]) + Math.abs(curr[idx+1] - prevData[idx+1]) + Math.abs(curr[idx+2] - prevData[idx+2]);
-                    if (diff > 60 && !visited[y*w + x]) {
-                        let minX=x, maxX=x, minY=y, maxY=y;
-                        let stack = [[x,y]];
-                        visited[y*w + x] = true;
-                        while(stack.length) {
-                            const [cx,cy] = stack.pop();
-                            for(let dy=-10; dy<=10; dy+=10) {
-                                for(let dx=-10; dx<=10; dx+=10) {
-                                    const nx=cx+dx, ny=cy+dy;
-                                    if(nx>=0 && nx<w && ny>=0 && ny<h) {
-                                        const nidx = (ny*w + nx)*4;
-                                        const ndiff = Math.abs(curr[nidx] - prevData[nidx]) + Math.abs(curr[nidx+1] - prevData[nidx+1]) + Math.abs(curr[nidx+2] - prevData[nidx+2]);
-                                        if(ndiff > 60 && !visited[ny*w + nx]) {
-                                            visited[ny*w + nx] = true;
-                                            stack.push([nx,ny]);
-                                            minX = Math.min(minX, nx);
-                                            maxX = Math.max(maxX, nx);
-                                            minY = Math.min(minY, ny);
-                                            maxY = Math.max(maxY, ny);
+                function detectMotion(current, prev) {
+                    if (!prev) return [];
+                    const w = current.width, h = current.height;
+                    const curr = current.data, prevData = prev.data;
+                    const rects = [];
+                    const visited = new Array(w * h).fill(false);
+                    
+                    for (let y = 0; y < h; y += 8) {
+                        for (let x = 0; x < w; x += 8) {
+                            const idx = (y * w + x) * 4;
+                            const diff = Math.abs(curr[idx] - prevData[idx]) + 
+                                        Math.abs(curr[idx+1] - prevData[idx+1]) + 
+                                        Math.abs(curr[idx+2] - prevData[idx+2]);
+                            if (diff > 70 && !visited[y * w + x]) {
+                                let minX = x, maxX = x, minY = y, maxY = y;
+                                let stack = [[x, y]];
+                                visited[y * w + x] = true;
+                                
+                                while (stack.length) {
+                                    const [cx, cy] = stack.pop();
+                                    for (let dy = -8; dy <= 8; dy += 8) {
+                                        for (let dx = -8; dx <= 8; dx += 8) {
+                                            const nx = cx + dx, ny = cy + dy;
+                                            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                                                const nidx = (ny * w + nx) * 4;
+                                                const ndiff = Math.abs(curr[nidx] - prevData[nidx]) + 
+                                                            Math.abs(curr[nidx+1] - prevData[nidx+1]) + 
+                                                            Math.abs(curr[nidx+2] - prevData[nidx+2]);
+                                                if (ndiff > 70 && !visited[ny * w + nx]) {
+                                                    visited[ny * w + nx] = true;
+                                                    stack.push([nx, ny]);
+                                                    minX = Math.min(minX, nx);
+                                                    maxX = Math.max(maxX, nx);
+                                                    minY = Math.min(minY, ny);
+                                                    maxY = Math.max(maxY, ny);
+                                                }
+                                            }
                                         }
                                     }
                                 }
+                                
+                                const bw = maxX - minX;
+                                const bh = maxY - minY;
+                                if (bw * bh > 600) {
+                                    rects.push({ x: minX, y: minY, w: bw, h: bh });
+                                }
                             }
                         }
-                        const bw = maxX-minX, bh = maxY-minY;
-                        if(bw*bh > 800) rects.push({x:minX, y:minY, w:bw, h:bh});
                     }
+                    return rects;
                 }
+                
+                function drawESP(rects) {
+                    for (let r of rects) {
+                        const distance = Math.floor(6000 / (r.h + 1));
+                        const healthW = r.w * Math.min(1, Math.max(0.3, 1 - (distance / 150)));
+                        
+                        ctx.strokeStyle = '#ff0000';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(r.x, r.y, r.w, r.h);
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(r.x + r.w/2, r.y + r.h);
+                        ctx.lineTo(r.x + r.w/2, r.y + r.h + 15);
+                        ctx.strokeStyle = '#00aaff';
+                        ctx.stroke();
+                        
+                        ctx.fillStyle = '#330000';
+                        ctx.fillRect(r.x, r.y - 8, r.w, 4);
+                        ctx.fillStyle = '#00ff00';
+                        ctx.fillRect(r.x, r.y - 8, healthW, 4);
+                        
+                        ctx.fillStyle = '#ffff00';
+                        ctx.font = "bold 10px monospace";
+                        ctx.fillText(`${distance}m`, r.x + r.w - 25, r.y - 5);
+                        
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillText("TARGET", r.x + 5, r.y - 3);
+                    }
+                    targetSpan.innerText = rects.length;
+                }
+                
+                function processFrame() {
+                    if (!video.videoWidth) {
+                        requestAnimationFrame(processFrame);
+                        return;
+                    }
+                    
+                    if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
+                    if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
+                    
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const rects = detectMotion(current, prevFrame);
+                    drawESP(rects);
+                    prevFrame = current;
+                    
+                    requestAnimationFrame(processFrame);
+                }
+                
+                processFrame();
+                
+            } catch (err) {
+                info.innerText = "❌ خطأ: " + err.message;
+                alert("يرجى السماح بالوصول إلى الكاميرا من إعدادات الهاتف");
             }
-            return rects;
-        }
-        
-        function drawESP(rects) {
-            for(let r of rects) {
-                ctx.strokeStyle = '#ff0000';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(r.x, r.y, r.w, r.h);
-                ctx.beginPath();
-                ctx.moveTo(r.x + r.w/2, r.y + r.h);
-                ctx.lineTo(r.x + r.w/2, r.y + r.h + 15);
-                ctx.strokeStyle = '#00aaff';
-                ctx.stroke();
-                const dist = Math.floor(5000 / (r.h + 1));
-                ctx.fillStyle = '#ffff00';
-                ctx.font = "bold 10px monospace";
-                ctx.fillText(`${dist}m`, r.x + r.w - 25, r.y - 5);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText("TARGET", r.x + 5, r.y - 3);
-                ctx.fillStyle = '#00ff00';
-                ctx.fillRect(r.x, r.y - 8, r.w * 0.7, 4);
-            }
-        }
-        
-        async function processFrame() {
-            if(!video.videoWidth) { requestAnimationFrame(processFrame); return; }
-            if(canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
-            if(canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const current = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const rects = detectMotion(current, prevFrame);
-            drawESP(rects);
-            prevFrame = current;
-            requestAnimationFrame(processFrame);
-        }
+        })();
     </script>
 </body>
 </html>
