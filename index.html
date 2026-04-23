@@ -1,126 +1,213 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بلاك سبكتر - ESP</title>
+    <title>AETHER VISION | نظام تتبع الأجسام بالذكاء الاصطناعي</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; overflow: hidden; }
-        video, canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        canvas { z-index: 10; }
-        .info { position: fixed; bottom: 20px; left: 10px; color: #0f0; background: #000; padding: 8px; z-index: 20; font-family: monospace; }
-        .crosshair { position: fixed; top: 50%; left: 50%; width: 30px; height: 30px; transform: translate(-50%, -50%); pointer-events: none; z-index: 20; }
-        .crosshair::before, .crosshair::after { content: ''; position: absolute; background: red; }
-        .crosshair::before { top: 50%; left: 0; width: 100%; height: 2px; transform: translateY(-50%); }
-        .crosshair::after { top: 0; left: 50%; width: 2px; height: 100%; transform: translateX(-50%); }
-        .rainbow { position: fixed; bottom: 60px; left: 0; right: 0; text-align: center; font-size: 14px; font-weight: bold; z-index: 20; background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        /* نظام التنسيق السيادي (UI) */
+        :root {
+            --brand-red: #e50914;
+            --dark-bg: #050505;
+            --surface: #141414;
+            --glow-cyan: #00f2ff;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            overflow: hidden; height: 100vh;
+        }
+
+        /* حاوية الفيديو والكاميرا */
+        .video-wrapper {
+            position: relative;
+            width: 100%; max-width: 900px;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.05);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        #webcam {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* مرآة للكاميرا الأمامية */
+        }
+
+        /* لوحة التتبع (Canvas) فوق الفيديو */
+        #output_canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none; /* لكي لا تعيق الضغط على الفيديو */
+        }
+
+        /* شاشة التحميل (Loader) */
+        #loader {
+            position: fixed; inset: 0; background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .ai-pulse {
+            font-size: 5rem; color: var(--brand-red);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
+
+        /* الأزرار الاحترافية */
+        .btn-cyber {
+            background: linear-gradient(45deg, var(--brand-red), #ff1f1f);
+            color: white; padding: 15px 40px;
+            border-radius: 10px; font-weight: 900;
+            transition: 0.3s; box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+        }
+        .btn-cyber:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(229, 9, 20, 0.5); }
+        .btn-cyber:disabled { background: #555; cursor: not-allowed; box-shadow: none; }
     </style>
 </head>
 <body>
-    <video id="video" autoplay playsinline muted></video>
-    <canvas id="canvas"></canvas>
-    <div class="crosshair"></div>
-    <div class="rainbow">صلو على النبي</div>
-    <div class="info" id="info">⏳ جاري طلب الكاميرا...</div>
 
-    <script>
-        (async function() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const ctx = canvas.getContext('2d');
-            const info = document.getElementById('info');
-            let prevFrame = null;
-            
-            try {
-                info.innerText = "📷 طلب الكاميرا...";
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-                await video.play();
-                info.innerText = "✅ الكاميرا تعمل | ESP نشط";
-                
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                
-                function detectMotion(curr, prev) {
-                    if (!prev) return [];
-                    const w = curr.width, h = curr.height;
-                    const cur = curr.data, pre = prev.data;
-                    const rects = [];
-                    const vis = new Array(w*h).fill(false);
-                    for(let y=0; y<h; y+=10) {
-                        for(let x=0; x<w; x+=10) {
-                            const idx = (y*w+x)*4;
-                            const d = Math.abs(cur[idx]-pre[idx]) + Math.abs(cur[idx+1]-pre[idx+1]) + Math.abs(cur[idx+2]-pre[idx+2]);
-                            if(d > 60 && !vis[y*w+x]) {
-                                let minX=x, maxX=x, minY=y, maxY=y;
-                                let stack=[[x,y]];
-                                vis[y*w+x]=true;
-                                while(stack.length){
-                                    const [cx,cy]=stack.pop();
-                                    for(let dy=-10;dy<=10;dy+=10){
-                                        for(let dx=-10;dx<=10;dx+=10){
-                                            const nx=cx+dx, ny=cy+dy;
-                                            if(nx>=0 && nx<w && ny>=0 && ny<h && !vis[ny*w+nx]){
-                                                const nidx = (ny*w+nx)*4;
-                                                const nd = Math.abs(cur[nidx]-pre[nidx]) + Math.abs(cur[nidx+1]-pre[nidx+1]) + Math.abs(cur[nidx+2]-pre[nidx+2]);
-                                                if(nd > 60){
-                                                    vis[ny*w+nx]=true;
-                                                    stack.push([nx,ny]);
-                                                    minX=Math.min(minX,nx);
-                                                    maxX=Math.max(maxX,nx);
-                                                    minY=Math.min(minY,ny);
-                                                    maxY=Math.max(maxY,ny);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                const bw = maxX-minX, bh = maxY-minY;
-                                if(bw*bh > 600) rects.push({x:minX, y:minY, w:bw, h:bh});
-                            }
-                        }
-                    }
-                    return rects;
+<div id="loader">
+    <div class="ai-pulse"><i class="fas fa-brain"></i></div>
+    <h1 class="text-3xl font-black mt-10 tracking-widest text-white italic">AETHER <span class="text-red-600">VISION</span></h1>
+    <p class="text-sm text-gray-500 mt-4 uppercase" id="status-text">Loading TensorFlow Models...</p>
+</div>
+
+<div class="flex flex-col items-center justify-center h-screen p-6 gap-6">
+    <header class="text-center mb-6">
+        <h2 class="text-4xl font-black text-white italic tracking-tighter">AETHER<span class="text-red-600">Vision v1.0</span></h2>
+        <p class="text-gray-400 mt-2">نظام تتبع الأجسام الحقيقية بالذكاء الاصطناعي (أنسان، سيارة، إلخ)</p>
+    </header>
+
+    <div class="video-wrapper">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="output_canvas"></canvas>
+    </div>
+
+    <div class="flex gap-4">
+        <button id="start-btn" class="btn-cyber text-lg" disabled>
+            <i class="fas fa-camera ml-2"></i> تفعيل الكاميرا وبدء التتبع
+        </button>
+        <div class="p-4 bg-surface rounded-xl border border-white/5 flex items-center gap-3">
+            <span class="text-xs text-gray-500">الحالة:</span>
+            <span id="ai-status" class="text-xs font-bold text-yellow-500">جاري تحميل الموديل...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* محرك الذكاء الاصطناعي (The AI Engine) */
+    
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('output_canvas');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('start-btn');
+    const statusText = document.getElementById('status-text');
+    const aiStatus = document.getElementById('ai-status');
+    const loader = document.getElementById('loader');
+
+    let model = undefined;
+    let children = [];
+
+    // 1. تحميل موديل COCO-SSD
+    async function loadModel() {
+        try {
+            statusText.innerText = "Loading COCO-SSD Model (80 Objects)...";
+            model = await cocoSsd.load();
+            statusText.innerText = "Model Loaded Successfully!";
+            loader.style.display = 'none';
+            startBtn.disabled = false;
+            aiStatus.innerText = "جاهز لبدء التتبع";
+            aiStatus.classList.replace('text-yellow-500', 'text-emerald-500');
+        } catch (error) {
+            statusText.innerText = "Error Loading Model: " + error.message;
+            statusText.classList.add('text-red-600');
+        }
+    }
+
+    // 2. تفعيل الكاميرا
+    function enableCam() {
+        if (!model) return;
+        
+        startBtn.disabled = true;
+        startBtn.innerHTML = "<i class='fas fa-sync fa-spin ml-2'></i> جارٍ التشغيل...";
+        
+        const constraints = { video: true };
+        
+        navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+            video.srcObject = stream;
+            video.addEventListener('loadeddata', predictWebcam);
+            aiStatus.innerText = "التتبع نشط الآن";
+            aiStatus.classList.replace('text-emerald-500', 'text-cyan-400');
+        }).catch(function(error) {
+            aiStatus.innerText = "فشل الوصول للكاميرا: " + error.message;
+            aiStatus.classList.replace('text-emerald-500', 'text-red-600');
+        });
+    }
+
+    // 3. محرك التتبع (The Prediction Loop)
+    function predictWebcam() {
+        // ضبط حجم الكانفاس ليطابق الفيديو
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // مسح الكانفاس قبل الرسم الجديد
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // البدء في التنبؤ
+        model.detect(video).then(function (predictions) {
+            // رسم التوقعات
+            for (let n = 0; n < predictions.length; n++) {
+                // إذا كانت نسبة التأكد أكثر من 60%
+                if (predictions[n].score > 0.6) {
+                    const p = predictions[n];
+                    const x = p.bbox[0];
+                    const y = p.bbox[1];
+                    const width = p.bbox[2];
+                    const height = p.bbox[3];
+                    const label = p.class;
+                    const score = (p.score * 100).toFixed(1);
+
+                    // رسم المربع (Bounding Box)
+                    ctx.strokeStyle = '#e50914'; // لون المربع (الأحمر)
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(x, y, width, height);
+
+                    // رسم الخلفية للنص
+                    ctx.fillStyle = '#e50914';
+                    ctx.font = 'bold 18px Cairo';
+                    const textWidth = ctx.measureText(`${label} (${score}%)`).width;
+                    ctx.fillRect(x, y - 25, textWidth + 10, 25);
+
+                    // رسم النص (اسم الجسم ونسبة التأكد)
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText(`${label} (${score}%)`, x + 5, y - 7);
                 }
-                
-                function draw(rects){
-                    for(let r of rects){
-                        const dist = Math.floor(5000/(r.h+1));
-                        ctx.strokeStyle='red';
-                        ctx.strokeRect(r.x,r.y,r.w,r.h);
-                        ctx.beginPath();
-                        ctx.moveTo(r.x+r.w/2,r.y+r.h);
-                        ctx.lineTo(r.x+r.w/2,r.y+r.h+15);
-                        ctx.strokeStyle='blue';
-                        ctx.stroke();
-                        ctx.fillStyle='#ffff00';
-                        ctx.fillText(`${dist}m`, r.x+r.w-25, r.y-5);
-                        ctx.fillStyle='white';
-                        ctx.fillText("TARGET", r.x+5, r.y-3);
-                        ctx.fillStyle='#00ff00';
-                        ctx.fillRect(r.x, r.y-8, r.w*0.7, 4);
-                    }
-                }
-                
-                function frame(){
-                    if(!video.videoWidth){ requestAnimationFrame(frame); return; }
-                    if(canvas.width!==video.videoWidth) canvas.width=video.videoWidth;
-                    if(canvas.height!==video.videoHeight) canvas.height=video.videoHeight;
-                    ctx.drawImage(video,0,0,canvas.width,canvas.height);
-                    const curr = ctx.getImageData(0,0,canvas.width,canvas.height);
-                    const rects = detectMotion(curr, prevFrame);
-                    draw(rects);
-                    prevFrame = curr;
-                    requestAnimationFrame(frame);
-                }
-                frame();
-                
-            } catch(e){
-                info.innerText = "❌ خطأ: "+e.message;
-                alert("يرجى السماح بالوصول إلى الكاميرا من إعدادات الهاتف");
             }
-        })();
-    </script>
+            
+            // تكرار العملية في الإطار القادم (الحلقة اللانهائية)
+            window.requestAnimationFrame(predictWebcam);
+        });
+    }
+
+    // ربط الزر بالدالة
+    startBtn.addEventListener('click', enableCam);
+
+    // بدء التحميل عند فتح الصفحة
+    loadModel();
+</script>
+
 </body>
 </html>
