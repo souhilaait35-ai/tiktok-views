@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>💣 العنكبوت النووي | حركة واقعية</title>
+    <title>🕷️ بلاك سبايدر - عنكبوت واقعي</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
         }
 
         body {
-            background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
+            background: radial-gradient(ellipse at center, #1a2a1a 0%, #0a0f0a 100%);
             min-height: 100vh;
             overflow: hidden;
             touch-action: none;
@@ -23,103 +23,86 @@
 
         canvas {
             display: block;
-            width: 100%;
-            height: 100%;
-            cursor: crosshair;
             position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
             z-index: 1;
         }
 
-        /* لوحة التحكم النووية */
+        /* لوحة التحكم */
         .control-panel {
             position: fixed;
             bottom: 20px;
-            left: 20px;
-            right: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(15px);
-            border-radius: 50px;
-            padding: 10px 20px;
+            border-radius: 60px;
+            padding: 8px 20px;
             display: flex;
-            justify-content: center;
             gap: 15px;
             z-index: 20;
-            border: 1px solid rgba(255, 0, 0, 0.3);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+            border: 1px solid #4caf50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.2);
         }
 
-        .nuke-btn {
-            background: linear-gradient(135deg, #1a1a2e, #0a0a1a);
-            border: 1px solid #ff0000;
-            color: #ff0000;
-            padding: 8px 20px;
+        button {
+            background: none;
+            border: none;
+            color: #4caf50;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px 16px;
             border-radius: 40px;
+            transition: all 0.2s;
             font-family: monospace;
             font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
         }
 
-        .nuke-btn:hover {
-            background: #ff0000;
+        button:hover {
+            background: #4caf50;
             color: #000;
-            box-shadow: 0 0 15px #ff0000;
-            transform: scale(1.02);
+            box-shadow: 0 0 15px #4caf50;
         }
 
         .stats {
             position: fixed;
             top: 15px;
             left: 15px;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 8px 15px;
-            border-radius: 30px;
-            color: #ff0000;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: #4caf50;
             font-family: monospace;
             font-size: 11px;
             z-index: 20;
-            border-left: 3px solid #ff0000;
-            letter-spacing: 1px;
+            border-left: 3px solid #4caf50;
         }
 
-        .rainbow-nuke {
+        .rainbow {
             position: fixed;
-            bottom: 85px;
+            bottom: 80px;
             left: 0;
             right: 0;
             text-align: center;
             font-size: 13px;
             font-weight: bold;
             z-index: 20;
-            background: linear-gradient(90deg, #ff0000, #ff7700, #ffff00, #00ff00, #0000ff, #8b00ff);
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
             background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             animation: rainbowMove 2s linear infinite;
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
 
         @keyframes rainbowMove {
             0% { background-position: 0% center; }
             100% { background-position: 200% center; }
-        }
-
-        .instruction {
-            position: fixed;
-            bottom: 140px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 10px;
-            font-family: monospace;
-            z-index: 20;
         }
     </style>
 </head>
@@ -128,25 +111,23 @@
     <canvas id="canvas"></canvas>
 
     <div class="control-panel">
-        <button class="nuke-btn" id="resetBtn">💣 إعادة ضبط</button>
-        <button class="nuke-btn" id="particleBtn">💥 جزيئات</button>
-        <button class="nuke-btn" id="webBtn">🕸️ شبكة</button>
+        <button id="resetBtn">🔄 إعادة ضبط</button>
+        <button id="legBtn">🦵 إظهار الأرجل</button>
+        <button id="shadowBtn">🌑 إظهار الظل</button>
     </div>
 
     <div class="stats">
-        🔴 العنكبوت النووي | 🕷️ السرعة: <span id="speedVal">1.0</span>x | 🦵 الأرجل: 8
+        🕷️ العنكبوت الأسطوري | 🦵 أرجل فعلية: 8
     </div>
-    <div class="rainbow-nuke">صلو على النبي | القنبلة النووية العنكبوتية</div>
-    <div class="instruction">👆 المس الشاشة | العنكبوت يتحرك نحو إصبعك</div>
+    <div class="rainbow">صلو على النبي | تنبض الحياة</div>
 
     <script>
         (function() {
-            // ========== إعدادات القنبلة ==========
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
             let w, h;
             
-            // عنكبوت القنبلة
+            // ========== إعدادات العنكبوت ==========
             let spider = {
                 x: 0, y: 0,
                 targetX: 0, targetY: 0,
@@ -154,65 +135,78 @@
                 legCount: 8,
                 bodyRadius: 22,
                 eyeRadius: 6,
-                speed: 0.12,
+                speed: 0.09,
                 legWave: 0,
-                shadowOffset: { x: 0, y: 0 }
+                legSpeed: 0.12,
+                showLegs: true,
+                showShadow: true
             };
             
             let touchPoint = { x: null, y: null, active: false };
             let particles = [];
-            let webLines = [];
-            let showWeb = true;
             let showParticles = true;
-            let legAngles = [];
-            let legPhases = [];
             
-            // ========== إعدادات الأرجل الواقعية ==========
-            class RealisticLeg {
+            // ========== كلاس الرجل الواقعية (بمفاصل متحركة) ==========
+            class RealLeg {
                 constructor(index, total) {
                     this.index = index;
-                    this.angle = (index / total) * Math.PI * 2;
+                    this.baseAngle = (index / total) * Math.PI * 2;
                     this.segments = 4;
-                    this.length = 70;
-                    this.phase = index * 0.8;
-                    this.currentAngle = this.angle;
+                    this.length = 72;
+                    this.phase = index * 0.9;
+                    this.wave = 0;
                 }
                 
-                getPoints(centerX, centerY, bodyRadius, waveTime, targetAngle) {
+                // حساب نقاط الرجل بالكامل
+                getPoints(cx, cy, bodyR, waveTime, targetAngle) {
                     const points = [];
-                    const baseAngle = this.angle + Math.sin(waveTime + this.phase) * 0.4;
-                    const angleToTarget = targetAngle !== null ? targetAngle : baseAngle;
-                    const mix = targetAngle !== null ? 0.7 : 0.3;
-                    const finalAngle = baseAngle * (1 - mix) + angleToTarget * mix;
                     
-                    let x = centerX + Math.cos(finalAngle) * bodyRadius;
-                    let y = centerY + Math.sin(finalAngle) * bodyRadius;
+                    // الزاوية الأساسية مع تموج طبيعي
+                    let angle = this.baseAngle + Math.sin(waveTime * 1.5 + this.phase) * 0.45;
+                    
+                    // إذا كان هناك هدف (لمسة)، تميل الأرجل نحوه
+                    if (targetAngle !== null) {
+                        const diff = Math.sin(waveTime * 2 + this.phase) * 0.3;
+                        angle = angle * 0.6 + targetAngle * 0.4 + diff;
+                    }
+                    
+                    // نقطة البداية على الجسم
+                    let x = cx + Math.cos(angle) * bodyR;
+                    let y = cy + Math.sin(angle) * bodyR;
                     points.push({ x, y });
                     
-                    const stepLength = this.length / this.segments;
+                    const segLen = this.length / this.segments;
+                    let lastAngle = angle;
+                    
                     for (let i = 1; i <= this.segments; i++) {
                         const t = i / this.segments;
-                        const bend = Math.sin(waveTime * 2 + this.phase + i) * 0.3;
-                        const angleOffset = (1 - t) * 0.5 + bend;
-                        const legAngle = finalAngle + angleOffset;
-                        x += Math.cos(legAngle) * stepLength;
-                        y += Math.sin(legAngle) * stepLength;
+                        // انحناء طبيعي يزيد في نهاية الرجل
+                        const bend = Math.sin(waveTime * 2.2 + this.phase + i) * 0.5;
+                        const curve = (1 - t) * 0.6;
+                        const angleOffset = curve + bend;
+                        
+                        let newAngle = lastAngle + angleOffset;
+                        x += Math.cos(newAngle) * segLen;
+                        y += Math.sin(newAngle) * segLen;
                         points.push({ x, y });
+                        lastAngle = newAngle;
                     }
                     return points;
                 }
                 
-                draw(ctx, centerX, centerY, bodyRadius, waveTime, targetAngle) {
-                    const points = this.getPoints(centerX, centerY, bodyRadius, waveTime, targetAngle);
+                draw(ctx, cx, cy, bodyR, waveTime, targetAngle) {
+                    if (!spider.showLegs) return;
+                    
+                    const points = this.getPoints(cx, cy, bodyR, waveTime, targetAngle);
                     if (points.length < 2) return;
                     
                     // ظل الرجل
                     ctx.beginPath();
-                    ctx.moveTo(points[0].x + 2, points[0].y + 2);
+                    ctx.moveTo(points[0].x + 3, points[0].y + 3);
                     for (let i = 1; i < points.length; i++) {
-                        ctx.lineTo(points[i].x + 2, points[i].y + 2);
+                        ctx.lineTo(points[i].x + 3, points[i].y + 3);
                     }
-                    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+                    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
                     ctx.lineWidth = 6;
                     ctx.stroke();
                     
@@ -222,43 +216,42 @@
                     for (let i = 1; i < points.length; i++) {
                         ctx.lineTo(points[i].x, points[i].y);
                     }
-                    ctx.strokeStyle = '#1a1a2e';
-                    ctx.lineWidth = 4;
+                    ctx.strokeStyle = '#2a2a2a';
+                    ctx.lineWidth = 5;
+                    ctx.stroke();
+                    ctx.strokeStyle = '#4a4a4a';
+                    ctx.lineWidth = 2;
                     ctx.stroke();
                     
-                    // مفاصل الرجل (تألق)
+                    // المفاصل (تظهر كنقاط زائدة)
                     for (let i = 1; i < points.length; i++) {
                         ctx.beginPath();
-                        ctx.arc(points[i].x, points[i].y, 2.5, 0, 2 * Math.PI);
-                        ctx.fillStyle = `rgba(255, 50, 50, ${0.5 + Math.sin(Date.now() * 0.01 + this.index) * 0.3})`;
+                        ctx.arc(points[i].x, points[i].y, 2.2, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#5a5a5a';
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(points[i].x, points[i].y, 1, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#8a8a8a';
                         ctx.fill();
                     }
                 }
             }
             
-            // ========== جزيئات الانفجار ==========
-            class NukeParticle {
+            // ========== جسيمات المشي ==========
+            class StepParticle {
                 constructor(x, y) {
                     this.x = x;
                     this.y = y;
-                    this.vx = (Math.random() - 0.5) * 8;
-                    this.vy = (Math.random() - 0.5) * 8 - 3;
                     this.life = 1;
-                    this.size = Math.random() * 5 + 2;
-                    this.color = `hsl(${Math.random() * 60 + 0}, 100%, 60%)`;
+                    this.size = Math.random() * 4 + 1;
                 }
-                
                 update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    this.vy += 0.2;
-                    this.life -= 0.02;
+                    this.life -= 0.03;
                     return this.life > 0;
                 }
-                
                 draw(ctx) {
-                    ctx.globalAlpha = this.life * 0.8;
-                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = this.life * 0.6;
+                    ctx.fillStyle = '#4caf50';
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
                     ctx.fill();
@@ -270,92 +263,60 @@
             function initLegs() {
                 spider.legs = [];
                 for (let i = 0; i < spider.legCount; i++) {
-                    spider.legs.push(new RealisticLeg(i, spider.legCount));
+                    spider.legs.push(new RealLeg(i, spider.legCount));
                 }
             }
             
-            // ========== إضافة جزيئات ==========
-            function addNukeParticles(x, y, count = 15) {
-                if (!showParticles) return;
-                for (let i = 0; i < count; i++) {
-                    particles.push(new NukeParticle(x, y));
-                }
+            // ========== إضافة أثر مشي ==========
+            function addStepParticle(x, y) {
+                particles.push(new StepParticle(x, y));
             }
             
-            // ========== شبكة العنكبوت ==========
-            function updateWebLines() {
-                if (!showWeb) return;
-                webLines = [];
-                const centerX = spider.x;
-                const centerY = spider.y;
-                for (let i = 0; i < 12; i++) {
-                    const angle = (i / 12) * Math.PI * 2;
-                    const radius = spider.bodyRadius * 2.5;
-                    webLines.push({
-                        start: { x: centerX, y: centerY },
-                        end: {
-                            x: centerX + Math.cos(angle) * radius * 1.5,
-                            y: centerY + Math.sin(angle) * radius * 1.5
-                        }
-                    });
-                }
-            }
-            
-            function drawWeb() {
-                if (!showWeb) return;
-                for (let line of webLines) {
-                    ctx.beginPath();
-                    ctx.moveTo(line.start.x, line.start.y);
-                    ctx.lineTo(line.end.x, line.end.y);
-                    ctx.strokeStyle = 'rgba(255, 50, 50, 0.2)';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
-            }
-            
-            // ========== رسم الظل ==========
-            function drawShadow() {
-                ctx.beginPath();
-                ctx.ellipse(spider.x + 5, spider.y + 8, spider.bodyRadius * 1.2, spider.bodyRadius * 0.8, 0, 0, 2 * Math.PI);
-                ctx.fillStyle = 'rgba(0,0,0,0.4)';
-                ctx.fill();
-            }
-            
-            // ========== رسم الجسم (واقعي) ==========
+            // ========== رسم الجسم بالكامل ==========
             function drawBody() {
+                // الظل الدائري
+                if (spider.showShadow) {
+                    ctx.beginPath();
+                    ctx.ellipse(spider.x + 4, spider.y + 6, spider.bodyRadius * 1.1, spider.bodyRadius * 0.7, 0, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+                    ctx.fill();
+                }
+                
                 // تدرج الجسم
                 const grad = ctx.createRadialGradient(spider.x - 5, spider.y - 5, 5, spider.x, spider.y, spider.bodyRadius);
-                grad.addColorStop(0, '#2a2a3a');
-                grad.addColorStop(1, '#0a0a1a');
+                grad.addColorStop(0, '#3a3a3a');
+                grad.addColorStop(1, '#151515');
                 ctx.fillStyle = grad;
                 ctx.beginPath();
                 ctx.arc(spider.x, spider.y, spider.bodyRadius, 0, 2 * Math.PI);
                 ctx.fill();
                 
-                // الخطوط على الظهر
-                ctx.strokeStyle = '#ff0000';
-                ctx.lineWidth = 1.5;
-                for (let i = -1; i <= 1; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(spider.x - 10, spider.y + i * 6);
-                    ctx.lineTo(spider.x + 10, spider.y + i * 6);
-                    ctx.stroke();
-                }
+                // التفاصيل السوداء على الظهر (نقوش)
+                ctx.fillStyle = '#0a0a0a';
+                ctx.beginPath();
+                ctx.ellipse(spider.x - 6, spider.y - 4, 4, 3, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(spider.x + 6, spider.y - 4, 4, 3, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(spider.x, spider.y + 2, 5, 4, 0, 0, 2 * Math.PI);
+                ctx.fill();
                 
-                // علامة القنبلة النووية ☢️
-                ctx.font = `${spider.bodyRadius * 0.8}px monospace`;
-                ctx.fillStyle = '#ff0000';
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = '#ff0000';
-                ctx.fillText('☢️', spider.x - 12, spider.y - 8);
-                ctx.fillText('💣', spider.x + 5, spider.y + 10);
+                // علامة القوة 💪
+                ctx.font = `${spider.bodyRadius * 0.7}px monospace`;
+                ctx.fillStyle = '#4caf50';
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = '#4caf50';
+                ctx.fillText('🕷️', spider.x - 12, spider.y - 10);
+                ctx.fillText('💪', spider.x + 8, spider.y + 12);
                 ctx.shadowBlur = 0;
             }
             
-            // ========== رسم العيون (تتبع اللمس) ==========
+            // ========== العيون (تتبع لمستك) ==========
             function drawEyes() {
-                const eyeOffsetX = spider.bodyRadius * 0.6;
-                const eyeOffsetY = spider.bodyRadius * 0.5;
+                const eyeOffX = spider.bodyRadius * 0.55;
+                const eyeOffY = spider.bodyRadius * 0.55;
                 let lookX = 0, lookY = 0;
                 
                 if (touchPoint.active && touchPoint.x && touchPoint.y) {
@@ -363,96 +324,104 @@
                     const dy = touchPoint.y - spider.y;
                     const dist = Math.hypot(dx, dy);
                     if (dist > 0.1) {
-                        lookX = (dx / dist) * 3;
-                        lookY = (dy / dist) * 3;
+                        lookX = (dx / dist) * 3.5;
+                        lookY = (dy / dist) * 3.5;
                     }
                 }
                 
-                // العين اليسرى
-                ctx.beginPath();
-                ctx.arc(spider.x - eyeOffsetX, spider.y - eyeOffsetY, spider.eyeRadius, 0, 2 * Math.PI);
+                // بياض العين
                 ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(spider.x - eyeOffX, spider.y - eyeOffY, spider.eyeRadius, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(spider.x - eyeOffsetX + lookX, spider.y - eyeOffsetY + lookY, 2.5, 0, 2 * Math.PI);
-                ctx.fillStyle = '#ff0000';
+                ctx.arc(spider.x + eyeOffX, spider.y - eyeOffY, spider.eyeRadius, 0, 2 * Math.PI);
                 ctx.fill();
                 
-                // العين اليمنى
+                // بؤبؤ العين
+                ctx.fillStyle = '#4caf50';
                 ctx.beginPath();
-                ctx.arc(spider.x + eyeOffsetX, spider.y - eyeOffsetY, spider.eyeRadius, 0, 2 * Math.PI);
+                ctx.arc(spider.x - eyeOffX + lookX, spider.y - eyeOffY + lookY, 2.5, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(spider.x + eyeOffsetX + lookX, spider.y - eyeOffsetY + lookY, 2.5, 0, 2 * Math.PI);
+                ctx.arc(spider.x + eyeOffX + lookX, spider.y - eyeOffY + lookY, 2.5, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // نقطة ضوء صغيرة
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(spider.x - eyeOffX + lookX - 1, spider.y - eyeOffY + lookY - 1, 0.8, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(spider.x + eyeOffX + lookX - 1, spider.y - eyeOffY + lookY - 1, 0.8, 0, 2 * Math.PI);
                 ctx.fill();
             }
             
-            // ========== تحديث حركة العنكبوت ==========
-            function updateSpiderMovement() {
+            // ========== تحديث الحركة ==========
+            function updateMovement() {
                 if (touchPoint.active && touchPoint.x && touchPoint.y) {
                     const dx = touchPoint.x - spider.x;
                     const dy = touchPoint.y - spider.y;
-                    const distance = Math.hypot(dx, dy);
+                    const dist = Math.hypot(dx, dy);
                     
-                    if (distance > 5) {
+                    if (dist > 3) {
                         spider.x += dx * spider.speed;
                         spider.y += dy * spider.speed;
-                        spider.legWave += 0.15;
-                        if (Math.random() < 0.3) {
-                            addNukeParticles(spider.x, spider.y, 1);
+                        spider.legWave += spider.legSpeed;
+                        
+                        // أثر مشي كل حركة
+                        if (Math.random() < 0.25) {
+                            addStepParticle(spider.x - 5, spider.y + 5);
                         }
                     } else {
                         spider.x = touchPoint.x;
                         spider.y = touchPoint.y;
-                        addNukeParticles(spider.x, spider.y, 8);
+                        // انفجار جسيمات عند الوصول
+                        for (let i = 0; i < 6; i++) {
+                            addStepParticle(spider.x, spider.y);
+                        }
                     }
-                    
-                    // تحديث الظل حسب الحركة
-                    spider.shadowOffset.x = (dx / distance) * 3 || 0;
-                    spider.shadowOffset.y = (dy / distance) * 3 || 0;
                 } else {
-                    spider.legWave += 0.05;
+                    spider.legWave += 0.03;
                 }
             }
             
-            // ========== رسم خلفية نارية ==========
+            // ========== رسم الخلفية (طبيعة مع خيوط العنكبوت) ==========
             function drawBackground() {
-                const grad = ctx.createRadialGradient(w/2, h/2, 50, w/2, h/2, w);
-                grad.addColorStop(0, '#1a0a0a');
-                grad.addColorStop(1, '#000000');
+                // تدرج الخلفية
+                const grad = ctx.createLinearGradient(0, 0, w, h);
+                grad.addColorStop(0, '#0a1f0a');
+                grad.addColorStop(1, '#051005');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
                 
-                // تأثير شبكي أحمر خفيف
-                ctx.strokeStyle = 'rgba(255, 0, 0, 0.05)';
-                ctx.lineWidth = 0.5;
-                for (let i = 0; i < w; i += 60) {
+                // شبكة خفيفة (خيوط العنكبوت الوهمية)
+                ctx.strokeStyle = 'rgba(76, 175, 80, 0.12)';
+                ctx.lineWidth = 0.8;
+                for (let i = 0; i < w; i += 70) {
                     ctx.beginPath();
                     ctx.moveTo(i, 0);
-                    ctx.lineTo(i, h);
+                    ctx.lineTo(w - i, h);
                     ctx.stroke();
                     ctx.beginPath();
                     ctx.moveTo(0, i);
-                    ctx.lineTo(w, i);
+                    ctx.lineTo(w, h - i);
                     ctx.stroke();
                 }
             }
             
-            // ========== حلقة الرسم الرئيسية ==========
+            // ========== حلقة الرسم ==========
             function animate() {
                 if (!w || !h) return;
                 
-                updateSpiderMovement();
-                updateWebLines();
+                updateMovement();
                 
-                // تحديث الجزيئات
+                // تحديث الجسيمات
                 particles = particles.filter(p => p.update());
                 
                 drawBackground();
-                drawShadow();
-                drawWeb();
                 
-                // حساب اتجاه الأرجل نحو اللمس
+                // حساب الزاوية المستهدفة للأرجل
                 let targetAngle = null;
                 if (touchPoint.active && touchPoint.x && touchPoint.y) {
                     targetAngle = Math.atan2(touchPoint.y - spider.y, touchPoint.x - spider.x);
@@ -466,21 +435,21 @@
                 drawBody();
                 drawEyes();
                 
-                // رسم الجزيئات
+                // رسم الجسيمات
                 for (let p of particles) {
                     p.draw(ctx);
                 }
                 
-                // رسم نقطة اللمس
+                // رسم نقطة اللمس التفاعلية
                 if (touchPoint.active && touchPoint.x && touchPoint.y) {
                     ctx.beginPath();
                     ctx.arc(touchPoint.x, touchPoint.y, 12, 0, 2 * Math.PI);
-                    ctx.strokeStyle = '#ff0000';
-                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#4caf50';
+                    ctx.lineWidth = 1.5;
                     ctx.stroke();
                     ctx.beginPath();
-                    ctx.arc(touchPoint.x, touchPoint.y, 4, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#ff0000';
+                    ctx.arc(touchPoint.x, touchPoint.y, 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
                     ctx.fill();
                 }
                 
@@ -497,7 +466,7 @@
                 touchPoint.x = x;
                 touchPoint.y = y;
                 touchPoint.active = true;
-                addNukeParticles(x, y, 20);
+                for (let i = 0; i < 8; i++) addStepParticle(x, y);
             }
             
             function handleTouchMove(e) {
@@ -514,7 +483,7 @@
             function handleTouchEnd(e) {
                 e.preventDefault();
                 touchPoint.active = false;
-                addNukeParticles(spider.x, spider.y, 15);
+                for (let i = 0; i < 5; i++) addStepParticle(spider.x, spider.y);
             }
             
             // ========== تغيير الحجم ==========
@@ -527,7 +496,6 @@
                 spider.y = h / 2;
                 spider.targetX = w / 2;
                 spider.targetY = h / 2;
-                updateWebLines();
             }
             
             // ========== الأزرار ==========
@@ -535,34 +503,28 @@
                 spider.x = w / 2;
                 spider.y = h / 2;
                 touchPoint.active = false;
-                addNukeParticles(spider.x, spider.y, 30);
+                for (let i = 0; i < 15; i++) addStepParticle(spider.x, spider.y);
             };
             
-            document.getElementById('particleBtn').onclick = (e) => {
-                showParticles = !showParticles;
-                e.target.textContent = showParticles ? "💥 جزيئات" : "💥 إخفاء الجزيئات";
+            let legVisible = true;
+            document.getElementById('legBtn').onclick = (e) => {
+                legVisible = !legVisible;
+                spider.showLegs = legVisible;
+                e.target.textContent = legVisible ? "🦵 إخفاء الأرجل" : "🦵 إظهار الأرجل";
             };
             
-            document.getElementById('webBtn').onclick = (e) => {
-                showWeb = !showWeb;
-                e.target.textContent = showWeb ? "🕸️ شبكة" : "🕸️ إخفاء الشبكة";
-                if (showWeb) updateWebLines();
+            let shadowVisible = true;
+            document.getElementById('shadowBtn').onclick = (e) => {
+                shadowVisible = !shadowVisible;
+                spider.showShadow = shadowVisible;
+                e.target.textContent = shadowVisible ? "🌑 إخفاء الظل" : "🌑 إظهار الظل";
             };
-            
-            // ضبط السرعة من لوحة التحكم
-            const speedSpan = document.getElementById('speedVal');
-            let speedLevel = 1;
-            setInterval(() => {
-                speedLevel = Math.min(2.5, Math.max(0.5, speedLevel + (touchPoint.active ? 0.01 : -0.005)));
-                spider.speed = 0.08 * speedLevel;
-                speedSpan.innerText = speedLevel.toFixed(1);
-            }, 100);
             
             // ========== بدء التشغيل ==========
             function init() {
                 resizeCanvas();
                 initLegs();
-                addNukeParticles(spider.x, spider.y, 40);
+                for (let i = 0; i < 20; i++) addStepParticle(spider.x, spider.y);
                 
                 canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
                 canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -570,7 +532,7 @@
                 window.addEventListener('resize', resizeCanvas);
                 
                 animate();
-                console.log('💣 القنبلة العنكبوتية النووية انطلقت!');
+                console.log('🕷️ العنكبوت فائق الواقعية يعمل');
             }
             
             init();
