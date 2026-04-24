@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>بلاك سبايدر - العنكبوت الأسطوري</title>
+    <title>💣 العنكبوت النووي | حركة واقعية</title>
     <style>
         * {
             margin: 0;
@@ -12,170 +12,253 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
+
         body {
-            background: #000;
+            background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
             min-height: 100vh;
             overflow: hidden;
             touch-action: none;
+            font-family: 'Segoe UI', 'Courier New', monospace;
         }
+
         canvas {
             display: block;
             width: 100%;
             height: 100%;
             cursor: crosshair;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
-        .controls {
+
+        /* لوحة التحكم النووية */
+        .control-panel {
             position: fixed;
             bottom: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(15px);
+            border-radius: 50px;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
             z-index: 20;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
         }
-        button {
-            background: rgba(0,0,0,0.7);
+
+        .nuke-btn {
+            background: linear-gradient(135deg, #1a1a2e, #0a0a1a);
             border: 1px solid #ff0000;
             color: #ff0000;
-            padding: 8px 16px;
-            margin: 5px;
-            border-radius: 30px;
+            padding: 8px 20px;
+            border-radius: 40px;
             font-family: monospace;
             font-weight: bold;
-            backdrop-filter: blur(5px);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
         }
-        .info {
+
+        .nuke-btn:hover {
+            background: #ff0000;
+            color: #000;
+            box-shadow: 0 0 15px #ff0000;
+            transform: scale(1.02);
+        }
+
+        .stats {
             position: fixed;
-            top: 10px;
-            left: 10px;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 8px 15px;
+            border-radius: 30px;
             color: #ff0000;
-            background: rgba(0,0,0,0.6);
-            padding: 5px 10px;
-            border-radius: 8px;
             font-family: monospace;
-            font-size: 10px;
+            font-size: 11px;
             z-index: 20;
-            border-left: 3px solid red;
+            border-left: 3px solid #ff0000;
+            letter-spacing: 1px;
         }
-        .rainbow {
+
+        .rainbow-nuke {
             position: fixed;
-            bottom: 70px;
+            bottom: 85px;
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 12px;
-            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+            font-size: 13px;
+            font-weight: bold;
+            z-index: 20;
+            background: linear-gradient(90deg, #ff0000, #ff7700, #ffff00, #00ff00, #0000ff, #8b00ff);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            font-weight: bold;
+            animation: rainbowMove 2s linear infinite;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        @keyframes rainbowMove {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .instruction {
+            position: fixed;
+            bottom: 140px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+            font-family: monospace;
+            z-index: 20;
         }
     </style>
 </head>
 <body>
+
     <canvas id="canvas"></canvas>
-    <div class="info">
-        🕷️ العنكبوت الأسود | عدد الأرجل: <span id="legCount">8</span>
+
+    <div class="control-panel">
+        <button class="nuke-btn" id="resetBtn">💣 إعادة ضبط</button>
+        <button class="nuke-btn" id="particleBtn">💥 جزيئات</button>
+        <button class="nuke-btn" id="webBtn">🕸️ شبكة</button>
     </div>
-    <div class="controls">
-        <button id="resetBtn">🔄 إعادة ضبط</button>
-        <button id="toggleGlowBtn">✨ إطفاء التوهج</button>
+
+    <div class="stats">
+        🔴 العنكبوت النووي | 🕷️ السرعة: <span id="speedVal">1.0</span>x | 🦵 الأرجل: 8
     </div>
-    <div class="rainbow">صلو على النبي</div>
+    <div class="rainbow-nuke">صلو على النبي | القنبلة النووية العنكبوتية</div>
+    <div class="instruction">👆 المس الشاشة | العنكبوت يتحرك نحو إصبعك</div>
 
     <script>
         (function() {
+            // ========== إعدادات القنبلة ==========
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
             let w, h;
             
-            // ========== إعدادات العنكبوت ==========
+            // عنكبوت القنبلة
             let spider = {
                 x: 0, y: 0,
                 targetX: 0, targetY: 0,
-                legCount: 8,
                 legs: [],
-                bodyRadius: 20,
-                eyeRadius: 5,
-                speed: 0.15,
-                glowEnabled: true
+                legCount: 8,
+                bodyRadius: 22,
+                eyeRadius: 6,
+                speed: 0.12,
+                legWave: 0,
+                shadowOffset: { x: 0, y: 0 }
             };
             
-            let particles = [];
             let touchPoint = { x: null, y: null, active: false };
+            let particles = [];
+            let webLines = [];
+            let showWeb = true;
+            let showParticles = true;
+            let legAngles = [];
+            let legPhases = [];
             
-            // ========== إنشاء أرجل العنكبوت ==========
-            class Leg {
-                constructor(index, totalLegs) {
+            // ========== إعدادات الأرجل الواقعية ==========
+            class RealisticLeg {
+                constructor(index, total) {
                     this.index = index;
-                    this.angle = (index / totalLegs) * Math.PI * 2;
-                    this.length = 60;
-                    this.segments = 3;
-                    this.offsetAngle = 0;
+                    this.angle = (index / total) * Math.PI * 2;
+                    this.segments = 4;
+                    this.length = 70;
+                    this.phase = index * 0.8;
+                    this.currentAngle = this.angle;
                 }
                 
-                getEndPosition(centerX, centerY, bodyRadius) {
-                    const angle = this.angle + this.offsetAngle;
-                    const startX = centerX + Math.cos(angle) * bodyRadius;
-                    const startY = centerY + Math.sin(angle) * bodyRadius;
-                    const endX = startX + Math.cos(angle) * this.length;
-                    const endY = startY + Math.sin(angle) * this.length;
-                    return { startX, startY, endX, endY };
-                }
-                
-                update(targetAngle) {
-                    // حركة طبيعية للأرجل
-                    this.offsetAngle += (targetAngle - this.offsetAngle) * 0.1;
-                    this.offsetAngle += Math.sin(Date.now() * 0.005 + this.index) * 0.05;
-                }
-                
-                draw(ctx, centerX, centerY, bodyRadius) {
-                    const { startX, startY, endX, endY } = this.getEndPosition(centerX, centerY, bodyRadius);
+                getPoints(centerX, centerY, bodyRadius, waveTime, targetAngle) {
+                    const points = [];
+                    const baseAngle = this.angle + Math.sin(waveTime + this.phase) * 0.4;
+                    const angleToTarget = targetAngle !== null ? targetAngle : baseAngle;
+                    const mix = targetAngle !== null ? 0.7 : 0.3;
+                    const finalAngle = baseAngle * (1 - mix) + angleToTarget * mix;
                     
-                    // رسم الظل
+                    let x = centerX + Math.cos(finalAngle) * bodyRadius;
+                    let y = centerY + Math.sin(finalAngle) * bodyRadius;
+                    points.push({ x, y });
+                    
+                    const stepLength = this.length / this.segments;
+                    for (let i = 1; i <= this.segments; i++) {
+                        const t = i / this.segments;
+                        const bend = Math.sin(waveTime * 2 + this.phase + i) * 0.3;
+                        const angleOffset = (1 - t) * 0.5 + bend;
+                        const legAngle = finalAngle + angleOffset;
+                        x += Math.cos(legAngle) * stepLength;
+                        y += Math.sin(legAngle) * stepLength;
+                        points.push({ x, y });
+                    }
+                    return points;
+                }
+                
+                draw(ctx, centerX, centerY, bodyRadius, waveTime, targetAngle) {
+                    const points = this.getPoints(centerX, centerY, bodyRadius, waveTime, targetAngle);
+                    if (points.length < 2) return;
+                    
+                    // ظل الرجل
                     ctx.beginPath();
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(endX, endY);
+                    ctx.moveTo(points[0].x + 2, points[0].y + 2);
+                    for (let i = 1; i < points.length; i++) {
+                        ctx.lineTo(points[i].x + 2, points[i].y + 2);
+                    }
                     ctx.strokeStyle = 'rgba(0,0,0,0.5)';
                     ctx.lineWidth = 6;
                     ctx.stroke();
                     
-                    // رسم الرجل
+                    // الرجل الرئيسي
                     ctx.beginPath();
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(endX, endY);
+                    ctx.moveTo(points[0].x, points[0].y);
+                    for (let i = 1; i < points.length; i++) {
+                        ctx.lineTo(points[i].x, points[i].y);
+                    }
                     ctx.strokeStyle = '#1a1a2e';
                     ctx.lineWidth = 4;
                     ctx.stroke();
                     
-                    // رسم مفصل الرجل (نقطة)
-                    ctx.beginPath();
-                    ctx.arc(endX, endY, 3, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#ff0000';
-                    ctx.fill();
+                    // مفاصل الرجل (تألق)
+                    for (let i = 1; i < points.length; i++) {
+                        ctx.beginPath();
+                        ctx.arc(points[i].x, points[i].y, 2.5, 0, 2 * Math.PI);
+                        ctx.fillStyle = `rgba(255, 50, 50, ${0.5 + Math.sin(Date.now() * 0.01 + this.index) * 0.3})`;
+                        ctx.fill();
+                    }
                 }
             }
             
-            // ========== جسم (جزئيات) ==========
-            class Particle {
+            // ========== جزيئات الانفجار ==========
+            class NukeParticle {
                 constructor(x, y) {
                     this.x = x;
                     this.y = y;
-                    this.vx = (Math.random() - 0.5) * 4;
-                    this.vy = (Math.random() - 0.5) * 4;
+                    this.vx = (Math.random() - 0.5) * 8;
+                    this.vy = (Math.random() - 0.5) * 8 - 3;
                     this.life = 1;
-                    this.size = Math.random() * 4 + 2;
+                    this.size = Math.random() * 5 + 2;
+                    this.color = `hsl(${Math.random() * 60 + 0}, 100%, 60%)`;
                 }
                 
                 update() {
                     this.x += this.vx;
                     this.y += this.vy;
+                    this.vy += 0.2;
                     this.life -= 0.02;
                     return this.life > 0;
                 }
                 
                 draw(ctx) {
-                    ctx.globalAlpha = this.life;
-                    ctx.fillStyle = `hsl(${Date.now() * 0.1}deg, 100%, 50%)`;
+                    ctx.globalAlpha = this.life * 0.8;
+                    ctx.fillStyle = this.color;
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
                     ctx.fill();
@@ -184,141 +267,166 @@
             }
             
             // ========== إنشاء الأرجل ==========
-            function initSpider() {
+            function initLegs() {
                 spider.legs = [];
                 for (let i = 0; i < spider.legCount; i++) {
-                    spider.legs.push(new Leg(i, spider.legCount));
+                    spider.legs.push(new RealisticLeg(i, spider.legCount));
                 }
             }
             
-            // ========== تحديث اتجاه الأرجل ==========
-            function updateLegs() {
-                if (!touchPoint.active || !touchPoint.x || !touchPoint.y) {
-                    for (let leg of spider.legs) {
-                        leg.update(0);
-                    }
-                    return;
-                }
-                
-                const dx = touchPoint.x - spider.x;
-                const dy = touchPoint.y - spider.y;
-                const targetAngle = Math.atan2(dy, dx);
-                
-                for (let leg of spider.legs) {
-                    leg.update(targetAngle);
-                }
-            }
-            
-            // ========== إنشاء جزيئات عند اللمس ==========
-            function addParticles(x, y, count = 10) {
+            // ========== إضافة جزيئات ==========
+            function addNukeParticles(x, y, count = 15) {
+                if (!showParticles) return;
                 for (let i = 0; i < count; i++) {
-                    particles.push(new Particle(x, y));
+                    particles.push(new NukeParticle(x, y));
                 }
             }
             
-            // ========== رسم العنكبوت ==========
-            function drawSpider() {
-                // الجسم الرئيسي (الظل)
-                ctx.shadowBlur = spider.glowEnabled ? 20 : 0;
-                ctx.shadowColor = '#ff0000';
-                
-                // الجسم
+            // ========== شبكة العنكبوت ==========
+            function updateWebLines() {
+                if (!showWeb) return;
+                webLines = [];
+                const centerX = spider.x;
+                const centerY = spider.y;
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i / 12) * Math.PI * 2;
+                    const radius = spider.bodyRadius * 2.5;
+                    webLines.push({
+                        start: { x: centerX, y: centerY },
+                        end: {
+                            x: centerX + Math.cos(angle) * radius * 1.5,
+                            y: centerY + Math.sin(angle) * radius * 1.5
+                        }
+                    });
+                }
+            }
+            
+            function drawWeb() {
+                if (!showWeb) return;
+                for (let line of webLines) {
+                    ctx.beginPath();
+                    ctx.moveTo(line.start.x, line.start.y);
+                    ctx.lineTo(line.end.x, line.end.y);
+                    ctx.strokeStyle = 'rgba(255, 50, 50, 0.2)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+            
+            // ========== رسم الظل ==========
+            function drawShadow() {
+                ctx.beginPath();
+                ctx.ellipse(spider.x + 5, spider.y + 8, spider.bodyRadius * 1.2, spider.bodyRadius * 0.8, 0, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                ctx.fill();
+            }
+            
+            // ========== رسم الجسم (واقعي) ==========
+            function drawBody() {
+                // تدرج الجسم
+                const grad = ctx.createRadialGradient(spider.x - 5, spider.y - 5, 5, spider.x, spider.y, spider.bodyRadius);
+                grad.addColorStop(0, '#2a2a3a');
+                grad.addColorStop(1, '#0a0a1a');
+                ctx.fillStyle = grad;
                 ctx.beginPath();
                 ctx.arc(spider.x, spider.y, spider.bodyRadius, 0, 2 * Math.PI);
-                ctx.fillStyle = '#0a0a1a';
                 ctx.fill();
+                
+                // الخطوط على الظهر
                 ctx.strokeStyle = '#ff0000';
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                ctx.lineWidth = 1.5;
+                for (let i = -1; i <= 1; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(spider.x - 10, spider.y + i * 6);
+                    ctx.lineTo(spider.x + 10, spider.y + i * 6);
+                    ctx.stroke();
+                }
                 
-                // العيون
-                const eyeOffset = spider.bodyRadius * 0.6;
-                ctx.beginPath();
-                ctx.arc(spider.x - eyeOffset, spider.y - eyeOffset, spider.eyeRadius, 0, 2 * Math.PI);
+                // علامة القنبلة النووية ☢️
+                ctx.font = `${spider.bodyRadius * 0.8}px monospace`;
                 ctx.fillStyle = '#ff0000';
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(spider.x + eyeOffset, spider.y - eyeOffset, spider.eyeRadius, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // بؤبؤ العين (يتبع اللمس)
-                if (touchPoint.active && touchPoint.x && touchPoint.y) {
-                    const angleToTouch = Math.atan2(touchPoint.y - spider.y, touchPoint.x - spider.x);
-                    const pupilOffset = 3;
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.arc(spider.x - eyeOffset + Math.cos(angleToTouch) * pupilOffset, 
-                           spider.y - eyeOffset + Math.sin(angleToTouch) * pupilOffset, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(spider.x + eyeOffset + Math.cos(angleToTouch) * pupilOffset, 
-                           spider.y - eyeOffset + Math.sin(angleToTouch) * pupilOffset, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                } else {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.arc(spider.x - eyeOffset, spider.y - eyeOffset, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(spider.x + eyeOffset, spider.y - eyeOffset, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                }
-                
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#ff0000';
+                ctx.fillText('☢️', spider.x - 12, spider.y - 8);
+                ctx.fillText('💣', spider.x + 5, spider.y + 10);
                 ctx.shadowBlur = 0;
-                
-                // الأرجل
-                for (let leg of spider.legs) {
-                    leg.draw(ctx, spider.x, spider.y, spider.bodyRadius);
-                }
             }
             
-            // ========== رسم أثر الحركة ==========
-            function drawTrail() {
+            // ========== رسم العيون (تتبع اللمس) ==========
+            function drawEyes() {
+                const eyeOffsetX = spider.bodyRadius * 0.6;
+                const eyeOffsetY = spider.bodyRadius * 0.5;
+                let lookX = 0, lookY = 0;
+                
                 if (touchPoint.active && touchPoint.x && touchPoint.y) {
-                    ctx.beginPath();
-                    ctx.moveTo(spider.x, spider.y);
-                    ctx.lineTo(touchPoint.x, touchPoint.y);
-                    ctx.strokeStyle = 'rgba(255, 0, 0, 0.3)';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 10]);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
+                    const dx = touchPoint.x - spider.x;
+                    const dy = touchPoint.y - spider.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > 0.1) {
+                        lookX = (dx / dist) * 3;
+                        lookY = (dy / dist) * 3;
+                    }
                 }
+                
+                // العين اليسرى
+                ctx.beginPath();
+                ctx.arc(spider.x - eyeOffsetX, spider.y - eyeOffsetY, spider.eyeRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(spider.x - eyeOffsetX + lookX, spider.y - eyeOffsetY + lookY, 2.5, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ff0000';
+                ctx.fill();
+                
+                // العين اليمنى
+                ctx.beginPath();
+                ctx.arc(spider.x + eyeOffsetX, spider.y - eyeOffsetY, spider.eyeRadius, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(spider.x + eyeOffsetX + lookX, spider.y - eyeOffsetY + lookY, 2.5, 0, 2 * Math.PI);
+                ctx.fill();
             }
             
             // ========== تحديث حركة العنكبوت ==========
-            function updateSpider() {
+            function updateSpiderMovement() {
                 if (touchPoint.active && touchPoint.x && touchPoint.y) {
                     const dx = touchPoint.x - spider.x;
                     const dy = touchPoint.y - spider.y;
                     const distance = Math.hypot(dx, dy);
                     
-                    if (distance > 3) {
+                    if (distance > 5) {
                         spider.x += dx * spider.speed;
                         spider.y += dy * spider.speed;
-                        if (distance > 30) {
-                            addParticles(spider.x, spider.y, 2);
+                        spider.legWave += 0.15;
+                        if (Math.random() < 0.3) {
+                            addNukeParticles(spider.x, spider.y, 1);
                         }
                     } else {
                         spider.x = touchPoint.x;
                         spider.y = touchPoint.y;
-                        addParticles(spider.x, spider.y, 5);
+                        addNukeParticles(spider.x, spider.y, 8);
                     }
+                    
+                    // تحديث الظل حسب الحركة
+                    spider.shadowOffset.x = (dx / distance) * 3 || 0;
+                    spider.shadowOffset.y = (dy / distance) * 3 || 0;
+                } else {
+                    spider.legWave += 0.05;
                 }
             }
             
-            // ========== رسم خلفية متحركة ==========
+            // ========== رسم خلفية نارية ==========
             function drawBackground() {
-                const grad = ctx.createLinearGradient(0, 0, w, h);
-                grad.addColorStop(0, '#05050a');
-                grad.addColorStop(1, '#0a0a1a');
+                const grad = ctx.createRadialGradient(w/2, h/2, 50, w/2, h/2, w);
+                grad.addColorStop(0, '#1a0a0a');
+                grad.addColorStop(1, '#000000');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
                 
-                // شبكة (Grid) خفيفة
+                // تأثير شبكي أحمر خفيف
                 ctx.strokeStyle = 'rgba(255, 0, 0, 0.05)';
                 ctx.lineWidth = 0.5;
-                for (let i = 0; i < w; i += 50) {
+                for (let i = 0; i < w; i += 60) {
                     ctx.beginPath();
                     ctx.moveTo(i, 0);
                     ctx.lineTo(i, h);
@@ -330,23 +438,33 @@
                 }
             }
             
-            // ========== حلقة الرسم ==========
+            // ========== حلقة الرسم الرئيسية ==========
             function animate() {
                 if (!w || !h) return;
                 
-                updateSpider();
-                updateLegs();
+                updateSpiderMovement();
+                updateWebLines();
                 
                 // تحديث الجزيئات
                 particles = particles.filter(p => p.update());
                 
                 drawBackground();
+                drawShadow();
+                drawWeb();
                 
-                // رسم الأثر
-                drawTrail();
+                // حساب اتجاه الأرجل نحو اللمس
+                let targetAngle = null;
+                if (touchPoint.active && touchPoint.x && touchPoint.y) {
+                    targetAngle = Math.atan2(touchPoint.y - spider.y, touchPoint.x - spider.x);
+                }
                 
-                // رسم العنكبوت
-                drawSpider();
+                // رسم الأرجل
+                for (let leg of spider.legs) {
+                    leg.draw(ctx, spider.x, spider.y, spider.bodyRadius, spider.legWave, targetAngle);
+                }
+                
+                drawBody();
+                drawEyes();
                 
                 // رسم الجزيئات
                 for (let p of particles) {
@@ -356,12 +474,12 @@
                 // رسم نقطة اللمس
                 if (touchPoint.active && touchPoint.x && touchPoint.y) {
                     ctx.beginPath();
-                    ctx.arc(touchPoint.x, touchPoint.y, 10, 0, 2 * Math.PI);
+                    ctx.arc(touchPoint.x, touchPoint.y, 12, 0, 2 * Math.PI);
                     ctx.strokeStyle = '#ff0000';
                     ctx.lineWidth = 2;
                     ctx.stroke();
                     ctx.beginPath();
-                    ctx.arc(touchPoint.x, touchPoint.y, 3, 0, 2 * Math.PI);
+                    ctx.arc(touchPoint.x, touchPoint.y, 4, 0, 2 * Math.PI);
                     ctx.fillStyle = '#ff0000';
                     ctx.fill();
                 }
@@ -379,7 +497,7 @@
                 touchPoint.x = x;
                 touchPoint.y = y;
                 touchPoint.active = true;
-                addParticles(x, y, 15);
+                addNukeParticles(x, y, 20);
             }
             
             function handleTouchMove(e) {
@@ -396,11 +514,10 @@
             function handleTouchEnd(e) {
                 e.preventDefault();
                 touchPoint.active = false;
-                touchPoint.x = null;
-                touchPoint.y = null;
+                addNukeParticles(spider.x, spider.y, 15);
             }
             
-            // ========== تغيير حجم الشاشة ==========
+            // ========== تغيير الحجم ==========
             function resizeCanvas() {
                 w = window.innerWidth;
                 h = window.innerHeight;
@@ -410,6 +527,7 @@
                 spider.y = h / 2;
                 spider.targetX = w / 2;
                 spider.targetY = h / 2;
+                updateWebLines();
             }
             
             // ========== الأزرار ==========
@@ -417,20 +535,34 @@
                 spider.x = w / 2;
                 spider.y = h / 2;
                 touchPoint.active = false;
-                particles = [];
-                addParticles(spider.x, spider.y, 20);
+                addNukeParticles(spider.x, spider.y, 30);
             };
             
-            document.getElementById('toggleGlowBtn').onclick = (e) => {
-                spider.glowEnabled = !spider.glowEnabled;
-                e.target.textContent = spider.glowEnabled ? "✨ إطفاء التوهج" : "✨ تفعيل التوهج";
+            document.getElementById('particleBtn').onclick = (e) => {
+                showParticles = !showParticles;
+                e.target.textContent = showParticles ? "💥 جزيئات" : "💥 إخفاء الجزيئات";
             };
+            
+            document.getElementById('webBtn').onclick = (e) => {
+                showWeb = !showWeb;
+                e.target.textContent = showWeb ? "🕸️ شبكة" : "🕸️ إخفاء الشبكة";
+                if (showWeb) updateWebLines();
+            };
+            
+            // ضبط السرعة من لوحة التحكم
+            const speedSpan = document.getElementById('speedVal');
+            let speedLevel = 1;
+            setInterval(() => {
+                speedLevel = Math.min(2.5, Math.max(0.5, speedLevel + (touchPoint.active ? 0.01 : -0.005)));
+                spider.speed = 0.08 * speedLevel;
+                speedSpan.innerText = speedLevel.toFixed(1);
+            }, 100);
             
             // ========== بدء التشغيل ==========
             function init() {
                 resizeCanvas();
-                initSpider();
-                addParticles(spider.x, spider.y, 30);
+                initLegs();
+                addNukeParticles(spider.x, spider.y, 40);
                 
                 canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
                 canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -438,7 +570,7 @@
                 window.addEventListener('resize', resizeCanvas);
                 
                 animate();
-                console.log('🕷️ بلاك سبايدر - العنكبوت الأسطوري يعمل');
+                console.log('💣 القنبلة العنكبوتية النووية انطلقت!');
             }
             
             init();
