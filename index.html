@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>بلاك تنتكل - تأثير المخالب باللمس</title>
+    <title>بلاك سبايك - 7 تأثيرات خارقة</title>
     <style>
         * {
             margin: 0;
@@ -24,155 +24,373 @@
             height: 100%;
             cursor: crosshair;
         }
-        .info {
+        .panel {
             position: fixed;
             bottom: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: #fff;
-            background: rgba(0,0,0,0.5);
-            padding: 8px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 20;
+            border: 1px solid #f00;
+        }
+        button {
+            background: #111;
+            border: 1px solid #f00;
+            color: #f00;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: #f00;
+            background: #000;
+            padding: 5px 10px;
+            border-radius: 8px;
             font-family: monospace;
-            font-size: 12px;
-            z-index: 10;
+            font-size: 10px;
+            z-index: 20;
         }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
-    <div class="info">👆 المس الشاشة | بلاك تنتكل - تأثير المخالب</div>
+    <div class="panel">
+        <button id="resetBtn">🔄 إعادة ضبط</button>
+        <button id="randomBtn">🎲 تأثير عشوائي</button>
+    </div>
+    <div class="info">⚡ بلاك سبايك | 7 تأثيرات | باللمس أو الماوس</div>
 
     <script>
         (function() {
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
             let w, h;
-            let mouse = { x: null, y: null };
-            let target = { x: 0, y: 0 };
-            let isLowPowerDevice = false;
-            let areaFactor = 1;
+            let pointer = { x: null, y: null, active: false };
             
-            const maxl = 400;
-            const minl = 50;
-            const n = isLowPowerDevice ? 22 : 28;
-            const numt = Math.max(100, Math.floor((isLowPowerDevice ? 320 : 520) * areaFactor));
-            let tent = [];
+            // ========== مكتبة التأثيرات (7 تأثيرات) ==========
+            let particles = [];
+            let effectType = 0; // 0-6
             
-            class Tentacle {
-                constructor(x, y, length, segments, angle) {
+            // تأثير 1: جزيئات نارية
+            class FireParticle {
+                constructor(x, y) {
                     this.x = x;
                     this.y = y;
-                    this.length = length;
-                    this.segments = segments;
-                    this.angle = angle;
-                    this.points = [];
-                    this.calculatePoints();
+                    this.vx = (Math.random() - 0.5) * 6;
+                    this.vy = (Math.random() - 0.5) * 6 - 3;
+                    this.life = 1;
+                    this.size = Math.random() * 5 + 2;
                 }
-                
-                calculatePoints() {
-                    this.points = [];
-                    const step = this.length / this.segments;
-                    for (let i = 0; i <= this.segments; i++) {
-                        const dist = step * i;
-                        const angleVariation = Math.sin(Date.now() * 0.002 + i * 0.3) * 0.3;
-                        const currentAngle = this.angle + angleVariation;
-                        const xOff = Math.cos(currentAngle) * dist;
-                        const yOff = Math.sin(currentAngle) * dist;
-                        this.points.push({
-                            x: this.x + xOff,
-                            y: this.y + yOff
-                        });
-                    }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.vy += 0.1;
+                    this.life -= 0.02;
+                    return this.life > 0;
                 }
-                
+                draw(ctx) {
+                    ctx.globalAlpha = this.life;
+                    ctx.fillStyle = `hsl(${Math.random() * 60}, 100%, 60%)`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+            
+            // تأثير 2: خيوط سوداء (مخالب)
+            class Tentacle {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.angle = Math.random() * Math.PI * 2;
+                    this.length = 80;
+                    this.speed = 0.05;
+                }
                 update(targetX, targetY) {
                     const dx = targetX - this.x;
                     const dy = targetY - this.y;
                     this.angle = Math.atan2(dy, dx);
-                    this.calculatePoints();
-                }
-                
-                draw(ctx) {
-                    if (this.points.length < 2) return;
-                    ctx.beginPath();
-                    ctx.moveTo(this.points[0].x, this.points[0].y);
-                    for (let i = 1; i < this.points.length; i++) {
-                        ctx.lineTo(this.points[i].x, this.points[i].y);
+                    this.x += Math.cos(this.angle) * 5;
+                    this.y += Math.sin(this.angle) * 5;
+                    if (this.x < 0 || this.x > w || this.y < 0 || this.y > h) {
+                        this.x = Math.random() * w;
+                        this.y = Math.random() * h;
                     }
-                    ctx.strokeStyle = `hsl(${Date.now() * 0.05 + this.x * 0.1}deg, 100%, 60%)`;
+                }
+                draw(ctx) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(this.x - Math.cos(this.angle) * this.length, this.y - Math.sin(this.angle) * this.length);
+                    ctx.strokeStyle = '#ff0000';
                     ctx.lineWidth = 3;
                     ctx.stroke();
                 }
             }
             
-            function initTentacles() {
-                tent = [];
-                for (let i = 0; i < numt; i++) {
-                    tent.push(new Tentacle(
-                        Math.random() * w,
-                        Math.random() * h,
-                        Math.random() * (maxl - minl) + minl,
-                        n,
-                        Math.random() * 2 * Math.PI
-                    ));
+            // تأثير 3: دوائر متحدة المركز
+            class Ring {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.radius = 5;
+                    this.maxRadius = 80;
+                    this.life = 1;
+                }
+                update() {
+                    this.radius += 4;
+                    this.life -= 0.02;
+                    return this.radius < this.maxRadius && this.life > 0;
+                }
+                draw(ctx) {
+                    ctx.globalAlpha = this.life * 0.6;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
                 }
             }
             
-            function handleTouchStart(e) {
-                e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                mouse.x = (touch.clientX - rect.left) * (w / rect.width);
-                mouse.y = (touch.clientY - rect.top) * (h / rect.height);
-                target.x = mouse.x;
-                target.y = mouse.y;
+            // تأثير 4: خطوط متشعبة
+            class Branch {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.angle = Math.random() * Math.PI * 2;
+                    this.length = 30;
+                    this.life = 1;
+                }
+                update() {
+                    this.length += 3;
+                    this.life -= 0.02;
+                    return this.life > 0;
+                }
+                draw(ctx) {
+                    ctx.globalAlpha = this.life;
+                    const endX = this.x + Math.cos(this.angle) * this.length;
+                    const endY = this.y + Math.sin(this.angle) * this.length;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
             }
             
-            function handleTouchMove(e) {
-                e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                mouse.x = (touch.clientX - rect.left) * (w / rect.width);
-                mouse.y = (touch.clientY - rect.top) * (h / rect.height);
-                target.x = mouse.x;
-                target.y = mouse.y;
+            // تأثير 5: نجوم متطايرة
+            class Star {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.vx = (Math.random() - 0.5) * 8;
+                    this.vy = (Math.random() - 0.5) * 8;
+                    this.life = 1;
+                    this.size = Math.random() * 4 + 1;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.life -= 0.02;
+                    return this.life > 0;
+                }
+                draw(ctx) {
+                    ctx.globalAlpha = this.life;
+                    ctx.fillStyle = '#ff0000';
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 72) * Math.PI / 180;
+                        const x2 = this.x + Math.cos(angle) * this.size * 2;
+                        const y2 = this.y + Math.sin(angle) * this.size * 2;
+                        if (i === 0) ctx.moveTo(x2, y2);
+                        else ctx.lineTo(x2, y2);
+                    }
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
             }
             
-            function handleTouchEnd(e) {
-                e.preventDefault();
-                mouse.x = null;
-                mouse.y = null;
-                target.x = w / 2;
-                target.y = h / 2;
+            // تأثير 6: دوامة حلزونية
+            class SpiralParticle {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.angle = 0;
+                    this.radius = 0;
+                    this.life = 1;
+                }
+                update() {
+                    this.angle += 0.3;
+                    this.radius += 3;
+                    this.life -= 0.02;
+                    return this.life > 0;
+                }
+                draw(ctx) {
+                    ctx.globalAlpha = this.life;
+                    const px = this.x + Math.cos(this.angle) * this.radius;
+                    const py = this.y + Math.sin(this.angle) * this.radius;
+                    ctx.fillStyle = '#ff0000';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
             }
             
+            // تأثير 7: NV Wave (موجات سريعة)
+            class Wave {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.wave = 0;
+                    this.life = 1;
+                }
+                update() {
+                    this.wave += 0.2;
+                    this.life -= 0.02;
+                    return this.life > 0;
+                }
+                draw(ctx) {
+                    ctx.globalAlpha = this.life * 0.5;
+                    for (let i = 0; i < 4; i++) {
+                        const offset = Math.sin(this.wave + i) * 15;
+                        ctx.beginPath();
+                        ctx.ellipse(this.x + offset * i, this.y, 10 + i * 5, 5 + i * 2, 0, 0, 2 * Math.PI);
+                        ctx.strokeStyle = '#ff0000';
+                        ctx.stroke();
+                    }
+                    ctx.globalAlpha = 1;
+                }
+            }
+            
+            let effectObjects = [];
+            
+            function addEffect(x, y) {
+                switch(effectType) {
+                    case 0: effectObjects.push(new FireParticle(x, y)); break;
+                    case 1: effectObjects.push(new Tentacle(x, y)); break;
+                    case 2: effectObjects.push(new Ring(x, y)); break;
+                    case 3: effectObjects.push(new Branch(x, y)); break;
+                    case 4: effectObjects.push(new Star(x, y)); break;
+                    case 5: effectObjects.push(new SpiralParticle(x, y)); break;
+                    case 6: effectObjects.push(new Wave(x, y)); break;
+                }
+                // إضافة جزيئات إضافية للتأثيرات السريعة
+                for (let i = 0; i < 5; i++) {
+                    if (effectType !== 1) effectObjects.push(new FireParticle(x, y));
+                }
+            }
+            
+            function updateEffects() {
+                for (let i = 0; i < effectObjects.length; i++) {
+                    const updated = effectObjects[i].update();
+                    if (!updated) {
+                        effectObjects.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+            
+            function drawEffects() {
+                for (let obj of effectObjects) {
+                    obj.draw(ctx);
+                }
+            }
+            
+            // ========== حلقة الرسم ==========
             function drawBackground() {
-                const grad = ctx.createLinearGradient(0, 0, w, h);
-                grad.addColorStop(0, '#0a0a1a');
-                grad.addColorStop(1, '#1a1a2e');
-                ctx.fillStyle = grad;
+                ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, w, h);
             }
             
-            function draw() {
+            function animate() {
                 if (!w || !h) return;
+                
                 drawBackground();
-                for (let t of tent) {
-                    t.update(target.x, target.y);
-                    t.draw(ctx);
+                
+                if (effectType === 1) {
+                    // تأثير المخالب: نضيف مخالب عند اللمس
+                    if (pointer.active && pointer.x && pointer.y) {
+                        for (let i = 0; i < 3; i++) {
+                            effectObjects.push(new Tentacle(pointer.x, pointer.y));
+                        }
+                    }
+                } else {
+                    // تأثيرات نارية مستمرة عند اللمس
+                    if (pointer.active && pointer.x && pointer.y) {
+                        addEffect(pointer.x, pointer.y);
+                    }
                 }
-                if (mouse.x && mouse.y) {
+                
+                updateEffects();
+                drawEffects();
+                
+                // رسم نقطة اللمس
+                if (pointer.active && pointer.x && pointer.y) {
                     ctx.beginPath();
-                    ctx.arc(mouse.x, mouse.y, 15, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                    ctx.fill();
+                    ctx.arc(pointer.x, pointer.y, 15, 0, 2 * Math.PI);
+                    ctx.strokeStyle = '#f00';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
                     ctx.beginPath();
-                    ctx.arc(mouse.x, mouse.y, 5, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#ff0000';
+                    ctx.arc(pointer.x, pointer.y, 4, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#f00';
                     ctx.fill();
                 }
-                requestAnimationFrame(draw);
+                
+                requestAnimationFrame(animate);
+            }
+            
+            // ========== أحداث اللمس والماوس ==========
+            function handlePointerStart(e) {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                let clientX, clientY;
+                if (e.touches) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                pointer.x = (clientX - rect.left) * (w / rect.width);
+                pointer.y = (clientY - rect.top) * (h / rect.height);
+                pointer.active = true;
+                for (let i = 0; i < 10; i++) addEffect(pointer.x, pointer.y);
+            }
+            
+            function handlePointerMove(e) {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                let clientX, clientY;
+                if (e.touches) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                pointer.x = (clientX - rect.left) * (w / rect.width);
+                pointer.y = (clientY - rect.top) * (h / rect.height);
+                pointer.active = true;
+            }
+            
+            function handlePointerEnd(e) {
+                e.preventDefault();
+                pointer.active = false;
             }
             
             function resizeCanvas() {
@@ -180,23 +398,30 @@
                 h = window.innerHeight;
                 canvas.width = w;
                 canvas.height = h;
-                target.x = w / 2;
-                target.y = h / 2;
-                initTentacles();
             }
             
-            function initEvents() {
-                canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-                canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-                canvas.addEventListener('touchend', handleTouchEnd);
-                window.addEventListener('resize', resizeCanvas);
-            }
+            document.getElementById('resetBtn').onclick = () => {
+                effectObjects = [];
+                pointer.active = false;
+            };
+            
+            document.getElementById('randomBtn').onclick = () => {
+                effectType = (effectType + 1) % 7;
+                const names = ["🔥 ناري", "🦑 مخالب", "🔄 حلقات", "🌿 متشعب", "⭐ نجوم", "🌀 دوامة", "🌊 موجي"];
+                document.querySelector('.info').innerHTML = `⚡ بلاك سبايك | تأثير: ${names[effectType]} | باللمس أو الماوس`;
+                effectObjects = [];
+            };
             
             function init() {
                 resizeCanvas();
-                initEvents();
-                draw();
-                console.log('✅ بلاك تنتكل - تأثير المخالب يعمل باللمس');
+                canvas.addEventListener('touchstart', handlePointerStart, { passive: false });
+                canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
+                canvas.addEventListener('touchend', handlePointerEnd);
+                canvas.addEventListener('mousedown', handlePointerStart);
+                canvas.addEventListener('mousemove', handlePointerMove);
+                canvas.addEventListener('mouseup', handlePointerEnd);
+                window.addEventListener('resize', resizeCanvas);
+                animate();
             }
             
             init();
